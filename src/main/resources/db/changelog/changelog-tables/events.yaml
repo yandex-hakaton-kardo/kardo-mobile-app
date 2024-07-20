@@ -12,7 +12,7 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
-                    primaryKeyName: pk_users
+                    primaryKeyName: pk_events
                     nullable: false
               - column:
                   name: event_name
@@ -20,9 +20,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: activity
-                  type: VARCHAR(100)
+                  name: activity_id
+                  type: BIGINT
                   constraints:
+                    foreignKeyName: fk_events_activities
+                    references: activities(id)
                     nullable: false
               - column:
                   name: description

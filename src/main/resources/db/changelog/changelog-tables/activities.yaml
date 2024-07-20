@@ -1,0 +1,89 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-activities
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: activities
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_activities
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: unq_activities
+              - column:
+                  name: description
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: true
+
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Брейкинг'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Воркаут'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Граффити'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Диджеинг'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Паркур'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Скейтбординг'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Трюковой самокат'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Трикинг'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Фриран'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Хип-хоп'
+

@@ -1,26 +1,32 @@
 package ru.yandex.kardomoblieapp.event;
 
-public enum Activity {
-    BMX("BMX"),
-    BRAKING("Брейкинг"),
-    WORKOUT("Воркаут"),
-    GRAFFITI("Граффити"),
-    DJ("Диждеинг"),
-    PARKOUR("Паркур"),
-    SKATE("Скейтбординг"),
-    SCOOTER("Трюковой самоткат"),
-    TRICKING("Трикинг"),
-    FREERUN("Фриран"),
-    HIP_HOP("Хип-хоп");
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-    private final String activity;
-    Activity(String activity) {
-        this.activity = activity;
-    }
+@Entity
+@Table(name = "activities")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
+@ToString
+public class Activity {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Override
-    public String toString() {
-        return this.activity;
-    }
+    private String name;
+
+    private String description;
 }
