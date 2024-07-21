@@ -1,4 +1,4 @@
-package ru.yandex.kardomoblieapp.user;
+package ru.yandex.kardomoblieapp.user.model;
 
 
 import jakarta.persistence.Column;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
@@ -32,6 +32,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "username")
     private String name;
 
     @Column(name = "second_name")
@@ -39,8 +40,8 @@ public class User {
 
     private String surname;
 
-    @Column(name = "date_of_birht")
-    private LocalDateTime dateOfBirth;
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     private String email;
 
@@ -49,7 +50,8 @@ public class User {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    private String county;
+    //TODO Собрать страны и города в отдельную таблицу
+    private String country;
 
     private String city;
 
@@ -60,8 +62,8 @@ public class User {
 
     private String overview;
 
-    @Column(name="social_network_link")
-    private String socialNetworkLink;
+    @Column(name = "website")
+    private String website;
 
     private boolean isAdmin;
 }

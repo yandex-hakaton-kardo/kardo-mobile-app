@@ -15,7 +15,7 @@ databaseChangeLog:
                     primaryKeyName: pk_users
                     nullable: false
               - column:
-                  name: name
+                  name: username
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
@@ -77,7 +77,7 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: social_network
+                  name: website
                   type: VARCHAR(100)
                   constraints:
                     nullable: true

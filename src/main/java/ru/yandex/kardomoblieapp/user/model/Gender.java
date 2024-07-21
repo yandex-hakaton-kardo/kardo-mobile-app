@@ -1,4 +1,4 @@
-package ru.yandex.kardomoblieapp.user;
+package ru.yandex.kardomoblieapp.user.model;
 
 public enum Gender {
     MALE,

@@ -1,0 +1,109 @@
+package ru.yandex.kardomoblieapp.shared.exception;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Map;
+
+@RestControllerAdvice
+@Slf4j
+public class ApplicationExceptionHandler {
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(NotFoundException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleNotAuthorizedException(NotAuthorizedException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidException(MethodArgumentNotValidException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        Map<String, String> exceptions = errorResponse.getErrors();
+        for (ObjectError oe : e.getBindingResult().getAllErrors()) {
+            exceptions.put(oe.getObjectName(), oe.getDefaultMessage());
+            log.error("Объект {} не прошел валидацию. Причина: {}.", oe.getObjectName(), oe.getDefaultMessage());
+        }
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+            exceptions.put(error.getField(), error.getDefaultMessage());
+            log.error("Поле {} не прошло валидацию. Причина: {}.", error.getField(), error.getDefaultMessage());
+        }
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConversionFailedException(MethodArgumentTypeMismatchException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("Неизвестное поле.", String.valueOf(e.getValue()));
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingRequestHeaderException(MissingRequestHeaderException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put(e.getHeaderName(), e.getLocalizedMessage());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put(e.getParameterName(), e.getLocalizedMessage());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHttpMediaTypeNotAcceptableException() {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("acceptable MIME type:", MediaType.APPLICATION_JSON_VALUE);
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleAllException(Exception e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("errorMessage", e.getLocalizedMessage());
+        errorResponse.getErrors().put("stackTrace", getStackTraceAsString(e));
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    private String getStackTraceAsString(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
+    }
+}
