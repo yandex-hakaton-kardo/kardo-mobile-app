@@ -16,17 +16,17 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: name
-                  type: VARCHAR(50)
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
                   name: second_name
-                  type: VARCHAR(50)
+                  type: VARCHAR(20)
                   constraints:
                     nullable: true
               - column:
                   name: surname
-                  type: VARCHAR(100)
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
@@ -43,7 +43,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: password
-                  type: VARCHAR(255)
+                  type: VARCHAR(100)
                   constraints:
                     nullable: false
               - column:
