@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(long requesterId, long userId) {
         User requester = findUser(requesterId);
         findUser(userId);
