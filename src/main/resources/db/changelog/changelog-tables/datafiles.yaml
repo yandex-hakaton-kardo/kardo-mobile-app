@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: DEV-1
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: data_files
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_data_files
+                    nullable: false
+              - column:
+                  name: file_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_type
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_path
+                  type: VARCHAR(200)
+                  constraints:
+                    nullable: false

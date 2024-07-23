@@ -67,10 +67,12 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: avatar
-                  type: VARCHAR(255)
+                  name: profile_picture_id
+                  type: BIGINT
                   constraints:
                     nullable: true
+                    foreignKeyName: fk_users_data_files
+                    references: data_files(id)
               - column:
                   name: overview
                   type: VARCHAR(1000)

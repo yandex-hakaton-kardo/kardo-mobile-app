@@ -1,6 +1,7 @@
 package ru.yandex.kardomoblieapp.user.model;
 
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 
 import java.time.LocalDate;
 
@@ -58,7 +62,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private String avatar;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_picture_id", referencedColumnName = "id")
+    private DataFile profilePicture;
 
     private String overview;
 

@@ -1,5 +1,6 @@
 package ru.yandex.kardomoblieapp.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,8 +23,7 @@ public class NewUserDto {
     @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
     private String name;
 
-    @NotEmpty(message = "Отчество не может быть пустым и должно содержать от 2 до 20 символов.")
-    @Size(min = 2, max = 20, message = "Отчество не может быть пустым и должно содержать от 2 до 20 символов.")
+    @Size(min = 2, max = 20, message = "Отчество должно содержать от 2 до 20 символов.")
     private String secondName;
 
     @NotEmpty(message = "Фамилия не может быть пустой и должна содержать от 2 до 20 символов.")
@@ -41,6 +41,7 @@ public class NewUserDto {
     private String password;
 
     @NotNull(message = "Дата рождения не может быть пустой.")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
     @NotBlank(message = "Страна не может быть пустой.")

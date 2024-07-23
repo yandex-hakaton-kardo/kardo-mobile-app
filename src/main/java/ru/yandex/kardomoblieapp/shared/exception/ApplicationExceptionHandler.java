@@ -27,6 +27,7 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleNotFoundException(NotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        log.error(e.getLocalizedMessage());
         return errorResponse;
     }
 
@@ -35,6 +36,7 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleNotAuthorizedException(NotAuthorizedException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        log.error(e.getLocalizedMessage());
         return errorResponse;
     }
 
@@ -87,6 +89,15 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleHttpMediaTypeNotAcceptableException() {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("acceptable MIME type:", MediaType.APPLICATION_JSON_VALUE);
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataFileStorageException(DataFileStorageException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error while managing file", e.getLocalizedMessage());
+        log.error(e.getLocalizedMessage());
         return errorResponse;
     }
 
