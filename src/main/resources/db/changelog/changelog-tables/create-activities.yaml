@@ -7,7 +7,7 @@ databaseChangeLog:
             tableName: activities
             columns:
               - column:
-                  name: id
+                  name: activity_id
                   type: BIGINT
                   autoIncrement: true
                   constraints:

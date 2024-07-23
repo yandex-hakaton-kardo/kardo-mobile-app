@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KardoMoblieAppApplication {
+public class KardoMobileAppApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(KardoMoblieAppApplication.class, args);
+        SpringApplication.run(KardoMobileAppApplication.class, args);
     }
 
 }

@@ -7,7 +7,7 @@ databaseChangeLog:
             tableName: events
             columns:
               - column:
-                  name: id
+                  name: event_id
                   type: BIGINT
                   autoIncrement: true
                   constraints:
@@ -24,7 +24,7 @@ databaseChangeLog:
                   type: BIGINT
                   constraints:
                     foreignKeyName: fk_events_activities
-                    references: activities(id)
+                    references: activities(activity_id)
                     nullable: false
               - column:
                   name: description

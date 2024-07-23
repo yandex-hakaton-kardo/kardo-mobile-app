@@ -7,7 +7,7 @@ databaseChangeLog:
             tableName: data_files
             columns:
               - column:
-                  name: id
+                  name: data_file_id
                   type: BIGINT
                   autoIncrement: true
                   constraints:

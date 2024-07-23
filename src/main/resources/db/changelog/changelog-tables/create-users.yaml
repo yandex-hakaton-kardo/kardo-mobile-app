@@ -7,7 +7,7 @@ databaseChangeLog:
             tableName: users
             columns:
               - column:
-                  name: id
+                  name: user_id
                   type: BIGINT
                   autoIncrement: true
                   constraints:
@@ -72,7 +72,7 @@ databaseChangeLog:
                   constraints:
                     nullable: true
                     foreignKeyName: fk_users_data_files
-                    references: data_files(id)
+                    references: data_files(data_file_id)
               - column:
                   name: overview
                   type: VARCHAR(1000)

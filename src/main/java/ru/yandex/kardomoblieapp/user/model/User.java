@@ -34,6 +34,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "username")
@@ -63,7 +64,7 @@ public class User {
     private Gender gender;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "profile_picture_id", referencedColumnName = "id")
+    @JoinColumn(name = "profile_picture_id", referencedColumnName = "data_file_id")
     private DataFile profilePicture;
 
     private String overview;
