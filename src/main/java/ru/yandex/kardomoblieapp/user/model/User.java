@@ -1,6 +1,7 @@
-package ru.yandex.kardomoblieapp.user;
+package ru.yandex.kardomoblieapp.user.model;
 
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,8 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
@@ -30,8 +34,10 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "username")
     private String name;
 
     @Column(name = "second_name")
@@ -39,8 +45,8 @@ public class User {
 
     private String surname;
 
-    @Column(name = "date_of_birht")
-    private LocalDateTime dateOfBirth;
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
 
     private String email;
 
@@ -49,19 +55,22 @@ public class User {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    private String county;
+    //TODO Собрать страны и города в отдельную таблицу
+    private String country;
 
     private String city;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private String avatar;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_picture_id", referencedColumnName = "data_file_id")
+    private DataFile profilePicture;
 
     private String overview;
 
-    @Column(name="social_network_link")
-    private String socialNetworkLink;
+    @Column(name = "website")
+    private String website;
 
     private boolean isAdmin;
 }

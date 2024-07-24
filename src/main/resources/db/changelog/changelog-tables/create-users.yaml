@@ -7,7 +7,7 @@ databaseChangeLog:
             tableName: users
             columns:
               - column:
-                  name: id
+                  name: user_id
                   type: BIGINT
                   autoIncrement: true
                   constraints:
@@ -15,7 +15,7 @@ databaseChangeLog:
                     primaryKeyName: pk_users
                     nullable: false
               - column:
-                  name: name
+                  name: username
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
@@ -67,17 +67,19 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: avatar
-                  type: VARCHAR(255)
+                  name: profile_picture_id
+                  type: BIGINT
                   constraints:
                     nullable: true
+                    foreignKeyName: fk_users_data_files
+                    references: data_files(data_file_id)
               - column:
                   name: overview
                   type: VARCHAR(1000)
                   constraints:
                     nullable: true
               - column:
-                  name: social_network
+                  name: website
                   type: VARCHAR(100)
                   constraints:
                     nullable: true
