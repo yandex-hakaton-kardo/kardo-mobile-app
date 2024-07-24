@@ -14,4 +14,6 @@ public class DataFileDto {
     private Long id;
 
     private String fileName;
+
+    private String filePath;
 }

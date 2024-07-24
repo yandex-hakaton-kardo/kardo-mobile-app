@@ -460,14 +460,14 @@ class UserControllerTest {
     void getUserProfilePicture_shouldReturnJpeg() {
         byte[] result = new byte[0];
 
-        when(userService.downloadProfilePicture(userId)).thenReturn(result);
+        when(userService.downloadProfilePictureBytes(userId)).thenReturn(result);
 
         mvc.perform(get("/users/{userId}/avatar", userId)
                         .header("X-Kardo-User-Id", requesterId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_JPEG));
 
-        verify(userService, times(1)).downloadProfilePicture(userId);
+        verify(userService, times(1)).downloadProfilePictureBytes(userId);
     }
 
     @Test
@@ -475,7 +475,7 @@ class UserControllerTest {
     @DisplayName("Получение фотографии профиля пользователя, пользователь не найден")
     void getUserProfilePicture_whenUserNotFound_shouldReturn404Status() {
         doThrow(new NotFoundException("Пользователь с id '" + userId + "' не найден.")).when(userService)
-                .downloadProfilePicture(userId);
+                .downloadProfilePictureBytes(userId);
 
         mvc.perform(get("/users/{userId}/avatar", userId)
                         .header("X-Kardo-User-Id", requesterId))
@@ -483,7 +483,7 @@ class UserControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
                 .andExpect(jsonPath("$.errors.error", is("Пользователь с id '" + userId + "' не найден.")));
 
-        verify(userService, times(1)).downloadProfilePicture(userId);
+        verify(userService, times(1)).downloadProfilePictureBytes(userId);
     }
 
     @Test

@@ -84,7 +84,7 @@ public class UserController {
     public byte[] getUserProfilePicture(@RequestHeader("X-Kardo-User-Id") long requesterId,
                                         @PathVariable long userId) {
         log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
-        return userService.downloadProfilePicture(userId);
+        return userService.downloadProfilePictureBytes(userId);
     }
 
     @DeleteMapping("/{userId}/avatar")
