@@ -1,4 +1,19 @@
 databaseChangeLog:
-  - includeAll:
-      path: /changelog-tables
+  - include:
+      file: create-datafiles.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-users.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-activities.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-events.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-posts.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: add-post_id-to-datafiles.yaml
       relativeToChangelogFile: true
