@@ -13,6 +13,8 @@ import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,6 +22,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -29,6 +32,7 @@ class DataFileServiceImplTest {
     private DataFileService dataFileService;
 
     private DataFile dataFile;
+    private DataFile dataFile1;
 
     private long userId;
 
@@ -40,6 +44,11 @@ class DataFileServiceImplTest {
                 .fileName("fileName")
                 .fileType(MediaType.IMAGE_JPEG_VALUE)
                 .filePath("filePath")
+                .build();
+        dataFile1 = DataFile.builder()
+                .fileName("fileName1")
+                .fileType(MediaType.IMAGE_JPEG_VALUE)
+                .filePath("filePath1")
                 .build();
 
         userId = 1L;
@@ -96,7 +105,6 @@ class DataFileServiceImplTest {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Удаление файла, которого нет в бд")
     void deleteFile_whenFileNotExists_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
@@ -118,7 +126,6 @@ class DataFileServiceImplTest {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Получение файла в виде массива байтов, файл не существует")
     void downloadFileBytesById_whenFileNotExists_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
@@ -138,11 +145,39 @@ class DataFileServiceImplTest {
     }
 
     @Test
-    @SneakyThrows
     @DisplayName("Получение файла по идентификатору, файл не существует")
     void findDataFileById_whenNoFileExists_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> dataFileService.findDataFileById(unknownId));
         assertThat(ex.getMessage(), is("Файл с id '" + unknownId + "' не найден."));
+    }
+
+    @Test
+    @DisplayName("Сохранение нескольких файлов")
+    @SneakyThrows
+    void saveDataFiles_shouldReturnDataFilesWithNotNullId() {
+        List<DataFile> savedFiles = dataFileService.saveDataFiles(List.of(dataFile, dataFile1));
+
+        assertThat(savedFiles, notNullValue());
+        assertThat(savedFiles.size(), is(2));
+        assertThat(savedFiles.get(0).getId(), greaterThan(0L));
+        assertThat(savedFiles.get(1).getId(), greaterThan(1L));
+    }
+
+    @Test
+    @DisplayName("Удаление нескольких файлов")
+    void deleteFiles_shouldDeleteFilesFromDbAndFileStorage() {
+        List<DataFile> savedFiles = dataFileService.saveDataFiles(List.of(dataFile, dataFile1));
+
+        DataFile savedFile1 = savedFiles.get(0);
+        DataFile savedFile2 = savedFiles.get(1);
+
+        dataFileService.deleteFiles(savedFiles);
+
+        assertThrows(NotFoundException.class, () -> dataFileService.findDataFileById(savedFile1.getId()));
+        assertThrows(NotFoundException.class, () -> dataFileService.findDataFileById(savedFile2.getId()));
+
+        assertFalse(Files.exists(Paths.get(savedFile1.getFilePath())));
+        assertFalse(Files.exists(Paths.get(savedFile2.getFilePath())));
     }
 }

@@ -18,4 +18,8 @@ public interface DataFileService {
     DataFile findDataFileById(long fileId);
 
     List<DataFile> findFilesFromPost(long postId);
+
+    List<DataFile> saveDataFiles(List<DataFile> uploadedFiles);
+
+    void deleteFiles(List<DataFile> files);
 }

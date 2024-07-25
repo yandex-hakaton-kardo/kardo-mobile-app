@@ -40,7 +40,7 @@ public class DataFileServiceImpl implements DataFileService {
     public List<DataFile> uploadMultipleFiles(List<MultipartFile> files, long userId) {
         final List<DataFile> dataFiles = new ArrayList<>();
         files.forEach(file -> dataFiles.add(createDataFileAndMoveToUserDirectory(file, userId)));
-        List<DataFile> savedFiles = dataFileRepository.saveAll(dataFiles);
+        final List<DataFile> savedFiles = dataFileRepository.saveAll(dataFiles);
         log.info("Пользователь с id '{}' загрузил список файлов в количестве: '{}'.", userId, savedFiles.size());
         return savedFiles;
     }
@@ -48,14 +48,9 @@ public class DataFileServiceImpl implements DataFileService {
     @Override
     @Transactional
     public void deleteFile(long fileId) {
-        try {
-            final DataFile fileToDelete = findFile(fileId);
-            dataFileRepository.deleteById(fileId);
-            final Path currentPicture = Paths.get(fileToDelete.getFilePath());
-            Files.deleteIfExists(currentPicture);
-        } catch (IOException e) {
-            throw new DataFileStorageException(e.getCause().getMessage());
-        }
+        final DataFile fileToDelete = findFile(fileId);
+        dataFileRepository.deleteById(fileId);
+        deleteFileFromLocalStorage(fileToDelete);
     }
 
     @Override
@@ -84,6 +79,34 @@ public class DataFileServiceImpl implements DataFileService {
         return filesFromPost;
     }
 
+    @Override
+    public List<DataFile> saveDataFiles(List<DataFile> dataFiles) {
+        List<DataFile> savedFiles = dataFileRepository.saveAll(dataFiles);
+        log.info("Сохранение группы файлов в количестве: '{}'.", savedFiles.size());
+        return savedFiles;
+    }
+
+    @Override
+    public void deleteFiles(List<DataFile> files) {
+        List<Long> oldFileIds = files.stream()
+                .map(DataFile::getId)
+                .toList();
+        dataFileRepository.deleteAllById(oldFileIds);
+
+        for (DataFile file : files) {
+            deleteFileFromLocalStorage(file);
+        }
+    }
+
+    private void deleteFileFromLocalStorage(DataFile file) {
+        try {
+            final Path currentPicture = Paths.get(file.getFilePath());
+            Files.deleteIfExists(currentPicture);
+        } catch (IOException e) {
+            throw new DataFileStorageException(e.getCause().getMessage());
+        }
+    }
+
     private DataFile findFile(long fileId) {
         return dataFileRepository.findById(fileId)
                 .orElseThrow(() -> new NotFoundException("Файл с id '" + fileId + "' не найден."));
@@ -104,18 +127,13 @@ public class DataFileServiceImpl implements DataFileService {
 
             final String filePath = userFileStorage + fileToUpload.getOriginalFilename();
             final Path file = Paths.get(filePath);
-            if (!Files.exists(file)) {
-                final DataFile dataFile = DataFile.builder()
-                        .fileName(fileToUpload.getName())
-                        .fileType(fileToUpload.getContentType())
-                        .filePath(filePath)
-                        .build();
-                fileToUpload.transferTo(file);
-                return dataFile;
-            } else {
-                log.info("Пользователь с id '{}' уже загружал файл с именем '{}'.", userId, fileToUpload.getOriginalFilename());
-                return dataFileRepository.findByFilePath(filePath);
-            }
+            final DataFile dataFile = DataFile.builder()
+                    .fileName(fileToUpload.getName())
+                    .fileType(fileToUpload.getContentType())
+                    .filePath(filePath)
+                    .build();
+            fileToUpload.transferTo(file);
+            return dataFile;
         } catch (IOException e) {
             throw new DataFileStorageException(e.getCause().getMessage());
         }
