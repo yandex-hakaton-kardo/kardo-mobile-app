@@ -14,7 +14,6 @@ import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
