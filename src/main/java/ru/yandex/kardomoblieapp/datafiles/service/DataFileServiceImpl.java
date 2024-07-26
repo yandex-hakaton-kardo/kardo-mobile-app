@@ -128,7 +128,7 @@ public class DataFileServiceImpl implements DataFileService {
             final String filePath = userFileStorage + fileToUpload.getOriginalFilename();
             final Path file = Paths.get(filePath);
             final DataFile dataFile = DataFile.builder()
-                    .fileName(fileToUpload.getName())
+                    .fileName(fileToUpload.getOriginalFilename())
                     .fileType(fileToUpload.getContentType())
                     .filePath(filePath)
                     .build();
