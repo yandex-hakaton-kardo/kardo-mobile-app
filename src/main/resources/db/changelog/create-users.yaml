@@ -19,6 +19,12 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
               - column:
                   name: second_name
                   type: VARCHAR(20)

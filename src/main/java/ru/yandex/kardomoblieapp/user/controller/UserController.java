@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
-import ru.yandex.kardomoblieapp.user.dto.NewUserDto;
+import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
@@ -41,9 +40,9 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Valid NewUserDto newUserDto) {
-        log.info("Регистрация нового пользователя с email '{}'.", newUserDto.getEmail());
-        final User userToAdd = userMapper.toModel(newUserDto);
+    public UserDto createUser(@RequestBody @Valid NewUserRequest newUser) {
+        log.info("Регистрация нового пользователя с email '{}'.", newUser.getEmail());
+        final User userToAdd = userMapper.toModel(newUser);
         final User addedUser = userService.createUser(userToAdd);
         return userMapper.toDto(addedUser);
     }
@@ -80,11 +79,12 @@ public class UserController {
         return dataFileMapper.toDto(savedFile);
     }
 
-    @GetMapping(value = "/{userId}/avatar", produces = MediaType.IMAGE_JPEG_VALUE)
-    public byte[] getUserProfilePicture(@RequestHeader("X-Kardo-User-Id") long requesterId,
+    @GetMapping(value = "/{userId}/avatar")
+    public DataFileDto getUserProfilePicture(@RequestHeader("X-Kardo-User-Id") long requesterId,
                                         @PathVariable long userId) {
         log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
-        return userService.downloadProfilePictureBytes(userId);
+        DataFile profilePicture = userService.getProfilePicture(userId);
+        return dataFileMapper.toDto(profilePicture);
     }
 
     @DeleteMapping("/{userId}/avatar")

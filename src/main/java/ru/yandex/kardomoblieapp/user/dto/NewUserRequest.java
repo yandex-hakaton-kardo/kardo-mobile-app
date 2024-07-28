@@ -1,34 +1,22 @@
 package ru.yandex.kardomoblieapp.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NewUserDto {
+public class NewUserRequest {
 
     @NotBlank(message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
     @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
     private String name;
-
-    @Size(min = 2, max = 20, message = "Отчество должно содержать от 2 до 20 символов.")
-    private String secondName;
-
-    @NotEmpty(message = "Фамилия не может быть пустой и должна содержать от 2 до 20 символов.")
-    @Size(min = 2, max = 20, message = "Фамилия не может быть пустой и должно содержать от 2 до 20 символов.")
-    private String surname;
 
     @NotBlank(message = "Некорректный формат электронной почты.")
     @Email(message = "Некорректный формат электронной почты.")
@@ -39,18 +27,4 @@ public class NewUserDto {
     @NotBlank(message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
     @Size(min = 6, max = 100, message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
     private String password;
-
-    @NotNull(message = "Дата рождения не может быть пустой.")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate dateOfBirth;
-
-    @NotBlank(message = "Страна не может быть пустой.")
-    private String country;
-
-    @NotBlank(message = "Город не может быть пустым.")
-    private String city;
-
-    @Size(min = 2, max = 50, message = "Ссылка не может быть пустой и должна содержать от 2 до 50 символов.")
-    private String website;
-
 }

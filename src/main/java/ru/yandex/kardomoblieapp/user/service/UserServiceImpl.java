@@ -76,16 +76,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public byte[] downloadProfilePictureBytes(long userId) {
+    public DataFile getProfilePicture(long userId) {
         final User user = findUser(userId);
         final DataFile profilePicture = user.getProfilePicture();
-        if (profilePicture == null) {
-            throw new NotFoundException("У пользователя c id'" + user.getId() + "' нет фотографии профиля.");
-        }
-
-        byte[] pictureBytes = dataFileService.downloadFileBytesById(profilePicture.getId());
-        log.info("Получение фотографии профиля '{}' пользователя с id '{}'.", profilePicture.getFileName(), userId);
-        return pictureBytes;
+        log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
+        return profilePicture;
     }
 
     @Override

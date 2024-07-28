@@ -17,7 +17,7 @@ public interface UserService {
 
     DataFile uploadProfilePicture(long requesterId, long userId, MultipartFile avatar);
 
-    byte[] downloadProfilePictureBytes(long userId);
+    DataFile getProfilePicture(long userId);
 
     void deleteProfilePicture(long requesterId, long userId);
 }
