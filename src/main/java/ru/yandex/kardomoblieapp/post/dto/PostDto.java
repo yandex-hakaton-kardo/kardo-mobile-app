@@ -15,9 +15,13 @@ public class PostDto {
 
     private long id;
 
-    private String content;
+    private String title;
 
     private ShortUserDto author;
 
     private DataFileDto file;
+
+    private long numberOfLikes;
+
+    private long numberOfViews;
 }

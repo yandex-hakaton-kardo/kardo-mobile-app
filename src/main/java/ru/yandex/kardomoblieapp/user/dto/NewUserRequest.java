@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.kardomoblieapp.shared.validation.Censored;
 
 @Data
 @AllArgsConstructor
@@ -16,7 +17,8 @@ public class NewUserRequest {
 
     @NotBlank(message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
     @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
-    private String name;
+    @Censored
+    private String username;
 
     @NotBlank(message = "Некорректный формат электронной почты.")
     @Email(message = "Некорректный формат электронной почты.")
