@@ -84,7 +84,7 @@ class UserControllerTest {
     @BeforeEach
     void init() {
         newUserRequest = NewUserRequest.builder()
-                .name("username")
+                .username("username")
                 .email("email@mail.com")
                 .password("password")
                 .build();
@@ -119,7 +119,81 @@ class UserControllerTest {
     @Test
     @SneakyThrows
     @DisplayName("Добавление пользователя с валидными полями")
-    void addUser_allFieldsValid_ShouldReturn200Status() {
+    void addUser_allFieldsValid_ShouldReturn201Status() {
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userMapper, times(1)).toModel(newUserRequest);
+        verify(userService, times(1)).createUser(user);
+        verify(userMapper, times(1)).toDto(user);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с матерным именем")
+    void addUser_whenBadName_ShouldReturn400Status() {
+        newUserRequest.setUsername("хуй");
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(jsonPath("$.errors.username",
+                        is("Строка содержит нецензурные слова.")));
+
+        verify(userMapper, never()).toModel(newUserRequest);
+        verify(userService, never()).createUser(any());
+        verify(userMapper, never()).toDto(any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с матерным именем")
+    void addUser_whenBadName2_ShouldReturn400Status() {
+        newUserRequest.setUsername("пидор");
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(jsonPath("$.errors.username",
+                        is("Строка содержит нецензурные слова.")));
+
+        verify(userMapper, never()).toModel(newUserRequest);
+        verify(userService, never()).createUser(any());
+        verify(userMapper, never()).toDto(any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с похожим на мат именем")
+    void addUser_whenNearlyBadName_ShouldReturn201Status() {
+        newUserRequest.setUsername("мандарин");
         when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
@@ -143,7 +217,7 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя с пустым именем")
     void addUser_withEmptyName_ShouldReturn400Status() {
-        newUserRequest.setName("");
+        newUserRequest.setUsername("");
         when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
@@ -168,7 +242,7 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя с коротким именем")
     void addUser_withShortName_ShouldReturn400Status() {
-        newUserRequest.setName("a");
+        newUserRequest.setUsername("a");
         when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
