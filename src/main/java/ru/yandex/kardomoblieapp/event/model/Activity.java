@@ -17,7 +17,7 @@ import lombok.ToString;
 @Builder
 @ToString
 public class Activity {
-
+    //ToDO вынести отдельно
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_id")
