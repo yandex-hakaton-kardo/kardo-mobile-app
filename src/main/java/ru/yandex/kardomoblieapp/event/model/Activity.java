@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+//ToDO вынести отдельно
+
+
 @Entity
 @Table(name = "activities")
 @AllArgsConstructor
@@ -17,7 +20,6 @@ import lombok.ToString;
 @Builder
 @ToString
 public class Activity {
-    //ToDO вынести отдельно
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_id")

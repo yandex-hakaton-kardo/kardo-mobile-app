@@ -9,7 +9,7 @@ import org.hibernate.annotations.Formula;
 import ru.yandex.kardomoblieapp.event.model.Event;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class EventDto {
     private String activity;
     private String eventType;
     private Event masterEvent;
-    private Set<Event> subEvents;
+    private List<Event> subEvents;
     private String prize;
 
 }

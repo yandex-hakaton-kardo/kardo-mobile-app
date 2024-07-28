@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Formula;
+import java.util.List;
+
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Table(name = "events")
@@ -45,16 +46,9 @@ public class Event {
     @Formula("(SELECT et.name FROM event_types et WHERE et.event_type_id = event_type_id)")
     private String eventType;
 
-
-    @ManyToOne
-    @JoinColumn(name = "master_event_id", referencedColumnName = "event_id")
-    private Event masterEvent;
-
     @OneToMany(mappedBy = "masterEvent")
-    private Set<Event> subEvents;
+    private List<Event> subEvents;
 
     @JoinColumn(name = "prize")
     private String prize;
-
-
 }
