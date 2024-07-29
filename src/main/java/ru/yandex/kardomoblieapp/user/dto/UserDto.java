@@ -8,6 +8,7 @@ import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.model.Gender;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -38,4 +39,6 @@ public class UserDto {
     private String overview;
 
     private String website;
+
+    private List<ShortUserDto> friends;
 }

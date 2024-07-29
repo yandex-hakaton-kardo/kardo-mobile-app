@@ -13,13 +13,17 @@ import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
+import ru.yandex.kardomoblieapp.user.model.Friendship;
+import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
 import ru.yandex.kardomoblieapp.user.model.User;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -251,8 +255,107 @@ class UserServiceImplTest {
                 is("Пользователь с id '" + savedUser.getId() + "' не имеет прав на редактирование профиля."));
     }
 
+    @Test
+    @DisplayName("Добавление пользователя в друзья, статус подписчик")
+    void addFriend_whenNotMutual_shouldSetStatusSubscriber() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+
+        Friendship friendship = userService.addFriend(savedUser.getId(), savedUser2.getId());
+
+        System.out.println(friendship);
+
+        assertThat(friendship, notNullValue());
+        assertThat(friendship.getStatus(), is(FriendshipStatus.SUBSCRIBER));
+        assertThat(friendship.getId().getUser().getId(), is(savedUser.getId()));
+        assertThat(friendship.getId().getFriend().getId(), is(savedUser2.getId()));
+    }
+
+    @Test
+    @DisplayName("Добавление пользователя в друзья, статус друг")
+    void addFriend_whenMutual_shouldSetStatusFriend() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+
+        userService.addFriend(savedUser.getId(), savedUser2.getId());
+        Friendship friendship = userService.addFriend(savedUser2.getId(), savedUser.getId());
+
+        System.out.println(friendship);
+
+        assertThat(friendship, notNullValue());
+        assertThat(friendship.getStatus(), is(FriendshipStatus.FRIEND));
+        assertThat(friendship.getId().getUser().getId(), is(savedUser2.getId()));
+        assertThat(friendship.getId().getFriend().getId(), is(savedUser.getId()));
+    }
+
+    @Test
+    @DisplayName("Получение списка друзей, друзей нет")
+    void getFriendsList_whenNoFriends_shouldReturnEmptyList() {
+        User savedUser = userService.createUser(user1);
+
+        List<User> friends = userService.getFriendsList(savedUser.getId());
+
+        assertThat(friends, notNullValue());
+        assertThat(friends, emptyIterable());
+    }
+
+    @Test
+    @DisplayName("Получение списка друзей, один друг")
+    void getFriendsList_whenOneFriends_shouldReturnListOfOne() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        userService.addFriend(savedUser.getId(), savedUser2.getId());
+
+        List<User> friends = userService.getFriendsList(savedUser.getId());
+
+        assertThat(friends, notNullValue());
+        assertThat(friends.size(), is(1));
+        assertThat(friends.get(0).getId(), is(savedUser2.getId()));
+
+
+        List<User> friends2 = userService.getFriendsList(savedUser2.getId());
+
+        assertThat(friends2, notNullValue());
+        assertThat(friends2, emptyIterable());
+    }
+
+    @Test
+    @DisplayName("Получение списка друзей, обоюдная дружба")
+    void getFriendsList_whenMutualFriendship_shouldReturnListOfOne() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        userService.addFriend(savedUser.getId(), savedUser2.getId());
+        userService.addFriend(savedUser2.getId(), savedUser.getId());
+
+        List<User> friendsOfUser = userService.getFriendsList(savedUser.getId());
+        List<User> friendsOfUser2 = userService.getFriendsList(savedUser2.getId());
+
+        assertThat(friendsOfUser, notNullValue());
+        assertThat(friendsOfUser.size(), is(1));
+        assertThat(friendsOfUser.get(0).getId(), is(savedUser2.getId()));
+        assertThat(friendsOfUser2, notNullValue());
+        assertThat(friendsOfUser2.size(), is(1));
+        assertThat(friendsOfUser2.get(0).getId(), is(savedUser.getId()));
+    }
+
+    @Test
+    @DisplayName("Удаление пользователя из друзей")
+    void deleteFriend() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        userService.addFriend(savedUser.getId(), savedUser2.getId());
+
+        userService.deleteFriend(savedUser.getId(), savedUser2.getId());
+
+        List<User> friends = userService.getFriendsList(savedUser2.getId());
+
+        assertThat(friends, notNullValue());
+        assertThat(friends, emptyIterable());
+    }
+
     private User createUser(int id) {
         return User.builder()
+                .username("username" + id)
                 .name("Имя" + id)
                 .secondName("Отчество")
                 .surname("Фамилия")

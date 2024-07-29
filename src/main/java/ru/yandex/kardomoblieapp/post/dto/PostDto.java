@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,4 +26,6 @@ public class PostDto {
     private long numberOfLikes;
 
     private long numberOfViews;
+
+    private List<CommentDto> comments;
 }

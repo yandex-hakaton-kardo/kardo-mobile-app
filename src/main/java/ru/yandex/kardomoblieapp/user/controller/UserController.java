@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,11 +21,15 @@ import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
+import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
+import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -81,7 +86,7 @@ public class UserController {
 
     @GetMapping(value = "/{userId}/avatar")
     public DataFileDto getUserProfilePicture(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                        @PathVariable long userId) {
+                                             @PathVariable long userId) {
         log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
         DataFile profilePicture = userService.getProfilePicture(userId);
         return dataFileMapper.toDto(profilePicture);
@@ -93,5 +98,25 @@ public class UserController {
                                      @PathVariable long userId) {
         log.info("Пользователь с id '{}' удаляет фотографию профиля.", userId);
         userService.deleteProfilePicture(requesterId, userId);
+    }
+
+    @PutMapping("/{userId}/friends/{friendId}")
+    public Friendship addFriend(@PathVariable long userId, @PathVariable long friendId) {
+        log.info("Пользователь с id '{}' добавляет в друзья пользователя c id '{}'.", userId, friendId);
+        return userService.addFriend(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<ShortUserDto> getFriendsList(@PathVariable long userId) {
+        log.info("Получение списка друзей пользователя с id '{}'.", userId);
+        List<User> friends = userService.getFriendsList(userId);
+        return userMapper.toShortDtoList(friends);
+    }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable long userId,
+                             @PathVariable long friendId) {
+        log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
+        userService.deleteFriend(userId, friendId);
     }
 }
