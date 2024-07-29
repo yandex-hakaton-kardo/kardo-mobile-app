@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
+import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
@@ -413,6 +414,7 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("Добавление комментария к посту")
     void addCommentToPost() {
         Post savedPost = postService.createPost(savedUser.getId(), file, content);
         Comment comment = Comment.builder()
@@ -426,5 +428,44 @@ class PostServiceImplTest {
         assertThat(savedComment.getText(), is(comment.getText()));
         assertThat(savedComment.getPost().getId(), is(savedPost.getId()));
         assertThat(savedComment.getAuthor().getId(), is(savedUser.getId()));
+    }
+
+    @Test
+    @DisplayName("Обновление комментария")
+    void updatedComment() {
+        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Comment comment = Comment.builder()
+                .text("comment")
+                .build();
+        Comment savedComment = postService.addCommentToPost(savedUser.getId(), savedPost.getId(), comment);
+        CommentRequest commentRequest = new CommentRequest("updated comment");
+
+        Comment updatedComment = postService.updateComment(savedUser.getId(), savedComment.getId(), commentRequest);
+        Post post = postService.findPostById(savedPost.getId());
+
+        assertThat(updatedComment, notNullValue());
+        assertThat(updatedComment.getId(), is(savedComment.getId()));
+        assertThat(updatedComment.getText(), is(commentRequest.getText()));
+        assertThat(updatedComment.getAuthor().getId(), is(savedUser.getId()));
+        assertThat(post.getComments().size(), is(1));
+        assertThat(post.getComments().get(0).getId(), is(savedComment.getId()));
+    }
+
+    @Test
+    @DisplayName("Удаление комментария")
+    void deleteComment() {
+        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Comment comment = Comment.builder()
+                .text("comment")
+                .build();
+        Comment savedComment = postService.addCommentToPost(savedUser.getId(), savedPost.getId(), comment);
+        CommentRequest commentRequest = new CommentRequest("updated comment");
+
+        postService.deleteComment(savedUser.getId(), savedComment.getId());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> postService.updateComment(savedUser.getId(), savedComment.getId(), commentRequest));
+
+        assertThat(ex.getMessage(), is("Комментарий с id '" + savedComment.getId() + "' не найден."));
     }
 }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentDto;
-import ru.yandex.kardomoblieapp.post.dto.NewCommentRequest;
+import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.dto.PostDto;
 import ru.yandex.kardomoblieapp.post.mapper.CommentMapper;
 import ru.yandex.kardomoblieapp.post.mapper.PostMapper;
@@ -107,10 +107,28 @@ public class PostController {
     @PostMapping("/{postId}/comment")
     public CommentDto addCommentToPost(@RequestHeader("X-Kardo-User-Id") long requesterId,
                                        @PathVariable long postId,
-                                       @RequestBody @Valid NewCommentRequest newCommentRequest) {
+                                       @RequestBody @Valid CommentRequest commentRequest) {
         log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", requesterId, postId);
-        Comment newComment = commentMapper.toModel(newCommentRequest);
+        Comment newComment = commentMapper.toModel(commentRequest);
         Comment comment = postService.addCommentToPost(requesterId, postId, newComment);
         return commentMapper.toDto(comment);
+    }
+
+    @PatchMapping("/{postId}/comment/{commentId}")
+    public CommentDto updateComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                                    @PathVariable long postId,
+                                    @PathVariable long commentId,
+                                    @RequestBody @Valid CommentRequest commentRequest) {
+        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", requesterId, commentId);
+        Comment updatedComment = postService.updateComment(requesterId, commentId, commentRequest);
+        return commentMapper.toDto(updatedComment);
+    }
+
+    @DeleteMapping("/{postId}/comment/{commentId}")
+    public void deleteComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                              @PathVariable long postId,
+                              @PathVariable long commentId) {
+        log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", requesterId, commentId);
+        postService.deleteComment(requesterId, commentId);
     }
 }

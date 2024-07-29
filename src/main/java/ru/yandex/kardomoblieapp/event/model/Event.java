@@ -13,8 +13,8 @@ import java.util.List;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "events")
+//@Entity
+//@Table(name = "events")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

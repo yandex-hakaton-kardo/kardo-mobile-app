@@ -6,8 +6,8 @@ import org.hibernate.annotations.Formula;
 import ru.yandex.kardomoblieapp.event.model.Event;
 import ru.yandex.kardomoblieapp.user.model.User;
 
-@Entity
-    @Table(name = "participants")
+//@Entity
+//    @Table(name = "participants")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
