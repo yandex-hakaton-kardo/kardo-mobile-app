@@ -15,6 +15,7 @@ import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostLike;
 import ru.yandex.kardomoblieapp.post.model.PostLikeId;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.repository.CommentRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostLikeRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostRepository;
@@ -23,6 +24,7 @@ import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,7 +79,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(postToUpdate);
         long likes = postLikeRepository.findPostLikesCount(postId);
-        postToUpdate.setNumberOfLikes(likes);
+        postToUpdate.setLikes(likes);
         log.info("Пост с id '{}' был обновлен пользователем с id '{}'.", postId, requesterId);
         return postToUpdate;
     }
@@ -99,7 +101,7 @@ public class PostServiceImpl implements PostService {
         post.addView();
         postRepository.save(post);
         long likes = postLikeRepository.findPostLikesCount(postId);
-        post.setNumberOfLikes(likes);
+        post.setLikes(likes);
         log.info("Получение поста с id '{}'.", postId);
         return post;
     }
@@ -131,15 +133,15 @@ public class PostServiceImpl implements PostService {
         }
 
         long likesCount = postLikeRepository.findPostLikesCount(postId);
-        post.setNumberOfLikes(likesCount);
+        post.setLikes(likesCount);
         postRepository.save(post);
         log.info("Количество лайков поста с id '{}': '{}'.", postId, likesCount);
         return likesCount;
     }
 
     @Override
-    public List<Post> getPostsFeed(Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size,
+    public List<Post> getPostsFeed(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size,
                 Sort.by("numberOfViews", "createdOn").descending());
         List<Post> feed = postRepository.getPostsFeed(pageable);
         log.info("Получен фид постов размером ");
@@ -178,6 +180,17 @@ public class PostServiceImpl implements PostService {
         checkIfUserIsCommentAuthor(requesterId, comment);
         commentRepository.deleteById(commentId);
         log.info("Пользователь с id '{}' удалил комментарий с id '{}'.", requesterId, commentId);
+    }
+
+    @Override
+    public List<Post> getRecommendations(long requesterId, Integer page, Integer size, PostSort sort) {
+        userService.findUserById(requesterId);
+        List<Long> friendsIds = new ArrayList<>(userService.getFriendsList(requesterId).stream().map(User::getId).toList());
+        friendsIds.add(requesterId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.name().toLowerCase()).descending());
+        List<Post> recommendations = postRepository.findRecommendations(friendsIds, pageable);
+        log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", requesterId, recommendations.size());
+        return recommendations;
     }
 
     private Post getPost(long postId) {

@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
@@ -47,6 +48,8 @@ class PostServiceImplTest {
 
     private User savedUser;
 
+    private User savedUser2;
+
     private String content;
 
     long unknownId;
@@ -68,6 +71,18 @@ class PostServiceImplTest {
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         savedUser = userService.createUser(user);
+        User user2 = User.builder()
+                .name("Имя 2")
+                .username("username 2")
+                .secondName("Отчество")
+                .surname("Фамилия")
+                .country("Россия")
+                .city("Москва")
+                .email("test2@mail.ru")
+                .password("password")
+                .dateOfBirth(LocalDate.of(1990, 12, 12))
+                .build();
+        savedUser2 = userService.createUser(user2);
         content = "post content";
         unknownId = 9999L;
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
@@ -87,8 +102,8 @@ class PostServiceImplTest {
         assertThat(savedPost.getFile().getFileName(), is(file.getOriginalFilename()));
         assertThat(savedPost.getTitle(), is(content));
         assertThat(savedPost.getAuthor().getId(), is(savedUser.getId()));
-        assertThat(savedPost.getNumberOfViews(), is(0L));
-        assertThat(savedPost.getNumberOfLikes(), is(0L));
+        assertThat(savedPost.getViews(), is(0L));
+        assertThat(savedPost.getLikes(), is(0L));
     }
 
     @Test
@@ -238,8 +253,8 @@ class PostServiceImplTest {
         assertThat(result.getAuthor().getId(), is(savedPost.getAuthor().getId()));
         assertThat(result.getFile().getId(), is(savedPost.getFile().getId()));
         assertThat(result.getCreatedOn(), is(savedPost.getCreatedOn()));
-        assertThat(result.getNumberOfViews(), is(1L));
-        assertThat(result.getNumberOfLikes(), is(0L));
+        assertThat(result.getViews(), is(1L));
+        assertThat(result.getLikes(), is(0L));
     }
 
     @Test
@@ -467,5 +482,44 @@ class PostServiceImplTest {
                 () -> postService.updateComment(savedUser.getId(), savedComment.getId(), commentRequest));
 
         assertThat(ex.getMessage(), is("Комментарий с id '" + savedComment.getId() + "' не найден."));
+    }
+
+    @Test
+    @DisplayName("Получение рекомендаций, у пользователя нет друзей.")
+    void getRecommendations_whenUserHaveNoFriends_shouldDisplayAllPosts() {
+        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+
+        List<Post> recommendations = postService.getRecommendations(savedUser2.getId(), 0, 10, PostSort.LIKES);
+
+        assertThat(recommendations, notNullValue());
+        assertThat(recommendations.size(), is(1));
+        assertThat(recommendations.get(0).getId(), is(savedPost.getId()));
+    }
+
+    @Test
+    @DisplayName("Получение рекомендаций, сортировка по количеству лайков.")
+    void getRecommendations_whenPostsHaveLikes_shouldBeOrderedByNumberOfLikes() {
+        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+
+        postService.addLikeToPost(savedPost2.getId(), savedPost2.getId());
+
+        List<Post> recommendations = postService.getRecommendations(savedUser2.getId(), 0, 10, PostSort.LIKES);
+
+        assertThat(recommendations, notNullValue());
+        assertThat(recommendations.size(), is(2));
+        assertThat(recommendations.get(0).getId(), is(savedPost2.getId()));
+        assertThat(recommendations.get(1).getId(), is(savedPost.getId()));
+    }
+
+    @Test
+    @DisplayName("Получение рекомендаций, пользователь не должен получать свои посты в рекомендации.")
+    void getRecommendations_whenUserHavePosts_shouldNotShowHisPostsInRecommendations() {
+        postService.createPost(savedUser.getId(), file, content);
+
+        List<Post> recommendations = postService.getRecommendations(savedUser.getId(), 0, 10, PostSort.LIKES);
+
+        assertThat(recommendations, notNullValue());
+        assertThat(recommendations, emptyIterable());
     }
 }

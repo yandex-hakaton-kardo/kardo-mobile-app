@@ -23,9 +23,9 @@ public class PostDto {
 
     private DataFileDto file;
 
-    private long numberOfLikes;
+    private long likes;
 
-    private long numberOfViews;
+    private long views;
 
     private List<CommentDto> comments;
 }

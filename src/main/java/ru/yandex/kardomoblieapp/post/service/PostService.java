@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 
 import java.util.List;
 
@@ -27,4 +28,6 @@ public interface PostService {
     Comment updateComment(long requesterId, long commentId, CommentRequest commentRequest);
 
     void deleteComment(long requesterId, long commentId);
+
+    List<Post> getRecommendations(long requesterId, Integer from, Integer size, PostSort sort);
 }

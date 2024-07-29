@@ -56,18 +56,18 @@ public class Post {
     @ToString.Exclude
     private DataFile file;
 
-    @Column(name = "number_of_likes")
-    private long numberOfLikes;
+    @Column(name = "likes")
+    private long likes;
 
-    @Column(name = "number_of_views")
-    private long numberOfViews;
+    @Column(name = "views")
+    private long views;
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
     @ToString.Exclude
     private final List<Comment> comments = new ArrayList<>();
 
     public void addView() {
-        numberOfViews++;
+        views++;
     }
 
     public void addComment(Comment comment) {

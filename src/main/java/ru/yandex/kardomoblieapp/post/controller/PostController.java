@@ -26,6 +26,7 @@ import ru.yandex.kardomoblieapp.post.mapper.CommentMapper;
 import ru.yandex.kardomoblieapp.post.mapper.PostMapper;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.service.PostService;
 
 import java.util.List;
@@ -97,11 +98,20 @@ public class PostController {
 
     @GetMapping("/feed")
     public List<PostDto> getPostsFeed(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                      @RequestParam(defaultValue = "0") Integer from,
+                                      @RequestParam(defaultValue = "0") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Получение ленты постов. from = '{}', size = '{}'.", from, size);
-        List<Post> feed = postService.getPostsFeed(from, size);
+        log.info("Получение ленты постов. from = '{}', size = '{}'.", page, size);
+        List<Post> feed = postService.getPostsFeed(page, size);
         return postMapper.toDtoList(feed);
+    }
+
+    public List<PostDto> getRecommendations(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                                            @RequestParam(defaultValue = "0") Integer page,
+                                            @RequestParam(defaultValue = "10") Integer size,
+                                            @RequestParam(defaultValue = "LIKES") PostSort sort) {
+        log.info("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
+        List<Post> recommendations = postService.getRecommendations(requesterId, page, size, sort);
+        return postMapper.toDtoList(recommendations);
     }
 
     @PostMapping("/{postId}/comment")
