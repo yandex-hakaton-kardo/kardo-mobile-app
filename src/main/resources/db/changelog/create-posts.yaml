@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: DEV-1
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: posts
+            columns:
+              - column:
+                  name: post_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_posts
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_posts
+                    references: users(user_id)
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(1000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_posts_data_files
+                    references: data_files(data_file_id)
+                    nullable: true
+              - column:
+                  name: created_on
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: number_of_likes
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: number_of_views
+                  type: BIGINT
+                  constraints:
+                    nullable: false

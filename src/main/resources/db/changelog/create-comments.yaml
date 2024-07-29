@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: DEV-1
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: comment_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_comments
+                    nullable: false
+              - column:
+                  name: text
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_comments_posts
+                    references: posts(post_id)
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_comments_users
+                    references: users(user_id)
+                    nullable: false
+              - column:
+                  name: created_on
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false

@@ -1,4 +1,4 @@
-package ru.yandex.kardomoblieapp.datafiles.dto;
+package ru.yandex.kardomoblieapp.post.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,11 +9,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DataFileDto {
+public class CommentDto {
 
-    private Long id;
+    private long id;
 
-    private String fileName;
+    private String text;
 
-    private String filePath;
+    private long authorId;
 }

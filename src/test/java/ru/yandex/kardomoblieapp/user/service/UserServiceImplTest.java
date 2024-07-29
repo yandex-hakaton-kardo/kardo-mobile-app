@@ -140,7 +140,6 @@ class UserServiceImplTest {
 
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
-
         DataFile savedFile = userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
 
         assertThat(savedFile, notNullValue());
@@ -187,9 +186,9 @@ class UserServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
         userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
 
-        byte[] result = userService.downloadProfilePicture(savedUser.getId());
+        DataFile profilePicture = userService.getProfilePicture(savedUser.getId());
 
-        assertThat(result, notNullValue());
+        assertThat(profilePicture, notNullValue());
     }
 
     @Test
@@ -197,7 +196,7 @@ class UserServiceImplTest {
     void downloadProfilePicture_whenUserNotExists_shouldThrowNotFoundException() {
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.downloadProfilePicture(unknownId));
+                () -> userService.getProfilePicture(unknownId));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
     }
@@ -208,7 +207,7 @@ class UserServiceImplTest {
         User savedUser = userService.createUser(user1);
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.downloadProfilePicture(savedUser.getId()));
+                () -> userService.getProfilePicture(savedUser.getId()));
 
         assertThat(ex.getLocalizedMessage(),
                 is("У пользователя c id'" + savedUser.getId() + "' нет фотографии профиля."));

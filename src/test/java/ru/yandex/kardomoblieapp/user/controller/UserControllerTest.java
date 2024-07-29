@@ -17,7 +17,7 @@ import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.NewUserDto;
+import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
@@ -65,7 +65,7 @@ class UserControllerTest {
     @MockBean
     private DataFileMapper dataFileMapper;
 
-    private NewUserDto newUser1;
+    private NewUserRequest newUserRequest;
 
     private User user;
 
@@ -83,15 +83,10 @@ class UserControllerTest {
 
     @BeforeEach
     void init() {
-        newUser1 = NewUserDto.builder()
-                .name("Имя")
-                .secondName("Отчество")
-                .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
-                .email("test@mail.ru")
+        newUserRequest = NewUserRequest.builder()
+                .username("username")
+                .email("email@mail.com")
                 .password("password")
-                .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         user = new User();
         userDto = UserDto.builder()
@@ -110,7 +105,11 @@ class UserControllerTest {
                 .password("updated password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
-        dataFile = new DataFile();
+        dataFile = DataFile.builder()
+                .id(32L)
+                .fileName("file")
+                .fileType(MediaType.IMAGE_JPEG_VALUE)
+                .build();
         dataFileDto = DataFileDto.builder()
                 .fileName("fileName")
                 .id(23L)
@@ -120,8 +119,8 @@ class UserControllerTest {
     @Test
     @SneakyThrows
     @DisplayName("Добавление пользователя с валидными полями")
-    void addUser_allFieldsValid_ShouldReturn200Status() {
-        when(userMapper.toModel(newUser1))
+    void addUser_allFieldsValid_ShouldReturn201Status() {
+        when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
                 .thenReturn(user);
@@ -130,12 +129,86 @@ class UserControllerTest {
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser1)))
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
                 .andExpect(jsonPath("$.email", is(userDto.getEmail())));
 
-        verify(userMapper, times(1)).toModel(newUser1);
+        verify(userMapper, times(1)).toModel(newUserRequest);
+        verify(userService, times(1)).createUser(user);
+        verify(userMapper, times(1)).toDto(user);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с матерным именем")
+    void addUser_whenBadName_ShouldReturn400Status() {
+        newUserRequest.setUsername("хуй");
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(jsonPath("$.errors.username",
+                        is("Строка содержит нецензурные слова.")));
+
+        verify(userMapper, never()).toModel(newUserRequest);
+        verify(userService, never()).createUser(any());
+        verify(userMapper, never()).toDto(any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с матерным именем")
+    void addUser_whenBadName2_ShouldReturn400Status() {
+        newUserRequest.setUsername("пидор");
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(jsonPath("$.errors.username",
+                        is("Строка содержит нецензурные слова.")));
+
+        verify(userMapper, never()).toModel(newUserRequest);
+        verify(userService, never()).createUser(any());
+        verify(userMapper, never()).toDto(any());
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("Добавление пользователя с похожим на мат именем")
+    void addUser_whenNearlyBadName_ShouldReturn201Status() {
+        newUserRequest.setUsername("мандарин");
+        when(userMapper.toModel(newUserRequest))
+                .thenReturn(user);
+        when(userService.createUser(user))
+                .thenReturn(user);
+        when(userMapper.toDto(user))
+                .thenReturn(userDto);
+
+        mvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userMapper, times(1)).toModel(newUserRequest);
         verify(userService, times(1)).createUser(user);
         verify(userMapper, times(1)).toDto(user);
     }
@@ -144,8 +217,8 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя с пустым именем")
     void addUser_withEmptyName_ShouldReturn400Status() {
-        newUser1.setName("");
-        when(userMapper.toModel(newUser1))
+        newUserRequest.setUsername("");
+        when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
                 .thenReturn(user);
@@ -154,13 +227,13 @@ class UserControllerTest {
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser1)))
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
                 .andExpect(jsonPath("$.errors.name",
                         is("Имя не может быть пустым и должно содержать от 2 до 20 символов.")));
 
-        verify(userMapper, never()).toModel(any());
+        verify(userMapper, never()).toModel(newUserRequest);
         verify(userService, never()).createUser(any());
         verify(userMapper, never()).toDto(any());
     }
@@ -169,8 +242,8 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя с коротким именем")
     void addUser_withShortName_ShouldReturn400Status() {
-        newUser1.setName("a");
-        when(userMapper.toModel(newUser1))
+        newUserRequest.setUsername("a");
+        when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
                 .thenReturn(user);
@@ -179,7 +252,7 @@ class UserControllerTest {
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser1)))
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
                 .andExpect(jsonPath("$.errors.name",
@@ -194,8 +267,8 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя без email")
     void addUser_withoutEmail_ShouldReturn400Status() {
-        newUser1.setEmail(null);
-        when(userMapper.toModel(newUser1))
+        newUserRequest.setEmail(null);
+        when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
                 .thenReturn(user);
@@ -204,12 +277,12 @@ class UserControllerTest {
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser1)))
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
                 .andExpect(jsonPath("$.errors.email",
                         is("Некорректный формат электронной почты.")));
-
+//
         verify(userMapper, never()).toModel(any());
         verify(userService, never()).createUser(any());
         verify(userMapper, never()).toDto(any());
@@ -219,8 +292,8 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Добавление пользователя с неправильным форматом email")
     void addUser_withoutWrongFormatEmail_ShouldReturn400Status() {
-        newUser1.setEmail("а@daf");
-        when(userMapper.toModel(newUser1))
+        newUserRequest.setEmail("а@daf");
+        when(userMapper.toModel(newUserRequest))
                 .thenReturn(user);
         when(userService.createUser(user))
                 .thenReturn(user);
@@ -229,7 +302,7 @@ class UserControllerTest {
 
         mvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newUser1)))
+                        .content(objectMapper.writeValueAsString(newUserRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
                 .andExpect(jsonPath("$.errors.email",
@@ -458,16 +531,17 @@ class UserControllerTest {
     @SneakyThrows
     @DisplayName("Получение фотографии профиля пользователя")
     void getUserProfilePicture_shouldReturnJpeg() {
-        byte[] result = new byte[0];
 
-        when(userService.downloadProfilePicture(userId)).thenReturn(result);
+        when(userService.getProfilePicture(userId)).thenReturn(dataFile);
+        when(dataFileMapper.toDto(dataFile)).thenReturn(dataFileDto);
 
         mvc.perform(get("/users/{userId}/avatar", userId)
                         .header("X-Kardo-User-Id", requesterId))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.IMAGE_JPEG));
+                .andExpect(jsonPath("$.id", is(dataFileDto.getId()), Long.class))
+                .andExpect(jsonPath("$.fileName", is(dataFileDto.getFileName())));
 
-        verify(userService, times(1)).downloadProfilePicture(userId);
+        verify(userService, times(1)).getProfilePicture(userId);
     }
 
     @Test
@@ -475,7 +549,7 @@ class UserControllerTest {
     @DisplayName("Получение фотографии профиля пользователя, пользователь не найден")
     void getUserProfilePicture_whenUserNotFound_shouldReturn404Status() {
         doThrow(new NotFoundException("Пользователь с id '" + userId + "' не найден.")).when(userService)
-                .downloadProfilePicture(userId);
+                .getProfilePicture(userId);
 
         mvc.perform(get("/users/{userId}/avatar", userId)
                         .header("X-Kardo-User-Id", requesterId))
@@ -483,7 +557,7 @@ class UserControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
                 .andExpect(jsonPath("$.errors.error", is("Пользователь с id '" + userId + "' не найден.")));
 
-        verify(userService, times(1)).downloadProfilePicture(userId);
+        verify(userService, times(1)).getProfilePicture(userId);
     }
 
     @Test

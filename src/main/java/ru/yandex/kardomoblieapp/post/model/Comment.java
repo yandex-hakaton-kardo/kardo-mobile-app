@@ -1,15 +1,14 @@
-package ru.yandex.kardomoblieapp.event;
+package ru.yandex.kardomoblieapp.post.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,39 +16,39 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import ru.yandex.kardomoblieapp.user.model.User;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "events")
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "comments")
 @Getter
 @Setter
-@Builder
 @ToString
-public class Event {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_id")
+    @Column(name = "comment_id")
     private Long id;
 
-    @Column(name = "event_name")
-    private String eventName;
+    @Column(name = "text", nullable = false)
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "activity_id")
+    @JoinColumn(name = "post_id")
     @ToString.Exclude
-    private Activity activity;
+    private Post post;
 
-    private String description;
+    @OneToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
-    private String prize;
-
-    private LocalDateTime eventStart;
-
-    private LocalDateTime eventEnd;
-
-    @Enumerated(EnumType.STRING)
-    private Stage stage;
+    @Column(name = "created_on")
+    @CreationTimestamp
+    private LocalDateTime created;
 }

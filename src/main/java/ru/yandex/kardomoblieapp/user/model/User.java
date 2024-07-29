@@ -37,7 +37,8 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "username")
+    private String username;
+
     private String name;
 
     @Column(name = "second_name")

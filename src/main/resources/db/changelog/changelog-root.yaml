@@ -17,3 +17,9 @@ databaseChangeLog:
   - include:
       file: add-post_id-to-datafiles.yaml
       relativeToChangelogFile: true
+  - include:
+      file: create-post_likes.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-comments.yaml
+      relativeToChangelogFile: true
