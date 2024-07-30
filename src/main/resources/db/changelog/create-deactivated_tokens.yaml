@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-deactivated_tokens
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: deactivated_tokens
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_deactivated_tokens
+              - column:
+                  name: keep_until
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false

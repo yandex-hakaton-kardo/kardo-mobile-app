@@ -1,4 +1,4 @@
-package ru.yandex.kardomoblieapp.security.jwt.serializer;
+package ru.yandex.kardomoblieapp.security.jwt.serialization;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -18,7 +18,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Setter
 @Slf4j
-public class AccessTokenJwsStringSerializer implements TokenSerilazer<String> {
+public class AccessTokenJwsStringSerializer implements TokenSerializer<String> {
 
     private final JWSSigner jwsSigner;
 

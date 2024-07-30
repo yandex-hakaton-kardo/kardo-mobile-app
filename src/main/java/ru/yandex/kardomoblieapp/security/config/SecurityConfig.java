@@ -1,8 +1,10 @@
 package ru.yandex.kardomoblieapp.security.config;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +18,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import ru.yandex.kardomoblieapp.security.jwt.config.JwtAuthenticationConfigurer;
-import ru.yandex.kardomoblieapp.security.jwt.serializer.AccessTokenJwsStringSerializer;
-import ru.yandex.kardomoblieapp.security.jwt.serializer.RefreshTokenJweStringSerializer;
+import ru.yandex.kardomoblieapp.security.jwt.repository.DeactivatedTokenRepository;
+import ru.yandex.kardomoblieapp.security.jwt.serialization.AccessTokenJwsStringDeserializer;
+import ru.yandex.kardomoblieapp.security.jwt.serialization.AccessTokenJwsStringSerializer;
+import ru.yandex.kardomoblieapp.security.jwt.serialization.RefreshTokenJweStringDeserializer;
+import ru.yandex.kardomoblieapp.security.jwt.serialization.RefreshTokenJweStringSerializer;
 
 import java.text.ParseException;
 
@@ -28,14 +33,24 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationConfigurer jwtAuthenticationConfigurer(
             @Value("${jwt.access-token-key}") String accessTokenKey,
-            @Value("${jwt.refresh-token-key}") String refreshTokenKey) throws ParseException, JOSEException {
+            @Value("${jwt.refresh-token-key}") String refreshTokenKey,
+            DeactivatedTokenRepository deactivatedTokenRepository) throws ParseException, JOSEException {
 
-        return new JwtAuthenticationConfigurer()
+        return JwtAuthenticationConfigurer.builder()
                 .accessTokenStringSerializer(new AccessTokenJwsStringSerializer(
-                        new MACSigner(OctetSequenceKey.parse(accessTokenKey))))
+                        new MACSigner(OctetSequenceKey.parse(accessTokenKey))
+                ))
                 .refreshTokenStringSerializer(new RefreshTokenJweStringSerializer(
                         new DirectEncrypter(OctetSequenceKey.parse(refreshTokenKey))
-                ));
+                ))
+                .accessTokenStringDeserializer(new AccessTokenJwsStringDeserializer(
+                        new MACVerifier(OctetSequenceKey.parse(accessTokenKey))
+                ))
+                .refreshTokenStringDeserializer(new RefreshTokenJweStringDeserializer(
+                        new DirectDecrypter(OctetSequenceKey.parse(refreshTokenKey))
+                ))
+                .deactivatedTokenRepository(deactivatedTokenRepository)
+                .build();
     }
 
     @Bean

@@ -6,4 +6,6 @@ import lombok.experimental.UtilityClass;
 public class SecurityUtils {
 
     public static final String LOGIN_PATH = "/users/login";
+
+    public static final String BEARER_AUTH = "Bearer ";
 }

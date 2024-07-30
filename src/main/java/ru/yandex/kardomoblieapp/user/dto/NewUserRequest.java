@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.kardomoblieapp.shared.validation.Censored;
 
 @Data
 @AllArgsConstructor

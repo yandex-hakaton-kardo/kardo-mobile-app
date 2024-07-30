@@ -1,4 +1,4 @@
-package ru.yandex.kardomoblieapp.security.jwt.serializer;
+package ru.yandex.kardomoblieapp.security.jwt.serialization;
 
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
@@ -19,7 +19,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Setter
 @Slf4j
-public class RefreshTokenJweStringSerializer implements TokenSerilazer<String> {
+public class RefreshTokenJweStringSerializer implements TokenSerializer<String> {
 
     private final JWEEncrypter jweEncrypter;
 

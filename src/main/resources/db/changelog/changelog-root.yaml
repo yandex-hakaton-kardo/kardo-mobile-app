@@ -26,3 +26,6 @@ databaseChangeLog:
   - include:
       file: create-friendship.yaml
       relativeToChangelogFile: true
+  - include:
+      file: create-deactivated_tokens.yaml
+      relativeToChangelogFile: true
