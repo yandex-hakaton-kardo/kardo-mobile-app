@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,18 +16,18 @@ import ru.yandex.kardomoblieapp.shared.validation.Censored;
 @Builder
 public class NewUserRequest {
 
-    @NotBlank(message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
-    @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
-    @Censored
+    @NotBlank(message = "Никнейм не может быть пустым и должно содержать от 2 до 30 символов.")
+    @Pattern(regexp = "^[a-z0-9]{2,30}$", message = "Никнейм не может быть пустым и должно содержать от 2 до 30 символов.")
     private String username;
 
     @NotBlank(message = "Некорректный формат электронной почты.")
     @Email(message = "Некорректный формат электронной почты.")
-    @Size(min = 6, max = 254, message = "Некорректный формат электронной почты.")
+    @Size(min = 5, max = 50, message = "Некорректный формат электронной почты.")
     private String email;
 
 
     @NotBlank(message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
-    @Size(min = 6, max = 100, message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$",
+            message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
     private String password;
 }

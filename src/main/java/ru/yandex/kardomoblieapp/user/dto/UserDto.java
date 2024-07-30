@@ -18,8 +18,7 @@ public class UserDto {
 
     private Long id;
 
-    private String username;
-
+♦
     private String name;
 
     private String secondName;
@@ -37,6 +36,9 @@ public class UserDto {
     private Gender gender;
 
     private DataFile profilePicture;
+
+    private String phoneNumber;
+
 
     private String overview;
 
