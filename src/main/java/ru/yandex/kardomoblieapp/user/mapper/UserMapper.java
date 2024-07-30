@@ -9,6 +9,8 @@ import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.User;
 
+import java.util.List;
+
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring")
@@ -22,4 +24,6 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
     void updateUser(UserUpdateRequest userUpdateRequest, @MappingTarget User user);
+
+    List<ShortUserDto> toShortDtoList(List<User> friends);
 }

@@ -3,7 +3,10 @@ package ru.yandex.kardomoblieapp.user.service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
+import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.User;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -20,4 +23,10 @@ public interface UserService {
     DataFile getProfilePicture(long userId);
 
     void deleteProfilePicture(long requesterId, long userId);
+
+    Friendship addFriend(long userId, long friendId);
+
+    List<User> getFriendsList(long userId);
+
+    void deleteFriend(long userId, long friendId);
 }

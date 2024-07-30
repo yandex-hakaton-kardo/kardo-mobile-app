@@ -39,12 +39,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: number_of_likes
+                  name: likes
                   type: BIGINT
                   constraints:
                     nullable: false
               - column:
-                  name: number_of_views
+                  name: views
                   type: BIGINT
                   constraints:
                     nullable: false

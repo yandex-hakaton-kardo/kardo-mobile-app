@@ -20,12 +20,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentDto;
-import ru.yandex.kardomoblieapp.post.dto.NewCommentRequest;
+import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.dto.PostDto;
 import ru.yandex.kardomoblieapp.post.mapper.CommentMapper;
 import ru.yandex.kardomoblieapp.post.mapper.PostMapper;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.service.PostService;
 
 import java.util.List;
@@ -97,20 +98,47 @@ public class PostController {
 
     @GetMapping("/feed")
     public List<PostDto> getPostsFeed(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                      @RequestParam(defaultValue = "0") Integer from,
+                                      @RequestParam(defaultValue = "0") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Получение ленты постов. from = '{}', size = '{}'.", from, size);
-        List<Post> feed = postService.getPostsFeed(from, size);
+        log.info("Получение ленты постов. from = '{}', size = '{}'.", page, size);
+        List<Post> feed = postService.getPostsFeed(page, size);
         return postMapper.toDtoList(feed);
+    }
+
+    public List<PostDto> getRecommendations(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                                            @RequestParam(defaultValue = "0") Integer page,
+                                            @RequestParam(defaultValue = "10") Integer size,
+                                            @RequestParam(defaultValue = "LIKES") PostSort sort) {
+        log.info("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
+        List<Post> recommendations = postService.getRecommendations(requesterId, page, size, sort);
+        return postMapper.toDtoList(recommendations);
     }
 
     @PostMapping("/{postId}/comment")
     public CommentDto addCommentToPost(@RequestHeader("X-Kardo-User-Id") long requesterId,
                                        @PathVariable long postId,
-                                       @RequestBody @Valid NewCommentRequest newCommentRequest) {
+                                       @RequestBody @Valid CommentRequest commentRequest) {
         log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", requesterId, postId);
-        Comment newComment = commentMapper.toModel(newCommentRequest);
+        Comment newComment = commentMapper.toModel(commentRequest);
         Comment comment = postService.addCommentToPost(requesterId, postId, newComment);
         return commentMapper.toDto(comment);
+    }
+
+    @PatchMapping("/{postId}/comment/{commentId}")
+    public CommentDto updateComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                                    @PathVariable long postId,
+                                    @PathVariable long commentId,
+                                    @RequestBody @Valid CommentRequest commentRequest) {
+        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", requesterId, commentId);
+        Comment updatedComment = postService.updateComment(requesterId, commentId, commentRequest);
+        return commentMapper.toDto(updatedComment);
+    }
+
+    @DeleteMapping("/{postId}/comment/{commentId}")
+    public void deleteComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
+                              @PathVariable long postId,
+                              @PathVariable long commentId) {
+        log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", requesterId, commentId);
+        postService.deleteComment(requesterId, commentId);
     }
 }

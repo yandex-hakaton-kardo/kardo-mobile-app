@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
+import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostLike;
 import ru.yandex.kardomoblieapp.post.model.PostLikeId;
+import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.repository.CommentRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostLikeRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostRepository;
@@ -22,6 +24,7 @@ import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,8 +64,8 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post updatePost(long requesterId, long postId, MultipartFile file, String content) {
         userService.findUserById(requesterId);
-        final Post postToUpdate = findPost(postId);
-        checkIfUserIsAuthor(requesterId, postToUpdate);
+        final Post postToUpdate = getPost(postId);
+        checkIfUserIsPostAuthor(requesterId, postToUpdate);
 
         DataFile currentFile = postToUpdate.getFile();
         if (file != null && !currentFile.getFileName().equals(file.getOriginalFilename())) {
@@ -76,7 +79,7 @@ public class PostServiceImpl implements PostService {
 
         postRepository.save(postToUpdate);
         long likes = postLikeRepository.findPostLikesCount(postId);
-        postToUpdate.setNumberOfLikes(likes);
+        postToUpdate.setLikes(likes);
         log.info("Пост с id '{}' был обновлен пользователем с id '{}'.", postId, requesterId);
         return postToUpdate;
     }
@@ -85,8 +88,8 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public void deletePost(long requesterId, long postId) {
         userService.findUserById(requesterId);
-        final Post postToDelete = findPost(postId);
-        checkIfUserIsAuthor(requesterId, postToDelete);
+        final Post postToDelete = getPost(postId);
+        checkIfUserIsPostAuthor(requesterId, postToDelete);
         DataFile file = postToDelete.getFile();
         dataFileService.deleteFile(file.getId());
         postRepository.deleteById(postId);
@@ -94,11 +97,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post findPostById(long postId) {
-        final Post post = findPost(postId);
+        final Post post = getPostWithComments(postId);
         post.addView();
         postRepository.save(post);
         long likes = postLikeRepository.findPostLikesCount(postId);
-        post.setNumberOfLikes(likes);
+        post.setLikes(likes);
         log.info("Получение поста с id '{}'.", postId);
         return post;
     }
@@ -114,7 +117,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public long addLikeToPost(long requesterId, long postId) {
         User user = userService.findUserById(requesterId);
-        Post post = findPost(postId);
+        Post post = getPost(postId);
 
         PostLikeId likeId = PostLikeId.of(post, user);
         Optional<PostLike> like = postLikeRepository.findById(likeId);
@@ -130,16 +133,16 @@ public class PostServiceImpl implements PostService {
         }
 
         long likesCount = postLikeRepository.findPostLikesCount(postId);
-        post.setNumberOfLikes(likesCount);
+        post.setLikes(likesCount);
         postRepository.save(post);
         log.info("Количество лайков поста с id '{}': '{}'.", postId, likesCount);
         return likesCount;
     }
 
     @Override
-    public List<Post> getPostsFeed(Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from / size, size,
-                Sort.by("numberOfViews", "createdOn").descending());
+    public List<Post> getPostsFeed(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by("views", "createdOn").descending());
         List<Post> feed = postRepository.getPostsFeed(pageable);
         log.info("Получен фид постов размером ");
         return feed;
@@ -149,23 +152,73 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Comment addCommentToPost(long requesterId, long postId, Comment newComment) {
         User author = userService.findUserById(requesterId);
-        Post post = findPost(postId);
+        Post post = getPost(postId);
         newComment.setAuthor(author);
         newComment.setPost(post);
         Comment savedComment = commentRepository.save(newComment);
+        post.addComment(savedComment);
+        postRepository.save(post);
         log.info("Пользователь с id '{} оставил комментарий на пост с id '{}'.", requesterId, postId);
         return savedComment;
     }
 
-    private Post findPost(long postId) {
+    @Override
+    public Comment updateComment(long requesterId, long commentId, CommentRequest commentRequest) {
+        userService.findUserById(requesterId);
+        Comment comment = getCommentWithAuthor(commentId);
+        checkIfUserIsCommentAuthor(requesterId, comment);
+        comment.setText(commentRequest.getText());
+        Comment savedComment = commentRepository.save(comment);
+        log.info("Пользователь с id '{}' отредактировал комментарий с id '{}'.", requesterId, commentId);
+        return savedComment;
+    }
+
+    @Override
+    public void deleteComment(long requesterId, long commentId) {
+        userService.findUserById(requesterId);
+        Comment comment = getCommentWithAuthor(commentId);
+        checkIfUserIsCommentAuthor(requesterId, comment);
+        commentRepository.deleteById(commentId);
+        log.info("Пользователь с id '{}' удалил комментарий с id '{}'.", requesterId, commentId);
+    }
+
+    @Override
+    public List<Post> getRecommendations(long requesterId, Integer page, Integer size, PostSort sort) {
+        userService.findUserById(requesterId);
+        List<Long> friendsIds = new ArrayList<>(userService.getFriendsList(requesterId).stream().map(User::getId).toList());
+        friendsIds.add(requesterId);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.name().toLowerCase()).descending());
+        List<Post> recommendations = postRepository.findRecommendations(friendsIds, pageable);
+        log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", requesterId, recommendations.size());
+        return recommendations;
+    }
+
+    private Post getPost(long postId) {
         return postRepository.findPostById(postId)
                 .orElseThrow(() -> new NotFoundException("Пост с id '" + postId + "' не найден."));
     }
 
-    private void checkIfUserIsAuthor(long userId, Post post) {
+    private Post getPostWithComments(long postId) {
+        return postRepository.findPostById(postId)
+                .orElseThrow(() -> new NotFoundException("Пост с id '" + postId + "' не найден."));
+    }
+
+    private void checkIfUserIsPostAuthor(long userId, Post post) {
         if (userId != post.getAuthor().getId()) {
             throw new NotAuthorizedException("Пользователь с id '" + userId
                     + "' не имеет прав на редактирование поста с id '" + post.getId() + "'.");
         }
+    }
+
+    private void checkIfUserIsCommentAuthor(long requesterId, Comment comment) {
+        if (comment.getAuthor().getId() != requesterId) {
+            throw new NotAuthorizedException("Пользователь с id '" + requesterId
+                    + "' не имеет прав на редактирование комментария с id '" + comment.getId() + "'.");
+        }
+    }
+
+    private Comment getCommentWithAuthor(long commentId) {
+        return commentRepository.findCommentById(commentId)
+                .orElseThrow(() -> new NotFoundException("Комментарий с id '" + commentId + "' не найден."));
     }
 }

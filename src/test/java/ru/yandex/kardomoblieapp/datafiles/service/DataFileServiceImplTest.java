@@ -69,7 +69,7 @@ class DataFileServiceImplTest {
 
         assertThat(savedFile, notNullValue());
         assertThat(savedFile.getId(), greaterThan(0L));
-        assertThat(savedFile.getFileName(), is(file.getName()));
+        assertThat(savedFile.getFileName(), is(file.getOriginalFilename()));
         assertThat(savedFile.getFileType(), is(file.getContentType()));
         assertThat(savedFile.getFilePath(), endsWith("/" + userId + "/" + dataFile.getFileName()));
     }
