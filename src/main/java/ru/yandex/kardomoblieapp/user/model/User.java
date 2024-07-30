@@ -73,5 +73,5 @@ public class User {
     @Column(name = "website")
     private String website;
 
-    private boolean isAdmin;
+    private UserRole role;
 }

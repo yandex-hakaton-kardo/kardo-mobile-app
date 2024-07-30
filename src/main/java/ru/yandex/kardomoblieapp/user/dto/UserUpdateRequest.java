@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.kardomoblieapp.shared.validation.Censored;
 
 import java.time.LocalDate;
 
@@ -14,6 +15,12 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class UserUpdateRequest {
+
+
+    //TODO добавить проверку на путсое поле
+    @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
+    @Censored
+    private String username;
 
     @Size(min = 2, max = 20, message = "Имя не может быть пустым и должно содержать от 2 до 20 символов.")
     private String name;

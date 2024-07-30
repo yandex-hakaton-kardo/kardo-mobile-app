@@ -43,7 +43,7 @@ public class UserController {
 
     private final DataFileMapper dataFileMapper;
 
-    @PostMapping
+    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createUser(@RequestBody @Valid NewUserRequest newUser) {
         log.info("Регистрация нового пользователя с email '{}'.", newUser.getEmail());

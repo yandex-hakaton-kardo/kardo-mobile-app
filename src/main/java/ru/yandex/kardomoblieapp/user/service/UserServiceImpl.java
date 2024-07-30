@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,7 @@ import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.FriendshipId;
 import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
 import ru.yandex.kardomoblieapp.user.model.User;
+import ru.yandex.kardomoblieapp.user.model.UserRole;
 import ru.yandex.kardomoblieapp.user.repository.FriendshipRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserRepository;
 
@@ -33,8 +35,11 @@ public class UserServiceImpl implements UserService {
 
     private final FriendshipRepository friendshipRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     public User createUser(User userToAdd) {
+        userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
         final User savedUser = userRepository.save(userToAdd);
         log.info("Пользователь с id '{}' был сохранен.", savedUser.getId());
         return savedUser;
@@ -155,7 +160,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkAuthorities(long userId, User requester) {
-        if (!(requester.getId() == userId || requester.isAdmin())) {
+        if (!(requester.getId() == userId || requester.getRole().equals(UserRole.ADMIN))) {
             throw new NotAuthorizedException("Пользователь с id '" + requester.getId() + "' не имеет прав на редактирование профиля.");
         }
     }
