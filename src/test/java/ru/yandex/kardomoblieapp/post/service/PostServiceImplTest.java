@@ -152,7 +152,8 @@ class PostServiceImplTest {
     @DisplayName("Обновление поста, пользователь не имеет прав на редактирование")
     void updatePost_whenUserNotAuthorized_shouldThrowNotAuthorisedException() {
         Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        User user = User.builder().name("Имя")
+        User user2 = User.builder().name("Имя")
+                .username("username2")
                 .secondName("Отчество")
                 .surname("Фамилия")
                 .country("Россия")
@@ -161,7 +162,7 @@ class PostServiceImplTest {
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
-        User secondUser = userService.createUser(user);
+        User secondUser = userService.createUser(user2);
 
         NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
                 () -> postService.updatePost(secondUser.getId(), savedPost.getId(), null, null));
@@ -222,7 +223,8 @@ class PostServiceImplTest {
     @DisplayName("Удаление поста, пользователь не найден")
     void deletePost_whenUserNotAuthorized_shouldThrowNotAuthorizedException() {
         Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        User user = User.builder().name("Имя")
+        User user2 = User.builder().name("Имя")
+                .username("username2")
                 .secondName("Отчество")
                 .surname("Фамилия")
                 .country("Россия")
@@ -231,7 +233,7 @@ class PostServiceImplTest {
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
-        User secondUser = userService.createUser(user);
+        User secondUser = userService.createUser(user2);
 
         NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
                 () -> postService.deletePost(secondUser.getId(), savedPost.getId()));
@@ -327,7 +329,8 @@ class PostServiceImplTest {
     @DisplayName("Добавление лайка посту двумя пользователями")
     void addLikeToPost_whenTwoUserLikedPost_postShouldHaveTwoLikes() {
         Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        User user = User.builder().name("Имя")
+        User user2 = User.builder().name("Имя")
+                .username("username2")
                 .secondName("Отчество")
                 .surname("Фамилия")
                 .country("Россия")
@@ -336,7 +339,7 @@ class PostServiceImplTest {
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
-        User secondUser = userService.createUser(user);
+        User secondUser = userService.createUser(user2);
 
         long firstLike = postService.addLikeToPost(savedUser.getId(), savedPost.getId());
         long secondLike = postService.addLikeToPost(secondUser.getId(), savedPost.getId());
@@ -502,7 +505,7 @@ class PostServiceImplTest {
         Post savedPost = postService.createPost(savedUser.getId(), file, content);
         Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
 
-        postService.addLikeToPost(savedPost2.getId(), savedPost2.getId());
+        postService.addLikeToPost(savedUser2.getId(), savedPost2.getId());
 
         List<Post> recommendations = postService.getRecommendations(savedUser2.getId(), 0, 10, PostSort.LIKES);
 

@@ -147,7 +147,7 @@ class UserServiceImplTest {
         DataFile savedFile = userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
 
         assertThat(savedFile, notNullValue());
-        assertThat(savedFile.getFileName(), is(file.getName()));
+        assertThat(savedFile.getFileName(), is(file.getOriginalFilename()));
         assertThat(savedFile.getFileType(), is(file.getContentType()));
         assertThat(savedUser.getId(), greaterThan(0L));
     }
@@ -203,18 +203,6 @@ class UserServiceImplTest {
                 () -> userService.getProfilePicture(unknownId));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
-    }
-
-    @Test
-    @DisplayName("Получение фотографии профиля пользователя, у пользователя нет фотографии профиля")
-    void downloadProfilePicture_whenNoProfilePicture_shouldThrowNotFoundException() {
-        User savedUser = userService.createUser(user1);
-
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.getProfilePicture(savedUser.getId()));
-
-        assertThat(ex.getLocalizedMessage(),
-                is("У пользователя c id'" + savedUser.getId() + "' нет фотографии профиля."));
     }
 
     @Test

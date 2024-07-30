@@ -142,7 +142,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> getPostsFeed(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size,
-                Sort.by("numberOfViews", "createdOn").descending());
+                Sort.by("views", "createdOn").descending());
         List<Post> feed = postRepository.getPostsFeed(pageable);
         log.info("Получен фид постов размером ");
         return feed;
