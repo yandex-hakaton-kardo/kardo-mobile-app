@@ -10,6 +10,8 @@ import ru.yandex.kardomoblieapp.security.jwt.serializer.TokenSerilazer;
 
 import java.util.Objects;
 
+import static ru.yandex.kardomoblieapp.security.SecurityUtils.LOGIN_PATH;
+
 public class JwtAuthenticationConfigurer extends AbstractHttpConfigurer<JwtAuthenticationConfigurer, HttpSecurity> {
 
     private TokenSerilazer<String> refreshTokenStringSerializer = Objects::toString;
@@ -20,7 +22,7 @@ public class JwtAuthenticationConfigurer extends AbstractHttpConfigurer<JwtAuthe
     public void init(HttpSecurity builder) throws Exception {
         var configurer = builder.getConfigurer(CsrfConfigurer.class);
         if (configurer != null) {
-            configurer.ignoringRequestMatchers(new AntPathRequestMatcher("/users/tokens", HttpMethod.POST.name()));
+            configurer.ignoringRequestMatchers(new AntPathRequestMatcher(LOGIN_PATH, HttpMethod.POST.name()));
         }
     }
 

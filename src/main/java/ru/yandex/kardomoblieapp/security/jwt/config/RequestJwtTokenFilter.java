@@ -24,6 +24,8 @@ import ru.yandex.kardomoblieapp.security.jwt.serializer.TokenSerilazer;
 import java.io.IOException;
 import java.util.Objects;
 
+import static ru.yandex.kardomoblieapp.security.SecurityUtils.LOGIN_PATH;
+
 @Setter
 public class RequestJwtTokenFilter extends OncePerRequestFilter {
 
@@ -65,6 +67,6 @@ public class RequestJwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return !request.getRequestURI().equals("/users/tokens");
+        return !request.getRequestURI().equals(LOGIN_PATH);
     }
 }
