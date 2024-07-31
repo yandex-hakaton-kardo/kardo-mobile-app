@@ -24,6 +24,7 @@ import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
+import ru.yandex.kardomoblieapp.user.mapper.FriendshipMapper;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
@@ -69,6 +70,9 @@ class UserControllerTest {
 
     @MockBean
     private DataFileMapper dataFileMapper;
+
+    @MockBean
+    private FriendshipMapper friendshipMapper;
 
     private NewUserRequest newUserRequest;
 
