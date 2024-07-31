@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
-import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
@@ -80,7 +79,7 @@ class UserServiceImplTest {
     @DisplayName("Обновление всех полей пользователя")
     void updateUser() {
         User savedUser = userService.createUser(user1);
-        User updatedUser = userService.updateUser(savedUser.getId(), savedUser.getId(), updateRequest);
+        User updatedUser = userService.updateUser(savedUser.getId(), updateRequest);
 
         assertThat(updatedUser, notNullValue());
         assertThat(updatedUser.getId(), is(savedUser.getId()));
@@ -92,7 +91,7 @@ class UserServiceImplTest {
     void updateUser_whenFieldNull_shouldRemainOldValue() {
         updateRequest.setName(null);
         User savedUser = userService.createUser(user1);
-        User updatedUser = userService.updateUser(savedUser.getId(), savedUser.getId(), updateRequest);
+        User updatedUser = userService.updateUser(savedUser.getId(), updateRequest);
 
         assertThat(updatedUser, notNullValue());
         assertThat(updatedUser.getId(), is(savedUser.getId()));
@@ -106,30 +105,16 @@ class UserServiceImplTest {
         User savedUser = userService.createUser(user1);
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.updateUser(savedUser.getId(), unknownId, updateRequest));
+                () -> userService.updateUser(unknownId, updateRequest));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
     }
 
     @Test
-    @DisplayName("Обновление пользователя, пользователь не имеет прав на редактирование")
-    void updateUser_whenUnauthorized_ShouldThrowNotFoundException() {
-        User savedUser = userService.createUser(user1);
-        User savedUser2 = userService.createUser(user2);
-
-        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
-                () -> userService.updateUser(savedUser2.getId(), savedUser.getId(), updateRequest));
-
-        assertThat(ex.getLocalizedMessage(),
-                is("Пользователь с id '" + savedUser2.getId() + "' не имеет прав на редактирование профиля."));
-    }
-
-
-    @Test
     @DisplayName("Удаление пользователя")
     void deleteUser() {
         User savedUser = userService.createUser(user1);
-        userService.deleteUser(savedUser.getId(), savedUser.getId());
+        userService.deleteUser(savedUser.getUsername(), savedUser.getId());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> userService.findUserById(savedUser.getId()));
@@ -144,7 +129,7 @@ class UserServiceImplTest {
 
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
-        DataFile savedFile = userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
+        DataFile savedFile = userService.uploadProfilePicture(savedUser.getId(), file);
 
         assertThat(savedFile, notNullValue());
         assertThat(savedFile.getFileName(), is(file.getOriginalFilename()));
@@ -160,26 +145,9 @@ class UserServiceImplTest {
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.uploadProfilePicture(unknownId, unknownId, file));
+                () -> userService.uploadProfilePicture(unknownId, file));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
-    }
-
-    @Test
-    @DisplayName("Добавление фотографии профиля, пользователь не имеет прав на редактирование")
-    void uploadProfilePicture_whenUnauthorized_ShouldThrowNotFoundException() throws IOException {
-        User savedUser = userService.createUser(user1);
-        User savedUser2 = userService.createUser(user2);
-
-        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
-        MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
-
-
-        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
-                () -> userService.uploadProfilePicture(savedUser2.getId(), savedUser.getId(), file));
-
-        assertThat(ex.getLocalizedMessage(),
-                is("Пользователь с id '" + savedUser2.getId() + "' не имеет прав на редактирование профиля."));
     }
 
     @Test
@@ -188,7 +156,7 @@ class UserServiceImplTest {
         User savedUser = userService.createUser(user1);
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
-        userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
+        userService.uploadProfilePicture(savedUser.getId(), file);
 
         DataFile profilePicture = userService.getProfilePicture(savedUser.getId());
 
@@ -211,9 +179,9 @@ class UserServiceImplTest {
         User savedUser = userService.createUser(user1);
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         MockMultipartFile file = new MockMultipartFile("avatar", "avatar.jpeg", MediaType.IMAGE_JPEG_VALUE, inputStream);
-        userService.uploadProfilePicture(savedUser.getId(), savedUser.getId(), file);
+        userService.uploadProfilePicture(savedUser.getId(), file);
 
-        userService.deleteProfilePicture(savedUser.getId(), savedUser.getId());
+        userService.deleteProfilePicture(savedUser.getId());
 
         User userWithoutAvatar = userService.findUserById(savedUser.getId());
 
@@ -225,22 +193,9 @@ class UserServiceImplTest {
     void deleteProfilePicture_whenUserNotExists_shouldThrowNotFoundException() {
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> userService.deleteProfilePicture(unknownId, unknownId));
+                () -> userService.deleteProfilePicture(unknownId));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
-    }
-
-    @Test
-    @DisplayName("Удаление фотографии пользователя, пользователь не имеет прав на редактирование профиля")
-    void deleteProfilePicture_whenUnauthorized_shouldThrowNotFoundException() {
-        User savedUser = userService.createUser(user1);
-        User savedUser2 = userService.createUser(user2);
-
-        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
-                () -> userService.deleteProfilePicture(savedUser.getId(), savedUser2.getId()));
-
-        assertThat(ex.getLocalizedMessage(),
-                is("Пользователь с id '" + savedUser.getId() + "' не имеет прав на редактирование профиля."));
     }
 
     @Test

@@ -16,7 +16,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: username
-                  type: VARCHAR(20)
+                  type: VARCHAR(30)
                   constraints:
                     nullable: false
                     unique: true
@@ -42,9 +42,9 @@ databaseChangeLog:
                     nullable: true
               - column:
                   name: email
-                  type: VARCHAR(255)
+                  type: VARCHAR(50)
                   constraints:
-                    unique: false
+                    unique: true
                     uniqueConstraintName: unq_email
                     nullable: false
               - column:
@@ -81,7 +81,7 @@ databaseChangeLog:
                     references: data_files(data_file_id)
               - column:
                   name: overview
-                  type: VARCHAR(1000)
+                  type: VARCHAR(500)
                   constraints:
                     nullable: true
               - column:

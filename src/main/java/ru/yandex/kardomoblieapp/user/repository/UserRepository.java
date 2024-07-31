@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findUsersWithIdsIn(List<Long> friendsIds);
 
     Optional<User> findByUsername(String username);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.profilePicture p WHERE u.id = ?1")
+    Optional<User> findFullUserById(long id);
 }

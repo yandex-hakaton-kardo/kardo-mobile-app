@@ -1,5 +1,6 @@
 package ru.yandex.kardomoblieapp.post.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,6 +29,7 @@ import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.service.PostService;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -36,6 +37,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Посты пользователей", description = "Взаимодействие с постами пользователей")
 public class PostController {
 
     private final PostService postService;
@@ -46,99 +48,98 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDto createPost(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                              @RequestParam(value = "files") MultipartFile file,
+    public PostDto createPost(@RequestParam("file") MultipartFile file,
                               @Size(min = 10, max = 250, message = "Текст должен содержать от 10 до 250 символов")
-                              @RequestParam("content") String content) {
-        log.info("Пользователь c id '{}' публикует новый пост.", requesterId);
-        final Post createdPost = postService.createPost(requesterId, file, content);
+                              @RequestParam("content") String content,
+                              Principal principal) {
+        log.info("Пользователь c id '{}' публикует новый пост.", principal.getName());
+        final Post createdPost = postService.createPost(principal.getName(), file, content);
         return postMapper.toDto(createdPost);
     }
 
     @PatchMapping("/{postId}")
-    public PostDto updatePost(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                              @PathVariable long postId,
+    public PostDto updatePost(@PathVariable long postId,
                               @RequestParam(value = "files", required = false) MultipartFile file,
                               @Size(min = 10, max = 250, message = "Текст должен содержать от 10 до 250 символов")
-                              @RequestParam(value = "content", required = false) String content) {
-        log.info("Пользователь c id '{}' обновляет пост с id '{}'.", requesterId, postId);
-        final Post updatedPost = postService.updatePost(requesterId, postId, file, content);
+                              @RequestParam(value = "content", required = false) String content,
+                              Principal principal) {
+        log.info("Пользователь c id '{}' обновляет пост с id '{}'.", principal.getName(), postId);
+        final Post updatedPost = postService.updatePost(principal.getName(), postId, file, content);
         return postMapper.toDto(updatedPost);
     }
 
     @DeleteMapping("/{postId}")
-    public void deletePost(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                           @PathVariable long postId) {
-        log.info("Пользователь c id '{}' удаляет пост с id '{}'.", requesterId, postId);
-        postService.deletePost(requesterId, postId);
+    public void deletePost(@PathVariable long postId,
+                           Principal principal) {
+        log.info("Пользователь c id '{}' удаляет пост с id '{}'.", principal.getName(), postId);
+        postService.deletePost(principal.getName(), postId);
     }
 
     @GetMapping("/{postId}")
-    public PostDto getPostById(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                               @PathVariable long postId) {
-        log.info("Пользователь c id '{}' запрашивает пост с id '{}'.", requesterId, postId);
+    public PostDto getPostById(@PathVariable long postId,
+                               Principal principal) {
+        log.info("Пользователь c id '{}' запрашивает пост с id '{}'.", principal.getName(), postId);
         final Post post = postService.findPostById(postId);
         return postMapper.toDto(post);
     }
 
     @GetMapping
-    public List<PostDto> getAllPostByUser(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                          @RequestParam long userId) {
+    public List<PostDto> getAllPostByUser(@RequestParam long userId) {
         log.info("Получение всех постов пользователя.");
         List<Post> userPosts = postService.findPostsFromUser(userId);
         return postMapper.toDtoList(userPosts);
     }
 
     @PutMapping("/{postId}/like")
-    public long addLikeToPost(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                              @PathVariable long postId) {
-        log.info("Пользователь с id '{}' ставит лайк посту с id '{}'.", requesterId, postId);
-        return postService.addLikeToPost(requesterId, postId);
+    public long addLikeToPost(@PathVariable long postId,
+                              Principal principal) {
+        log.info("Пользователь с id '{}' ставит лайк посту с id '{}'.", principal.getName(), postId);
+        return postService.addLikeToPost(principal.getName(), postId);
     }
 
     @GetMapping("/feed")
-    public List<PostDto> getPostsFeed(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                      @RequestParam(defaultValue = "0") Integer page,
+    public List<PostDto> getPostsFeed(@RequestParam(defaultValue = "0") Integer page,
                                       @RequestParam(defaultValue = "10") Integer size) {
         log.info("Получение ленты постов. from = '{}', size = '{}'.", page, size);
         List<Post> feed = postService.getPostsFeed(page, size);
         return postMapper.toDtoList(feed);
     }
 
-    public List<PostDto> getRecommendations(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                            @RequestParam(defaultValue = "0") Integer page,
+    @GetMapping("/recommendations")
+    public List<PostDto> getRecommendations(@RequestParam(defaultValue = "0") Integer page,
                                             @RequestParam(defaultValue = "10") Integer size,
-                                            @RequestParam(defaultValue = "LIKES") PostSort sort) {
+                                            @RequestParam(defaultValue = "LIKES") PostSort sort,
+                                            Principal principal) {
         log.info("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
-        List<Post> recommendations = postService.getRecommendations(requesterId, page, size, sort);
+        List<Post> recommendations = postService.getRecommendations(principal.getName(), page, size, sort);
         return postMapper.toDtoList(recommendations);
     }
 
     @PostMapping("/{postId}/comment")
-    public CommentDto addCommentToPost(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                       @PathVariable long postId,
-                                       @RequestBody @Valid CommentRequest commentRequest) {
-        log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", requesterId, postId);
+    public CommentDto addCommentToPost(@PathVariable long postId,
+                                       @RequestBody @Valid CommentRequest commentRequest,
+                                       Principal principal) {
+        log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", postId);
         Comment newComment = commentMapper.toModel(commentRequest);
-        Comment comment = postService.addCommentToPost(requesterId, postId, newComment);
+        Comment comment = postService.addCommentToPost(principal.getName(), postId, newComment);
         return commentMapper.toDto(comment);
     }
 
     @PatchMapping("/{postId}/comment/{commentId}")
-    public CommentDto updateComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                                    @PathVariable long postId,
+    public CommentDto updateComment(@PathVariable long postId,
                                     @PathVariable long commentId,
-                                    @RequestBody @Valid CommentRequest commentRequest) {
-        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", requesterId, commentId);
-        Comment updatedComment = postService.updateComment(requesterId, commentId, commentRequest);
+                                    @RequestBody @Valid CommentRequest commentRequest,
+                                    Principal principal) {
+        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", commentId);
+        Comment updatedComment = postService.updateComment(principal.getName(), commentId, commentRequest);
         return commentMapper.toDto(updatedComment);
     }
 
     @DeleteMapping("/{postId}/comment/{commentId}")
-    public void deleteComment(@RequestHeader("X-Kardo-User-Id") long requesterId,
-                              @PathVariable long postId,
-                              @PathVariable long commentId) {
-        log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", requesterId, commentId);
-        postService.deleteComment(requesterId, commentId);
+    public void deleteComment(@PathVariable long postId,
+                              @PathVariable long commentId,
+                              Principal principal) {
+        log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", principal.getName(), commentId);
+        postService.deleteComment(principal.getName(), commentId);
     }
 }

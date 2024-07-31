@@ -73,5 +73,6 @@ public class User {
     @Column(name = "website")
     private String website;
 
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 }

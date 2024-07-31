@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class NewUserRequest {
 
-    @NotBlank(message = "Никнейм не может быть пустым и должно содержать от 2 до 30 символов.")
-    @Pattern(regexp = "^[a-z0-9]{2,30}$", message = "Никнейм не может быть пустым и должно содержать от 2 до 30 символов.")
+    @NotBlank(message = "Никнейм не может быть пустым и должен содержать от 2 до 30 символов.")
+    @Pattern(regexp = "^[a-z0-9]{2,30}$", message = "Никнейм не может быть пустым и должен содержать от 2 до 30 символов.")
     private String username;
 
     @NotBlank(message = "Некорректный формат электронной почты.")
-    @Email(message = "Некорректный формат электронной почты.")
+    @Email(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Некорректный формат электронной почты.")
     @Size(min = 5, max = 50, message = "Некорректный формат электронной почты.")
     private String email;
 

@@ -26,6 +26,9 @@ import ru.yandex.kardomoblieapp.security.jwt.serialization.RefreshTokenJweString
 
 import java.text.ParseException;
 
+import static ru.yandex.kardomoblieapp.user.model.UserRole.ADMIN;
+import static ru.yandex.kardomoblieapp.user.model.UserRole.USER;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -64,10 +67,23 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/users/register", HttpMethod.POST.name()).not().fullyAuthenticated()
+                        .requestMatchers("/users/register").hasRole(ADMIN.name())
+                        .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/users/{userId}", HttpMethod.GET.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/users/{userId}/friends", HttpMethod.GET.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/users/{userId}/avatar", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/users/**").hasRole(USER.name())
+                        .requestMatchers("/posts/**").hasRole(USER.name())
+                        .requestMatchers("/posts/{postId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/posts/{postId}/comment/{commentId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/posts/**", HttpMethod.GET.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/swagger-ui").hasRole(ADMIN.name())
+                        .requestMatchers("/actuator/**").hasRole(ADMIN.name())
                         .anyRequest().authenticated())
+
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/users/register"));
 
-        return http.build();
+        return http.getOrBuild();
     }
 
     @Bean

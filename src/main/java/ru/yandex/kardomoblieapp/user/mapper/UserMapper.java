@@ -4,6 +4,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
+import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
@@ -19,6 +20,8 @@ public interface UserMapper {
     User toModel(NewUserRequest newUserRequest);
 
     UserDto toDto(User addedUser);
+
+    NewUserResponse toNewUserDto(User user);
 
     ShortUserDto toShortDto(User user);
 

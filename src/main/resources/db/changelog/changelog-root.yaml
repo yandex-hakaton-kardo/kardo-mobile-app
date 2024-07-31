@@ -29,3 +29,6 @@ databaseChangeLog:
   - include:
       file: create-deactivated_tokens.yaml
       relativeToChangelogFile: true
+  - include:
+      file: insert-admin.yaml
+      relativeToChangelogFile: true

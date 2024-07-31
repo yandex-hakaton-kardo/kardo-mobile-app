@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
-import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
@@ -40,6 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(User userToAdd) {
         userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
+        userToAdd.setRole(UserRole.USER);
         final User savedUser = userRepository.save(userToAdd);
         log.info("Пользователь с id '{}' был сохранен.", savedUser.getId());
         return savedUser;
@@ -49,10 +49,8 @@ public class UserServiceImpl implements UserService {
     //TODO получить от фронта id пользователя, делающего запрос
     @Override
     @Transactional
-    public User updateUser(long requesterId, long userId, UserUpdateRequest userUpdateRequest) {
-        final User requester = getUser(requesterId);
+    public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
         userMapper.updateUser(userUpdateRequest, user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);
         return user;
@@ -60,10 +58,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(long requesterId, long userId) {
-        final User requester = getUser(requesterId);
+    public void deleteUser(String username, long userId) {
         getUser(userId);
-        checkAuthorities(userId, requester);
         userRepository.deleteById(userId);
     }
 
@@ -76,10 +72,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public DataFile uploadProfilePicture(long requesterId, long userId, MultipartFile picture) {
-        final User requester = getUser(requesterId);
+    public DataFile uploadProfilePicture(long userId, MultipartFile picture) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
 
         DataFile uploadedFile = dataFileService.uploadFile(picture, userId);
         user.setProfilePicture(uploadedFile);
@@ -97,10 +91,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteProfilePicture(long requesterId, long userId) {
-        final User requester = getUser(requesterId);
+    public void deleteProfilePicture(long userId) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
         deleteCurrentProfilePictureIfExists(user);
     }
 
@@ -142,7 +134,13 @@ public class UserServiceImpl implements UserService {
         User user = getUser(userId);
         User friend = getUser(friendId);
         friendshipRepository.deleteById(FriendshipId.of(user, friend));
-        log.info("Пользователь с id '{}' удлалил из друзей пользователя с id '{}'.", userId, friendId);
+        log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Пользователь с именем '" + username + "' не найден."));
     }
 
     private void deleteCurrentProfilePictureIfExists(User user) {
@@ -155,13 +153,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUser(long userId) {
-        return userRepository.findById(userId)
+        return userRepository.findFullUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id '" + userId + "' не найден."));
-    }
-
-    private void checkAuthorities(long userId, User requester) {
-        if (!(requester.getId() == userId || requester.getRole().equals(UserRole.ADMIN))) {
-            throw new NotAuthorizedException("Пользователь с id '" + requester.getId() + "' не имеет прав на редактирование профиля.");
-        }
     }
 }
