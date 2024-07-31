@@ -56,18 +56,15 @@ public class UserUpdateRequest {
     @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate dateOfBirth;
 
-    @Schema(description = "Страна проживания")
-    private String country;
-
-    @Schema(description = "Город проживания")
-    private String city;
+    @Schema(description = "Место проживания")
+    private Location location;
 
     @Pattern(regexp = "^[0-9+]${12,15}", message = "Неверный формат номера телефона.")
     @Schema(description = "Номер телефона", minLength = 12, maxLength = 15)
     private String phoneNumber;
 
     @Size(min = 2, max = 500, message = "Описание не может быть пустым и должно содержать от 2 до 1000 символов.")
-    @Pattern(regexp = "^[a-zA-zа-яА-ЯёЁ-]+$", message = "Описание не может быть пустым и должно содержать от 2 до 1000 символов.")
+    @Pattern(regexp = "^[a-zA-zа-яА-ЯёЁ -]+$", message = "Описание не может быть пустым и должно содержать от 2 до 1000 символов.")
     @Schema(description = "О себе")
     private String overview;
 

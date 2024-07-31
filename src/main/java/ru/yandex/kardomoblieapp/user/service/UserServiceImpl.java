@@ -10,7 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
+import ru.yandex.kardomoblieapp.location.model.City;
+import ru.yandex.kardomoblieapp.location.model.Country;
+import ru.yandex.kardomoblieapp.location.model.Region;
+import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
+import ru.yandex.kardomoblieapp.user.dto.Location;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
@@ -22,6 +27,7 @@ import ru.yandex.kardomoblieapp.user.repository.FriendshipRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +44,8 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final LocationService locationService;
+
     @Override
     public User createUser(User userToAdd) {
         userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
@@ -47,13 +55,14 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
-
-    //TODO получить от фронта id пользователя, делающего запрос
     @Override
     @Transactional
     public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
         userMapper.updateUser(userUpdateRequest, user);
+        Location location = userUpdateRequest.getLocation();
+        setLocationToUser(location, user);
+        userRepository.save(user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);
         return user;
     }
@@ -165,5 +174,35 @@ public class UserServiceImpl implements UserService {
     private User getUser(long userId) {
         return userRepository.findFullUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id '" + userId + "' не найден."));
+    }
+
+    private void setLocationToUser(Location location, User user) {
+        if (location.getCountryId() != null) {
+            Country country = locationService.getCountryById(location.getCountryId());
+            user.setCountry(country);
+        }
+
+        if (location.getRegionId() != null) {
+            Region region = locationService.getRegionById(location.getRegionId());
+            user.setRegion(region);
+        }
+
+        if (location.getCity() != null) {
+            Optional<City> city = locationService.findCityByNameCountryAndRegion(location.getCity(),
+                    user.getCountry() != null ? user.getCountry().getId() : null,
+                    user.getRegion() != null ? user.getRegion().getId() : null);
+
+            if (city.isPresent()) {
+                user.setCity(city.get());
+            } else {
+                City newCity = City.builder()
+                        .name(location.getCity())
+                        .country(user.getCountry())
+                        .region(user.getRegion())
+                        .build();
+                City savedCity = locationService.addCity(newCity);
+                user.setCity(savedCity);
+            }
+        }
     }
 }
