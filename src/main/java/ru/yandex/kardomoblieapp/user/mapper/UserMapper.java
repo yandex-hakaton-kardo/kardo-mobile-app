@@ -29,4 +29,6 @@ public interface UserMapper {
     void updateUser(UserUpdateRequest userUpdateRequest, @MappingTarget User user);
 
     List<ShortUserDto> toShortDtoList(List<User> friends);
+
+    List<UserDto> toDtoList(List<User> users);
 }

@@ -31,4 +31,6 @@ public interface UserService {
     void deleteFriend(long userId, long friendId);
 
     User findByUsername(String username);
+
+    List<User> findAllUsers(Integer page, Integer size);
 }

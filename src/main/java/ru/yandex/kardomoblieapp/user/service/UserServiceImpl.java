@@ -2,6 +2,8 @@ package ru.yandex.kardomoblieapp.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -141,6 +143,14 @@ public class UserServiceImpl implements UserService {
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь с именем '" + username + "' не найден."));
+    }
+
+    @Override
+    public List<User> findAllUsers(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<User> users = userRepository.findAll(pageable).getContent();
+        log.info("Получен список всех пользователей");
+        return users;
     }
 
     private void deleteCurrentProfilePictureIfExists(User user) {

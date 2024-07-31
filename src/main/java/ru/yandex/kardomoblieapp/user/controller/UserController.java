@@ -1,6 +1,7 @@
 package ru.yandex.kardomoblieapp.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -54,8 +55,8 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation()
-    public NewUserResponse createUser(@RequestBody @Valid NewUserRequest newUser) {
+    @Operation(summary = "Регистрация пользователя в приложении")
+    public NewUserResponse createUser(@RequestBody @Valid @Parameter(description = "Регистрационные данные") NewUserRequest newUser) {
         log.info("Регистрация нового пользователя с email '{}'.", newUser.getEmail());
         final User userToAdd = userMapper.toModel(newUser);
         final User addedUser = userService.createUser(userToAdd);
@@ -64,9 +65,10 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     @SecurityRequirement(name = "JWT")
-    public UserDto updateUser(@PathVariable long userId,
-                              @RequestBody @Valid UserUpdateRequest userUpdateRequest,
-                              Principal principal) {
+    @Operation(summary = "Редактирование данных пользователя")
+    public UserDto updateUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
+                              @RequestBody @Valid @Parameter(description = "Обновленные параметры") UserUpdateRequest userUpdateRequest,
+                              @Parameter(hidden = true) Principal principal) {
         log.info("Обновление данных пользователя с id '{}'.", userId);
         final User updatedUser = userService.updateUser(userId, userUpdateRequest);
         return userMapper.toDto(updatedUser);
@@ -75,15 +77,17 @@ public class UserController {
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "JWT")
-    public void deleteUser(@PathVariable long userId,
-                           Principal principal) {
+    @Operation(summary = "Удаление профиля пользователя")
+    public void deleteUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
+                           @Parameter(hidden = true) Principal principal) {
         log.info("Удаление пользователя с id '{}'.", userId);
         userService.deleteUser(principal.getName(), userId);
     }
 
     @GetMapping("/{userId}")
     @SecurityRequirement(name = "JWT")
-    public UserDto findUserById(@PathVariable long userId) {
+    @Operation(summary = "Поиск пользователя по идентификатору")
+    public UserDto findUserById(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение данных пользователя с id '{}'.", userId);
         final User user = userService.findUserById(userId);
         return userMapper.toDto(user);
@@ -91,9 +95,11 @@ public class UserController {
 
     @PostMapping("/{userId}/avatar")
     @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Обновление фотографии профиля")
     public DataFileDto uploadProfilePicture(@PathVariable long userId,
-                                            @RequestParam("avatar") MultipartFile avatar,
-                                            Principal principal) {
+                                            @RequestParam("avatar")
+                                            @Parameter(description = "Файл фотографии") MultipartFile avatar,
+                                            @Parameter(hidden = true) Principal principal) {
         log.info("Загрузка фотографии профиля '{}' пользователя с id '{}'.", avatar.getName(), userId);
         final DataFile savedFile = userService.uploadProfilePicture(userId, avatar);
         return dataFileMapper.toDto(savedFile);
@@ -101,7 +107,9 @@ public class UserController {
 
     @GetMapping(value = "/{userId}/avatar")
     @SecurityRequirement(name = "JWT")
-    public DataFileDto getUserProfilePicture(@PathVariable long userId) {
+    @Operation(summary = "Получение фотографии профиля")
+    public DataFileDto getUserProfilePicture(@PathVariable
+                                             @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
         DataFile profilePicture = userService.getProfilePicture(userId);
         return dataFileMapper.toDto(profilePicture);
@@ -110,15 +118,18 @@ public class UserController {
     @DeleteMapping("/{userId}/avatar")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "JWT")
-    public void deleteProfilePicture(@PathVariable long userId,
-                                     Principal principal) {
+    @Operation(summary = "Удаление фотографии профиля")
+    public void deleteProfilePicture(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
+                                     @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь с id '{}' удаляет фотографию профиля.", userId);
         userService.deleteProfilePicture(userId);
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
     @SecurityRequirement(name = "JWT")
-    public FriendshipDto addFriend(@PathVariable long userId, @PathVariable long friendId) {
+    @Operation(summary = "Добавление пользователя в друзья")
+    public FriendshipDto addFriend(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
+                                   @PathVariable @Parameter(description = "Идентификатор друга") long friendId) {
         log.info("Пользователь с id '{}' добавляет в друзья пользователя c id '{}'.", userId, friendId);
         Friendship friendship = userService.addFriend(userId, friendId);
         return friendshipMapper.toDto(friendship);
@@ -126,7 +137,8 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     @SecurityRequirement(name = "JWT")
-    public List<ShortUserDto> getFriendsList(@PathVariable long userId) {
+    @Operation(summary = "Получение списка друзей пользователя")
+    public List<ShortUserDto> getFriendsList(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение списка друзей пользователя с id '{}'.", userId);
         List<User> friends = userService.getFriendsList(userId);
         return userMapper.toShortDtoList(friends);
@@ -134,9 +146,22 @@ public class UserController {
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     @SecurityRequirement(name = "JWT")
-    public void deleteFriend(@PathVariable long userId,
-                             @PathVariable long friendId) {
+    @Operation(summary = "Удаление пользователя из друзей")
+    public void deleteFriend(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
+                             @PathVariable @Parameter(description = "Идентификатор друга") long friendId) {
         log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
         userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Удаление пользователя из друзей")
+    public List<UserDto> findAllUsers(@RequestParam(defaultValue = "0")
+                                      @Parameter(description = "Номер страницы") Integer page,
+                                      @RequestParam(defaultValue = "10")
+                                      @Parameter(description = "Количество элементов на странце") Integer size) {
+        log.info("Получение списка всех пользователей. page: '{}', size: '{}'.", page, size);
+        List<User> users = userService.findAllUsers(page, size);
+        return userMapper.toDtoList(users);
     }
 }

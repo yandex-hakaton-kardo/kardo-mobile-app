@@ -1,5 +1,8 @@
 package ru.yandex.kardomoblieapp.post.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -48,97 +51,126 @@ public class PostController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDto createPost(@RequestParam("file") MultipartFile file,
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Публикация нового поста")
+    public PostDto createPost(@RequestParam("file") @Parameter(description = "Файл") MultipartFile file,
                               @Size(min = 10, max = 250, message = "Текст должен содержать от 10 до 250 символов")
-                              @RequestParam("content") String content,
-                              Principal principal) {
+                              @RequestParam("content") @Parameter(description = "Имя поста") String content,
+                              @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' публикует новый пост.", principal.getName());
         final Post createdPost = postService.createPost(principal.getName(), file, content);
         return postMapper.toDto(createdPost);
     }
 
     @PatchMapping("/{postId}")
-    public PostDto updatePost(@PathVariable long postId,
-                              @RequestParam(value = "files", required = false) MultipartFile file,
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Редактирование поста")
+    public PostDto updatePost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                              @RequestParam(value = "files", required = false)
+                              @Parameter(description = "Файл") MultipartFile file,
                               @Size(min = 10, max = 250, message = "Текст должен содержать от 10 до 250 символов")
-                              @RequestParam(value = "content", required = false) String content,
-                              Principal principal) {
+                              @RequestParam(value = "content", required = false)
+                              @Parameter(description = "Имя поста") String content,
+                              @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' обновляет пост с id '{}'.", principal.getName(), postId);
         final Post updatedPost = postService.updatePost(principal.getName(), postId, file, content);
         return postMapper.toDto(updatedPost);
     }
 
     @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable long postId,
-                           Principal principal) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Удаление поста")
+    public void deletePost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                           @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' удаляет пост с id '{}'.", principal.getName(), postId);
         postService.deletePost(principal.getName(), postId);
     }
 
     @GetMapping("/{postId}")
-    public PostDto getPostById(@PathVariable long postId,
-                               Principal principal) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Поиск поста по идентификатору")
+    public PostDto getPostById(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                               @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' запрашивает пост с id '{}'.", principal.getName(), postId);
         final Post post = postService.findPostById(postId);
         return postMapper.toDto(post);
     }
 
     @GetMapping
-    public List<PostDto> getAllPostByUser(@RequestParam long userId) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Поиск всех постов пользователя")
+    public List<PostDto> getAllPostByUser(@RequestParam @Parameter(description = "Идентификатор поста") long userId) {
         log.info("Получение всех постов пользователя.");
         List<Post> userPosts = postService.findPostsFromUser(userId);
         return postMapper.toDtoList(userPosts);
     }
 
     @PutMapping("/{postId}/like")
-    public long addLikeToPost(@PathVariable long postId,
-                              Principal principal) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Добавление лайка посту")
+    public long addLikeToPost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                              @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь с id '{}' ставит лайк посту с id '{}'.", principal.getName(), postId);
         return postService.addLikeToPost(principal.getName(), postId);
     }
 
     @GetMapping("/feed")
-    public List<PostDto> getPostsFeed(@RequestParam(defaultValue = "0") Integer page,
-                                      @RequestParam(defaultValue = "10") Integer size) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Получение ленты постов")
+    public List<PostDto> getPostsFeed(@RequestParam(defaultValue = "0")
+                                      @Parameter(description = "Номер страницы") Integer page,
+                                      @RequestParam(defaultValue = "10")
+                                      @Parameter(description = "Количество постов на странице") Integer size) {
         log.info("Получение ленты постов. from = '{}', size = '{}'.", page, size);
         List<Post> feed = postService.getPostsFeed(page, size);
         return postMapper.toDtoList(feed);
     }
 
     @GetMapping("/recommendations")
-    public List<PostDto> getRecommendations(@RequestParam(defaultValue = "0") Integer page,
-                                            @RequestParam(defaultValue = "10") Integer size,
-                                            @RequestParam(defaultValue = "LIKES") PostSort sort,
-                                            Principal principal) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Получение рекомендаций")
+    public List<PostDto> getRecommendations(@RequestParam(defaultValue = "0")
+                                            @Parameter(description = "Номер страницы") Integer page,
+                                            @RequestParam(defaultValue = "10")
+                                            @Parameter(description = "Количество постов на странице") Integer size,
+                                            @RequestParam(defaultValue = "LIKES")
+                                            @Parameter(description = "Параметр сортировки") PostSort sort,
+                                            @Parameter(hidden = true) Principal principal) {
         log.info("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
         List<Post> recommendations = postService.getRecommendations(principal.getName(), page, size, sort);
         return postMapper.toDtoList(recommendations);
     }
 
     @PostMapping("/{postId}/comment")
-    public CommentDto addCommentToPost(@PathVariable long postId,
-                                       @RequestBody @Valid CommentRequest commentRequest,
-                                       Principal principal) {
-        log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", postId);
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Добавление комментария к посту")
+    public CommentDto addCommentToPost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                                       @RequestBody @Valid @Parameter(description = "Новый комментарий") CommentRequest commentRequest,
+                                       @Parameter(hidden = true) Principal principal) {
+        log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", principal.getName(), postId);
         Comment newComment = commentMapper.toModel(commentRequest);
         Comment comment = postService.addCommentToPost(principal.getName(), postId, newComment);
         return commentMapper.toDto(comment);
     }
 
     @PatchMapping("/{postId}/comment/{commentId}")
-    public CommentDto updateComment(@PathVariable long postId,
-                                    @PathVariable long commentId,
-                                    @RequestBody @Valid CommentRequest commentRequest,
-                                    Principal principal) {
-        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", commentId);
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Редактирование комментария")
+    public CommentDto updateComment(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                                    @PathVariable @Parameter(description = "Идентификатор комментария") long commentId,
+                                    @RequestBody @Valid @Parameter(description = "Новый комментарий") CommentRequest commentRequest,
+                                    @Parameter(hidden = true) Principal principal) {
+        log.info("Пользователь с id '{}' добавляет комментарий c id '{}'.", principal.getName(), commentId);
         Comment updatedComment = postService.updateComment(principal.getName(), commentId, commentRequest);
         return commentMapper.toDto(updatedComment);
     }
 
     @DeleteMapping("/{postId}/comment/{commentId}")
-    public void deleteComment(@PathVariable long postId,
-                              @PathVariable long commentId,
-                              Principal principal) {
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Удаление комментария")
+    public void deleteComment(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                              @PathVariable @Parameter(description = "Идентификатор комментария") long commentId,
+                              @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", principal.getName(), commentId);
         postService.deleteComment(principal.getName(), commentId);
     }
