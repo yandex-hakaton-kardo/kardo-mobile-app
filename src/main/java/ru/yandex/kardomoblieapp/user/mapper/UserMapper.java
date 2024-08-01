@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.user.mapper;
 
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
@@ -19,6 +20,9 @@ public interface UserMapper {
 
     User toModel(NewUserRequest newUserRequest);
 
+    @Mapping(source = "country.id", target = "country")
+    @Mapping(source = "region.id", target = "region")
+    @Mapping(source = "city.id", target = "city")
     UserDto toDto(User addedUser);
 
     NewUserResponse toNewUserDto(User user);

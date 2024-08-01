@@ -9,7 +9,6 @@ import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.model.Gender;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -42,6 +41,9 @@ public class UserDto {
     @Schema(description = "Страна проживания")
     private String country;
 
+    @Schema(description = "Регион страны проживания")
+    private String region;
+
     @Schema(description = "Город проживания")
     private String city;
 
@@ -59,7 +61,4 @@ public class UserDto {
 
     @Schema(description = "Ссылка на соцсети")
     private String website;
-
-    @Schema(description = "Список друзей")
-    private List<ShortUserDto> friends;
 }

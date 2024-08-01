@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: create-countires
+      id: create-countries
       author: vvbakhanovich
       changes:
         - createTable:
@@ -16,7 +16,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: name
-                  type: VARCHAR 30
+                  type: VARCHAR(50)
                   constraints:
                     nullable: false
 

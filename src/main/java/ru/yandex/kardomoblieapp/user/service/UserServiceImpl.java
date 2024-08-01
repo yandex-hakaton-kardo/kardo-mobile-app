@@ -57,9 +57,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(long userId, UserUpdateRequest userUpdateRequest, LocationInfo locationInfo) {
+    public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
         userMapper.updateUser(userUpdateRequest, user);
+        LocationInfo locationInfo = LocationInfo.builder()
+                .countryId(userUpdateRequest.getCountryId())
+                .regionId(userUpdateRequest.getRegionId())
+                .city(userUpdateRequest.getCity())
+                .build();
         setLocationToUser(locationInfo, user);
         userRepository.save(user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);

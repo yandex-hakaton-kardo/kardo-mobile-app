@@ -1,5 +1,8 @@
-package ru.yandex.kardomoblieapp.location;
+package ru.yandex.kardomoblieapp.location.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +24,7 @@ import java.util.List;
 @RequestMapping("/countries")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Географические локации", description = "Взаимодействие с географическими локациями")
 public class LocationController {
 
     private final LocationService locationService;
@@ -31,30 +35,34 @@ public class LocationController {
 
     private final CityMapper cityMapper;
 
-    @GetMapping("")
-    public CountryDto getAllCountries() {
+    @GetMapping
+    @Operation(summary = "Получение списка всех стран в алфавитном порядке")
+    public List<CountryDto> getAllCountries() {
         log.info("Получение списка стран.");
         List<Country> countries = locationService.getAllCountries();
         return countryMapper.toDtoList(countries);
     }
 
     @GetMapping("/{countryId}")
-    public CountryDto getCountryById(@PathVariable long countryId) {
+    @Operation(summary = "Получение страны по идентификатору")
+    public CountryDto getCountryById(@PathVariable @Parameter(description = "Идентификатор страны") long countryId) {
         log.info("Получение списка стран.");
         Country country = locationService.getCountryById(countryId);
         return countryMapper.toDto(country);
     }
 
     @GetMapping("/{countryId}/regions/")
-    public List<RegionDto> getAllRegionsByCountryId(@PathVariable long countryId) {
+    @Operation(summary = "Получение регионов по идентификатору страны")
+    public List<RegionDto> getAllRegionsByCountryId(@PathVariable @Parameter(description = "Идентификатор страны") long countryId) {
         log.info("Получение списка регионов страны с id '{}'.", countryId);
         List<Region> regions = locationService.getAllCountryRegions(countryId);
         return regionMapper.toDtoList(regions);
     }
 
     @GetMapping("/{countryId}/regions/{regionId}")
-    public RegionDto getRegionById(@PathVariable long countryId,
-                                   @PathVariable long regionId) {
+    @Operation(summary = "Получение региона по идентификатору")
+    public RegionDto getRegionById(@PathVariable @Parameter(description = "Идентификатор страны") long countryId,
+                                   @PathVariable @Parameter(description = "Идентификатор региона") long regionId) {
         log.info("Получение региона с id '{}'.");
         Region region = locationService.getRegionById(regionId);
         return regionMapper.toDto(region);

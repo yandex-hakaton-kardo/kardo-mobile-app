@@ -52,6 +52,17 @@ public class UserUpdateRequest {
     @Schema(description = "Пароль", minLength = 8, maxLength = 15)
     private String password;
 
+    @Schema(description = "Страна проживания")
+    private Long countryId;
+
+    @Schema(description = "Регион проживания")
+    private Long regionId;
+
+    @Schema(description = "Город проживания")
+    @Size(min = 2, max = 20, message = "Название города должно содержать от 2 до 20 символов.")
+    @Pattern(regexp = "^[a-zA-zа-яА-ЯёЁ -]+$", message = "Название города должно содержать от 2 до 20 символов.")
+    private String city;
+
     @Schema(description = "Дата рождения пользователя")
     @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate dateOfBirth;

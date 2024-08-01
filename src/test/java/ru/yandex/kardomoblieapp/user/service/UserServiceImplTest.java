@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
+import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
@@ -47,6 +48,8 @@ class UserServiceImplTest {
 
     private long unknownId;
 
+    private LocationInfo locationInfo;
+
     @BeforeEach
     void init() {
         user1 = createUser(1);
@@ -56,13 +59,16 @@ class UserServiceImplTest {
                 .name("updated Имя")
                 .secondName("updated Отчество")
                 .surname("updated Фамилия")
-                .country("updated Россия")
-                .city("updated Москва")
                 .email("updatedtest@mail.ru")
                 .password("updated password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         unknownId = 99999L;
+        locationInfo = LocationInfo.builder()
+                .countryId(1L)
+                .regionId(1L)
+                .city("Москва")
+                .build();
     }
 
     @Test
@@ -302,8 +308,6 @@ class UserServiceImplTest {
                 .name("Имя" + id)
                 .secondName("Отчество")
                 .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
                 .email(id + "test@mail.ru")
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))

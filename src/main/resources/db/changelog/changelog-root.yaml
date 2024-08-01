@@ -1,5 +1,14 @@
 databaseChangeLog:
   - include:
+      file: create-countries.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-regions.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-cities.yaml
+      relativeToChangelogFile: true
+  - include:
       file: create-datafiles.yaml
       relativeToChangelogFile: true
   - include:
