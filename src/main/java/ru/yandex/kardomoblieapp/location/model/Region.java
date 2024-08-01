@@ -1,5 +1,6 @@
 package ru.yandex.kardomoblieapp.location.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -23,6 +24,7 @@ public class Region {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "region_id")
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

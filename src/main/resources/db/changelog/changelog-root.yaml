@@ -41,3 +41,6 @@ databaseChangeLog:
   - include:
       file: insert-admin.yaml
       relativeToChangelogFile: true
+  - include:
+      file: unq-cities.sql
+      relativeToChangelogFile: true

@@ -6,5 +6,5 @@ import ru.yandex.kardomoblieapp.location.model.City;
 import java.util.Optional;
 
 public interface CityRepository extends JpaRepository<City, Long> {
-    Optional<City> findByNameAndCountryIdAndRegionId(String cityName, long countryId, long regionId);
+    Optional<City> findByNameAndCountryIdAndRegionId(String cityName, Long countryId, Long regionId);
 }
