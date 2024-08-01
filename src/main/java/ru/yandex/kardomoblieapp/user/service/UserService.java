@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.user.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
+import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.User;
@@ -12,7 +13,7 @@ public interface UserService {
 
     User createUser(User userToAdd);
 
-    User updateUser(long userId, UserUpdateRequest userUpdateRequest);
+    User updateUser(long userId, UserUpdateRequest userUpdateRequest, LocationInfo locationInfo);
 
     void deleteUser(String username, long userId);
 

@@ -15,7 +15,7 @@ import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
 import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.Location;
+import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
@@ -57,11 +57,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
+    public User updateUser(long userId, UserUpdateRequest userUpdateRequest, LocationInfo locationInfo) {
         final User user = getUser(userId);
         userMapper.updateUser(userUpdateRequest, user);
-        Location location = userUpdateRequest.getLocation();
-        setLocationToUser(location, user);
+        setLocationToUser(locationInfo, user);
         userRepository.save(user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);
         return user;
@@ -176,19 +175,19 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id '" + userId + "' не найден."));
     }
 
-    private void setLocationToUser(Location location, User user) {
-        if (location.getCountryId() != null) {
-            Country country = locationService.getCountryById(location.getCountryId());
+    private void setLocationToUser(LocationInfo locationInfo, User user) {
+        if (locationInfo.getCountryId() != null) {
+            Country country = locationService.getCountryById(locationInfo.getCountryId());
             user.setCountry(country);
         }
 
-        if (location.getRegionId() != null) {
-            Region region = locationService.getRegionById(location.getRegionId());
+        if (locationInfo.getRegionId() != null) {
+            Region region = locationService.getRegionById(locationInfo.getRegionId());
             user.setRegion(region);
         }
 
-        if (location.getCity() != null) {
-            Optional<City> city = locationService.findCityByNameCountryAndRegion(location.getCity(),
+        if (locationInfo.getCity() != null) {
+            Optional<City> city = locationService.findCityByNameCountryAndRegion(locationInfo.getCity(),
                     user.getCountry() != null ? user.getCountry().getId() : null,
                     user.getRegion() != null ? user.getRegion().getId() : null);
 
@@ -196,7 +195,7 @@ public class UserServiceImpl implements UserService {
                 user.setCity(city.get());
             } else {
                 City newCity = City.builder()
-                        .name(location.getCity())
+                        .name(locationInfo.getCity())
                         .country(user.getCountry())
                         .region(user.getRegion())
                         .build();

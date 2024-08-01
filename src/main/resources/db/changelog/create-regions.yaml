@@ -1,0 +1,506 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-regions
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: regions
+            columns:
+              - column:
+                  name: region_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_regions
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_regions_countries
+                    references: countries(country_id)
+                    nullable: false
+
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Алтайский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Амурская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Владимирская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Брянская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ивановская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Калужская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Воронежская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Забайкальский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Иркутская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Калининградская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Камчатский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Кировская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ленинградская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Липецкая область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: г.Москва
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Рязанская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Московская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ненецкий АО
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Нижегородская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Новгородская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Новосибирская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Омская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Оренбургская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Орловская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Пермский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Приморский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Адыгея
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Башкортостан
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Кабардино-Балкария
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Коми
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Крым
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Марий Эл
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Мордовия
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Татарстан
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Тыва
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Республика Хакасия
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ростовская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: г.Санкт-Петербург
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Самарская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Саратовская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Сахалинская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Свердловская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ставрапольский край
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Тверская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Томская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Тульская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Тюменская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Удмуртская республика
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ульяновская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ханты-Мансийский АО - Югра
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ямало-Ненецкий АО
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Ярославская область
+              - column:
+                  name: country_id
+                  value: 1
+        - insert:
+            tableName: regions
+            columns:
+              - column:
+                  name: name
+                  value: Луганская Народная Республика
+              - column:
+                  name: country_id
+                  value: 1

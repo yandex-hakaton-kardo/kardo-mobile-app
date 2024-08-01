@@ -56,9 +56,6 @@ public class UserUpdateRequest {
     @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate dateOfBirth;
 
-    @Schema(description = "Место проживания")
-    private Location location;
-
     @Pattern(regexp = "^[0-9+]${12,15}", message = "Неверный формат номера телефона.")
     @Schema(description = "Номер телефона", minLength = 12, maxLength = 15)
     private String phoneNumber;

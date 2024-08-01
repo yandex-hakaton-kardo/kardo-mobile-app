@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Schema(description = "Место проживания")
-public class Location {
+public class LocationInfo {
 
     @Schema(description = "Страна проживания")
     private Long countryId;

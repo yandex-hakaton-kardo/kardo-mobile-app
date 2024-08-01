@@ -24,6 +24,7 @@ import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.dto.FriendshipDto;
+import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
@@ -68,9 +69,10 @@ public class UserController {
     @Operation(summary = "Редактирование данных пользователя")
     public UserDto updateUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
                               @RequestBody @Valid @Parameter(description = "Обновленные параметры") UserUpdateRequest userUpdateRequest,
+                              @RequestBody @Valid @Parameter(description = "Данные о местоположении") LocationInfo locationInfo,
                               @Parameter(hidden = true) Principal principal) {
         log.info("Обновление данных пользователя с id '{}'.", userId);
-        final User updatedUser = userService.updateUser(userId, userUpdateRequest);
+        final User updatedUser = userService.updateUser(userId, userUpdateRequest, locationInfo);
         return userMapper.toDto(updatedUser);
     }
 

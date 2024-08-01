@@ -28,7 +28,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Country> getAllCountries() {
-        List<Country> countries = countryRepository.findAll();
+        List<Country> countries = countryRepository.findAllCountriesOrderByName();
         log.info("Получен список всех стран");
         return countries;
     }
@@ -42,7 +42,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<Region> getAllCountryRegions(long countryId) {
-        List<Region> regions = regionRepository.findAllByCountryId(countryId);
+        List<Region> regions = regionRepository.findAllByCountryIdOrderByName(countryId);
         log.info("Получены все регионы страны с id '{}'.", countryId);
         return regions;
     }

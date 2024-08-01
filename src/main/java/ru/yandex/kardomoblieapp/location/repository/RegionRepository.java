@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
-    @Query("SELECT r FROM Region r LEFT JOIN FETCH r.country c WHERE c.id = ?1")
-    List<Region> findAllByCountryId(long countryId);
+    @Query("SELECT r FROM Region r LEFT JOIN FETCH r.country c WHERE c.id = ?1 ORDER BY r.name")
+    List<Region> findAllByCountryIdOrderByName(long countryId);
 
     @Query("SELECT r FROM Region r LEFT JOIN FETCH r.country c WHERE r.id = ?1")
     Optional<Region> findByRegionId(long regionId);

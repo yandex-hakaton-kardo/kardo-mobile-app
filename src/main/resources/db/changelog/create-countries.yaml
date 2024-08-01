@@ -1,0 +1,160 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-countires
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: countries
+            columns:
+              - column:
+                  name: country_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_countries
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR 30
+                  constraints:
+                    nullable: false
+
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Российская Федерация
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Беларусь
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Ирак
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Киргизия
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Таджикистан
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Марокко
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Коста-Рика
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Венесуэла
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Мексика
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Уругвай
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Колумбия
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Аргентина
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Новая Зеландия
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Чили
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Перу
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Бразилия
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Сальвадор
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Страны Азии
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Страны Арабского мира
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Страны Африки и Океании
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Страны Европы
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Страны Северной и Южной Америки
+        - insert:
+            tableName: countries
+            columns:
+              - column:
+                  name: name
+                  value: Китай
