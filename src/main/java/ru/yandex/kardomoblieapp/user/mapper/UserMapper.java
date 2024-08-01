@@ -30,6 +30,9 @@ public interface UserMapper {
     ShortUserDto toShortDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "country", ignore = true)
+    @Mapping(target = "region", ignore = true)
+    @Mapping(target = "city", ignore = true)
     void updateUser(UserUpdateRequest userUpdateRequest, @MappingTarget User user);
 
     List<ShortUserDto> toShortDtoList(List<User> friends);
