@@ -7,6 +7,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.kardomoblieapp.location.model.City;
 import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
 @TestInstance(Lifecycle.PER_CLASS)
+@Transactional
 class LocationServiceImplTest {
 
     @Autowired
