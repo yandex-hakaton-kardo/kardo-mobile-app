@@ -2,23 +2,32 @@ package ru.yandex.kardomoblieapp.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
-import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
+import ru.yandex.kardomoblieapp.location.model.City;
+import ru.yandex.kardomoblieapp.location.model.Country;
+import ru.yandex.kardomoblieapp.location.model.Region;
+import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
+import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.FriendshipId;
 import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
 import ru.yandex.kardomoblieapp.user.model.User;
+import ru.yandex.kardomoblieapp.user.model.UserRole;
 import ru.yandex.kardomoblieapp.user.repository.FriendshipRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,32 +42,39 @@ public class UserServiceImpl implements UserService {
 
     private final FriendshipRepository friendshipRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final LocationService locationService;
+
     @Override
     public User createUser(User userToAdd) {
+        userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
+        userToAdd.setRole(UserRole.USER);
         final User savedUser = userRepository.save(userToAdd);
         log.info("Пользователь с id '{}' был сохранен.", savedUser.getId());
         return savedUser;
     }
 
-
-    //TODO получить от фронта id пользователя, делающего запрос
     @Override
     @Transactional
-    public User updateUser(long requesterId, long userId, UserUpdateRequest userUpdateRequest) {
-        final User requester = getUser(requesterId);
+    public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
         userMapper.updateUser(userUpdateRequest, user);
+        LocationInfo locationInfo = LocationInfo.builder()
+                .countryId(userUpdateRequest.getCountryId())
+                .regionId(userUpdateRequest.getRegionId())
+                .city(userUpdateRequest.getCity())
+                .build();
+        setLocationToUser(locationInfo, user);
+        userRepository.save(user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);
         return user;
     }
 
     @Override
     @Transactional
-    public void deleteUser(long requesterId, long userId) {
-        final User requester = getUser(requesterId);
+    public void deleteUser(String username, long userId) {
         getUser(userId);
-        checkAuthorities(userId, requester);
         userRepository.deleteById(userId);
     }
 
@@ -71,10 +87,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public DataFile uploadProfilePicture(long requesterId, long userId, MultipartFile picture) {
-        final User requester = getUser(requesterId);
+    public DataFile uploadProfilePicture(long userId, MultipartFile picture) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
 
         DataFile uploadedFile = dataFileService.uploadFile(picture, userId);
         user.setProfilePicture(uploadedFile);
@@ -92,10 +106,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteProfilePicture(long requesterId, long userId) {
-        final User requester = getUser(requesterId);
+    public void deleteProfilePicture(long userId) {
         final User user = getUser(userId);
-        checkAuthorities(userId, requester);
         deleteCurrentProfilePictureIfExists(user);
     }
 
@@ -137,7 +149,21 @@ public class UserServiceImpl implements UserService {
         User user = getUser(userId);
         User friend = getUser(friendId);
         friendshipRepository.deleteById(FriendshipId.of(user, friend));
-        log.info("Пользователь с id '{}' удлалил из друзей пользователя с id '{}'.", userId, friendId);
+        log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
+    }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Пользователь с именем '" + username + "' не найден."));
+    }
+
+    @Override
+    public List<User> findAllUsers(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<User> users = userRepository.findAll(pageable).getContent();
+        log.info("Получен список всех пользователей");
+        return users;
     }
 
     private void deleteCurrentProfilePictureIfExists(User user) {
@@ -150,13 +176,37 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUser(long userId) {
-        return userRepository.findById(userId)
+        return userRepository.findFullUserById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id '" + userId + "' не найден."));
     }
 
-    private void checkAuthorities(long userId, User requester) {
-        if (!(requester.getId() == userId || requester.isAdmin())) {
-            throw new NotAuthorizedException("Пользователь с id '" + requester.getId() + "' не имеет прав на редактирование профиля.");
+    private void setLocationToUser(LocationInfo locationInfo, User user) {
+        if (locationInfo.getCountryId() != null) {
+            Country country = locationService.getCountryById(locationInfo.getCountryId());
+            user.setCountry(country);
+        }
+
+        if (locationInfo.getRegionId() != null) {
+            Region region = locationService.getRegionById(locationInfo.getRegionId());
+            user.setRegion(region);
+        }
+
+        if (locationInfo.getCity() != null) {
+            Optional<City> city = locationService.findCityByNameCountryAndRegion(locationInfo.getCity(),
+                    user.getCountry() != null ? user.getCountry().getId() : null,
+                    user.getRegion() != null ? user.getRegion().getId() : null);
+
+            if (city.isPresent()) {
+                user.setCity(city.get());
+            } else {
+                City newCity = City.builder()
+                        .name(locationInfo.getCity())
+                        .country(user.getCountry())
+                        .region(user.getRegion())
+                        .build();
+                City savedCity = locationService.addCity(newCity);
+                user.setCity(savedCity);
+            }
         }
     }
 }

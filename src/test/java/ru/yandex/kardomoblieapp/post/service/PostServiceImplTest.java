@@ -15,7 +15,6 @@ import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
-import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
@@ -52,6 +51,8 @@ class PostServiceImplTest {
 
     private String content;
 
+    String unknownUsername;
+
     long unknownId;
 
     private MockMultipartFile file;
@@ -64,8 +65,6 @@ class PostServiceImplTest {
                 .username("username")
                 .secondName("Отчество")
                 .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
                 .email("test@mail.ru")
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
@@ -76,14 +75,13 @@ class PostServiceImplTest {
                 .username("username 2")
                 .secondName("Отчество")
                 .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
                 .email("test2@mail.ru")
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         savedUser2 = userService.createUser(user2);
         content = "post content";
+        unknownUsername = "unknownUsername";
         unknownId = 9999L;
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         file = new MockMultipartFile("file", "fileName", MediaType.IMAGE_JPEG_VALUE, inputStream);
@@ -92,7 +90,7 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Создание поста с прикрепленными файлами")
     void createPost_whenFilesNotNull_shouldCreatePostWithFiles() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
         assertThat(savedPost, notNullValue());
         assertThat(savedPost.getId(), greaterThan(0L));
@@ -110,18 +108,18 @@ class PostServiceImplTest {
     @DisplayName("Создание поста, пользователь не найден")
     void createPost_whenUserNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.createPost(unknownId, file, content));
+                () -> postService.createPost(unknownUsername, file, content));
 
-        assertThat(ex.getMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + unknownUsername + "' не найден."));
     }
 
     @Test
     @DisplayName("Обновление текста поста")
     void updatePost_withoutNewFile_shouldUpdateOnlyContent() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
         String updatedContent = "updated content";
-        Post updatePost = postService.updatePost(savedUser.getId(), savedPost.getId(), null, updatedContent);
+        Post updatePost = postService.updatePost(savedUser.getUsername(), savedPost.getId(), null, updatedContent);
 
         assertThat(updatePost, notNullValue());
         assertThat(updatePost.getId(), is(savedPost.getId()));
@@ -137,9 +135,9 @@ class PostServiceImplTest {
     void updatePost_whenFileNotNull_shouldReplaceOldFile() {
         InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
         MultipartFile newFile = new MockMultipartFile("file", "new fileName", MediaType.IMAGE_JPEG_VALUE, inputStream);
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        Post updatePost = postService.updatePost(savedUser.getId(), savedPost.getId(), newFile, null);
+        Post updatePost = postService.updatePost(savedUser.getUsername(), savedPost.getId(), newFile, null);
 
         assertThat(updatePost, notNullValue());
         assertThat(updatePost.getId(), is(savedPost.getId()));
@@ -149,42 +147,20 @@ class PostServiceImplTest {
     }
 
     @Test
-    @DisplayName("Обновление поста, пользователь не имеет прав на редактирование")
-    void updatePost_whenUserNotAuthorized_shouldThrowNotAuthorisedException() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        User user2 = User.builder().name("Имя")
-                .username("username2")
-                .secondName("Отчество")
-                .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
-                .email("test@mail.ru")
-                .password("password")
-                .dateOfBirth(LocalDate.of(1990, 12, 12))
-                .build();
-        User secondUser = userService.createUser(user2);
-
-        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
-                () -> postService.updatePost(secondUser.getId(), savedPost.getId(), null, null));
-        assertThat(ex.getMessage(), is("Пользователь с id '" + secondUser.getId()
-                + "' не имеет прав на редактирование поста с id '" + savedPost.getId() + "'."));
-    }
-
-    @Test
     @DisplayName("Обновление поста, пользователь не найден")
     void updatePost_whenUserNotFound_shouldThrowNotFoundException() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.updatePost(unknownId, savedPost.getId(), file, content));
+                () -> postService.updatePost(unknownUsername, savedPost.getId(), file, content));
 
-        assertThat(ex.getMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + unknownUsername + "' не найден."));
     }
 
     @Test
     @DisplayName("Обновление поста, пост не найден")
     void updatePost_whenPostNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.updatePost(savedUser.getId(), unknownId, file, content));
+                () -> postService.updatePost(savedUser.getUsername(), unknownId, file, content));
 
         assertThat(ex.getMessage(), is("Пост с id '" + unknownId + "' не найден."));
     }
@@ -192,9 +168,9 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Удаление поста")
     void deletePost() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        postService.deletePost(savedUser.getId(), savedPost.getId());
+        postService.deletePost(savedUser.getUsername(), savedPost.getId());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> postService.findPostById(savedPost.getId()));
@@ -205,7 +181,7 @@ class PostServiceImplTest {
     @DisplayName("Удаление поста, пост не найден")
     void deletePost_whenPostNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.deletePost(savedUser.getId(), unknownId));
+                () -> postService.deletePost(savedUser.getUsername(), unknownId));
 
         assertThat(ex.getMessage(), is("Пост с id '" + unknownId + "' не найден."));
     }
@@ -214,38 +190,15 @@ class PostServiceImplTest {
     @DisplayName("Удаление поста, пользователь не найден")
     void deletePost_whenUserNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.deletePost(unknownId, unknownId));
+                () -> postService.deletePost(unknownUsername, unknownId));
 
-        assertThat(ex.getMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
-    }
-
-    @Test
-    @DisplayName("Удаление поста, пользователь не найден")
-    void deletePost_whenUserNotAuthorized_shouldThrowNotAuthorizedException() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        User user2 = User.builder().name("Имя")
-                .username("username2")
-                .secondName("Отчество")
-                .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
-                .email("test@mail.ru")
-                .password("password")
-                .dateOfBirth(LocalDate.of(1990, 12, 12))
-                .build();
-        User secondUser = userService.createUser(user2);
-
-        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
-                () -> postService.deletePost(secondUser.getId(), savedPost.getId()));
-
-        assertThat(ex.getMessage(), is("Пользователь с id '" + secondUser.getId()
-                + "' не имеет прав на редактирование поста с id '" + savedPost.getId() + "'."));
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + unknownUsername + "' не найден."));
     }
 
     @Test
     @DisplayName("Получение поста по id")
     void findPostById() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
         Post result = postService.findPostById(savedPost.getId());
 
@@ -271,7 +224,7 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Получение списка постов пользователя, у пользователя один пост")
     void findPostsFromUser_whenUserHaveOnePost_shouldReturnOnlyOnePost() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
         List<Post> postsFromUser = postService.findPostsFromUser(savedUser.getId());
 
@@ -292,10 +245,10 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Получение списка постов пользователя, у пользователя несколько постов")
     void findPostsFromUser_whenUserHaveMultiplePost_shouldReturnList() {
-        postService.createPost(savedUser.getId(), file, content);
-        postService.createPost(savedUser.getId(), file, content);
-        postService.createPost(savedUser.getId(), file, content);
-        postService.createPost(savedUser.getId(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
 
         List<Post> postsFromUser = postService.findPostsFromUser(savedUser.getId());
 
@@ -306,9 +259,9 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Добавление лайка посту")
     void addLikeToPost_whenPostHaveNoLikes_shouldHaveOneLike() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        long numberOfLikes = postService.addLikeToPost(savedUser.getId(), savedPost.getId());
+        long numberOfLikes = postService.addLikeToPost(savedUser.getUsername(), savedPost.getId());
 
         assertThat(numberOfLikes, is(1L));
     }
@@ -316,10 +269,10 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Повторное добавление лайка посту")
     void addLikeToPost_whenUserAlreadyLikedPost_shouldRemoveLikeFromPost() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        long firstLike = postService.addLikeToPost(savedUser.getId(), savedPost.getId());
-        long secondLike = postService.addLikeToPost(savedUser.getId(), savedPost.getId());
+        long firstLike = postService.addLikeToPost(savedUser.getUsername(), savedPost.getId());
+        long secondLike = postService.addLikeToPost(savedUser.getUsername(), savedPost.getId());
 
         assertThat(firstLike, is(1L));
         assertThat(secondLike, is(0L));
@@ -328,21 +281,19 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Добавление лайка посту двумя пользователями")
     void addLikeToPost_whenTwoUserLikedPost_postShouldHaveTwoLikes() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
         User user2 = User.builder().name("Имя")
                 .username("username2")
                 .secondName("Отчество")
                 .surname("Фамилия")
-                .country("Россия")
-                .city("Москва")
-                .email("test@mail.ru")
+                .email("newuser@mail.ru")
                 .password("password")
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         User secondUser = userService.createUser(user2);
 
-        long firstLike = postService.addLikeToPost(savedUser.getId(), savedPost.getId());
-        long secondLike = postService.addLikeToPost(secondUser.getId(), savedPost.getId());
+        long firstLike = postService.addLikeToPost(savedUser.getUsername(), savedPost.getId());
+        long secondLike = postService.addLikeToPost(secondUser.getUsername(), savedPost.getId());
 
         assertThat(firstLike, is(1L));
         assertThat(secondLike, is(2L));
@@ -352,16 +303,16 @@ class PostServiceImplTest {
     @DisplayName("Добавление лайка посту, пользователь не найден")
     void addLikeToPost_whenUserNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.addLikeToPost(unknownId, unknownId));
+                () -> postService.addLikeToPost(unknownUsername, unknownId));
 
-        assertThat(ex.getMessage(), is("Пользователь с id '" + unknownId + "' не найден."));
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + unknownUsername + "' не найден."));
     }
 
     @Test
     @DisplayName("Добавление лайка посту, пост не найден")
     void addLikeToPost_whenPostNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.addLikeToPost(savedUser.getId(), unknownId));
+                () -> postService.addLikeToPost(savedUser.getUsername(), unknownId));
 
         assertThat(ex.getMessage(), is("Пост с id '" + unknownId + "' не найден."));
     }
@@ -370,8 +321,8 @@ class PostServiceImplTest {
     @DisplayName("Получение ленты постов без просмотров")
     @SneakyThrows
     void getPostsFeed_whenNoPostViews_shouldReturnFromLatestToEarliest() {
-        Post savedPost1 = postService.createPost(savedUser.getId(), file, content);
-        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
         List<Post> feed = postService.getPostsFeed(0, 10);
 
@@ -385,8 +336,8 @@ class PostServiceImplTest {
     @DisplayName("Получение ленты постов без просмотров, список длинной 1")
     @SneakyThrows
     void getPostsFeed_whenSizeIs1_shouldReturnOnePost() {
-        Post savedPost1 = postService.createPost(savedUser.getId(), file, content);
-        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
         List<Post> feed = postService.getPostsFeed(0, 1);
 
@@ -399,8 +350,8 @@ class PostServiceImplTest {
     @DisplayName("Получение ленты постов без просмотров")
     @SneakyThrows
     void getPostsFeed_whenPostHaveViews_shouldPostWithViewsFirst() {
-        Post savedPost1 = postService.createPost(savedUser.getId(), file, content);
-        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
         postService.findPostById(savedPost1.getId());
 
@@ -416,8 +367,8 @@ class PostServiceImplTest {
     @DisplayName("Получение ленты постов без просмотров")
     @SneakyThrows
     void getPostsFeed_whenAllPostsHaveViews_shouldPostWithMostViewsFirst() {
-        Post savedPost1 = postService.createPost(savedUser.getId(), file, content);
-        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
         postService.findPostById(savedPost1.getId());
         postService.findPostById(savedPost2.getId());
@@ -434,12 +385,12 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Добавление комментария к посту")
     void addCommentToPost() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
         Comment comment = Comment.builder()
                 .text("comment")
                 .build();
 
-        Comment savedComment = postService.addCommentToPost(savedUser.getId(), savedPost.getId(), comment);
+        Comment savedComment = postService.addCommentToPost(savedUser.getUsername(), savedPost.getId(), comment);
 
         assertThat(savedComment, notNullValue());
         assertThat(savedComment.getId(), greaterThan(0L));
@@ -451,14 +402,14 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Обновление комментария")
     void updatedComment() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
         Comment comment = Comment.builder()
                 .text("comment")
                 .build();
-        Comment savedComment = postService.addCommentToPost(savedUser.getId(), savedPost.getId(), comment);
+        Comment savedComment = postService.addCommentToPost(savedUser.getUsername(), savedPost.getId(), comment);
         CommentRequest commentRequest = new CommentRequest("updated comment");
 
-        Comment updatedComment = postService.updateComment(savedUser.getId(), savedComment.getId(), commentRequest);
+        Comment updatedComment = postService.updateComment(savedUser.getUsername(), savedComment.getId(), commentRequest);
         Post post = postService.findPostById(savedPost.getId());
 
         assertThat(updatedComment, notNullValue());
@@ -472,17 +423,17 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Удаление комментария")
     void deleteComment() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
         Comment comment = Comment.builder()
                 .text("comment")
                 .build();
-        Comment savedComment = postService.addCommentToPost(savedUser.getId(), savedPost.getId(), comment);
+        Comment savedComment = postService.addCommentToPost(savedUser.getUsername(), savedPost.getId(), comment);
         CommentRequest commentRequest = new CommentRequest("updated comment");
 
-        postService.deleteComment(savedUser.getId(), savedComment.getId());
+        postService.deleteComment(savedUser.getUsername(), savedComment.getId());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.updateComment(savedUser.getId(), savedComment.getId(), commentRequest));
+                () -> postService.updateComment(savedUser.getUsername(), savedComment.getId(), commentRequest));
 
         assertThat(ex.getMessage(), is("Комментарий с id '" + savedComment.getId() + "' не найден."));
     }
@@ -490,9 +441,9 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Получение рекомендаций, у пользователя нет друзей.")
     void getRecommendations_whenUserHaveNoFriends_shouldDisplayAllPosts() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        List<Post> recommendations = postService.getRecommendations(savedUser2.getId(), 0, 10, PostSort.LIKES);
+        List<Post> recommendations = postService.getRecommendations(savedUser2.getUsername(), 0, 10, PostSort.LIKES);
 
         assertThat(recommendations, notNullValue());
         assertThat(recommendations.size(), is(1));
@@ -502,12 +453,12 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Получение рекомендаций, сортировка по количеству лайков.")
     void getRecommendations_whenPostsHaveLikes_shouldBeOrderedByNumberOfLikes() {
-        Post savedPost = postService.createPost(savedUser.getId(), file, content);
-        Post savedPost2 = postService.createPost(savedUser.getId(), file, content);
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
+        Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
-        postService.addLikeToPost(savedUser2.getId(), savedPost2.getId());
+        postService.addLikeToPost(savedUser2.getUsername(), savedPost2.getId());
 
-        List<Post> recommendations = postService.getRecommendations(savedUser2.getId(), 0, 10, PostSort.LIKES);
+        List<Post> recommendations = postService.getRecommendations(savedUser2.getUsername(), 0, 10, PostSort.LIKES);
 
         assertThat(recommendations, notNullValue());
         assertThat(recommendations.size(), is(2));
@@ -518,9 +469,9 @@ class PostServiceImplTest {
     @Test
     @DisplayName("Получение рекомендаций, пользователь не должен получать свои посты в рекомендации.")
     void getRecommendations_whenUserHavePosts_shouldNotShowHisPostsInRecommendations() {
-        postService.createPost(savedUser.getId(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
 
-        List<Post> recommendations = postService.getRecommendations(savedUser.getId(), 0, 10, PostSort.LIKES);
+        List<Post> recommendations = postService.getRecommendations(savedUser.getUsername(), 0, 10, PostSort.LIKES);
 
         assertThat(recommendations, notNullValue());
         assertThat(recommendations, emptyIterable());

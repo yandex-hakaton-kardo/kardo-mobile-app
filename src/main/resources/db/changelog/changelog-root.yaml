@@ -1,5 +1,14 @@
 databaseChangeLog:
   - include:
+      file: create-countries.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-regions.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-cities.yaml
+      relativeToChangelogFile: true
+  - include:
       file: create-datafiles.yaml
       relativeToChangelogFile: true
   - include:
@@ -25,4 +34,13 @@ databaseChangeLog:
       relativeToChangelogFile: true
   - include:
       file: create-friendship.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-deactivated_tokens.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: insert-admin.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: unq-cities.sql
       relativeToChangelogFile: true

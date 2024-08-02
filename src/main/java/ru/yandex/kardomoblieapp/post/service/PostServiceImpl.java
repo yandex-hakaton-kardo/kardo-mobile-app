@@ -45,32 +45,31 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(long requesterId, MultipartFile file, String content) {
-        final User author = userService.findUserById(requesterId);
+    public Post createPost(String username, MultipartFile file, String content) {
+        final User author = userService.findByUsername(username);
         final Post newPost = Post.builder()
                 .author(author)
                 .title(content)
                 .build();
 
-        DataFile uploadedFile = dataFileService.uploadFile(file, requesterId);
+        DataFile uploadedFile = dataFileService.uploadFile(file, author.getId());
         newPost.setFile(uploadedFile);
         uploadedFile.setPost(newPost);
         Post savedPost = postRepository.save(newPost);
-        log.info("Пользователь с id '{}' создал пост с id '{}'.", requesterId, savedPost.getId());
+        log.info("Пользователь с id '{}' создал пост с id '{}'.", author.getId(), savedPost.getId());
         return savedPost;
     }
 
     @Override
     @Transactional
-    public Post updatePost(long requesterId, long postId, MultipartFile file, String content) {
-        userService.findUserById(requesterId);
+    public Post updatePost(String username, long postId, MultipartFile file, String content) {
+        User user = userService.findByUsername(username);
         final Post postToUpdate = getPost(postId);
-        checkIfUserIsPostAuthor(requesterId, postToUpdate);
 
         DataFile currentFile = postToUpdate.getFile();
         if (file != null && !currentFile.getFileName().equals(file.getOriginalFilename())) {
             dataFileService.deleteFile(currentFile.getId());
-            DataFile newFile = dataFileService.uploadFile(file, requesterId);
+            DataFile newFile = dataFileService.uploadFile(file, user.getId());
             postToUpdate.setFile(newFile);
         }
         if (content != null) {
@@ -80,16 +79,15 @@ public class PostServiceImpl implements PostService {
         postRepository.save(postToUpdate);
         long likes = postLikeRepository.findPostLikesCount(postId);
         postToUpdate.setLikes(likes);
-        log.info("Пост с id '{}' был обновлен пользователем с id '{}'.", postId, requesterId);
+        log.info("Пост с id '{}' был обновлен пользователем с id '{}'.", postId, user.getId());
         return postToUpdate;
     }
 
     @Override
     @Transactional
-    public void deletePost(long requesterId, long postId) {
-        userService.findUserById(requesterId);
+    public void deletePost(String username, long postId) {
+        userService.findByUsername(username);
         final Post postToDelete = getPost(postId);
-        checkIfUserIsPostAuthor(requesterId, postToDelete);
         DataFile file = postToDelete.getFile();
         dataFileService.deleteFile(file.getId());
         postRepository.deleteById(postId);
@@ -115,8 +113,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public long addLikeToPost(long requesterId, long postId) {
-        User user = userService.findUserById(requesterId);
+    public long addLikeToPost(String username, long postId) {
+        User user = userService.findByUsername(username);
         Post post = getPost(postId);
 
         PostLikeId likeId = PostLikeId.of(post, user);
@@ -124,12 +122,12 @@ public class PostServiceImpl implements PostService {
 
         if (like.isEmpty()) {
             postLikeRepository.save(new PostLike(likeId));
-            log.info("Пользователь с id '{}' поставил лайк посту с id '{}'.", requesterId,
+            log.info("Пользователь с id '{}' поставил лайк посту с id '{}'.", user.getId(),
                     postId);
         } else {
             postLikeRepository.deleteById(likeId);
             log.info("Пользователь с id '{}' попытался повторно поставить лайк посту с id '{}'. Лайк удален.",
-                    requesterId, postId);
+                    user.getId(), postId);
         }
 
         long likesCount = postLikeRepository.findPostLikesCount(postId);
@@ -150,46 +148,45 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Comment addCommentToPost(long requesterId, long postId, Comment newComment) {
-        User author = userService.findUserById(requesterId);
+    public Comment addCommentToPost(String username, long postId, Comment newComment) {
+        User author = userService.findByUsername(username);
         Post post = getPost(postId);
         newComment.setAuthor(author);
         newComment.setPost(post);
         Comment savedComment = commentRepository.save(newComment);
         post.addComment(savedComment);
         postRepository.save(post);
-        log.info("Пользователь с id '{} оставил комментарий на пост с id '{}'.", requesterId, postId);
+        log.info("Пользователь с id '{} оставил комментарий на пост с id '{}'.", author.getId(), postId);
         return savedComment;
     }
 
     @Override
-    public Comment updateComment(long requesterId, long commentId, CommentRequest commentRequest) {
-        userService.findUserById(requesterId);
+    public Comment updateComment(String username, long commentId, CommentRequest commentRequest) {
         Comment comment = getCommentWithAuthor(commentId);
-        checkIfUserIsCommentAuthor(requesterId, comment);
+        checkIfUserIsCommentAuthor(username, comment);
         comment.setText(commentRequest.getText());
         Comment savedComment = commentRepository.save(comment);
-        log.info("Пользователь с id '{}' отредактировал комментарий с id '{}'.", requesterId, commentId);
+        log.info("Пользователь с id '{}' отредактировал комментарий с id '{}'.", username, commentId);
         return savedComment;
     }
 
     @Override
-    public void deleteComment(long requesterId, long commentId) {
-        userService.findUserById(requesterId);
+    public void deleteComment(String username, long commentId) {
+        userService.findByUsername(username);
         Comment comment = getCommentWithAuthor(commentId);
-        checkIfUserIsCommentAuthor(requesterId, comment);
+        checkIfUserIsCommentAuthor(username, comment);
         commentRepository.deleteById(commentId);
-        log.info("Пользователь с id '{}' удалил комментарий с id '{}'.", requesterId, commentId);
+        log.info("Пользователь с id '{}' удалил комментарий с id '{}'.", username, commentId);
     }
 
     @Override
-    public List<Post> getRecommendations(long requesterId, Integer page, Integer size, PostSort sort) {
-        userService.findUserById(requesterId);
-        List<Long> friendsIds = new ArrayList<>(userService.getFriendsList(requesterId).stream().map(User::getId).toList());
-        friendsIds.add(requesterId);
+    public List<Post> getRecommendations(String username, Integer page, Integer size, PostSort sort) {
+        User user = userService.findByUsername(username);
+        List<Long> friendsIds = new ArrayList<>(userService.getFriendsList(user.getId()).stream().map(User::getId).toList());
+        friendsIds.add(user.getId());
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.name().toLowerCase()).descending());
         List<Post> recommendations = postRepository.findRecommendations(friendsIds, pageable);
-        log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", requesterId, recommendations.size());
+        log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", user.getId(), recommendations.size());
         return recommendations;
     }
 
@@ -203,16 +200,9 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new NotFoundException("Пост с id '" + postId + "' не найден."));
     }
 
-    private void checkIfUserIsPostAuthor(long userId, Post post) {
-        if (userId != post.getAuthor().getId()) {
-            throw new NotAuthorizedException("Пользователь с id '" + userId
-                    + "' не имеет прав на редактирование поста с id '" + post.getId() + "'.");
-        }
-    }
-
-    private void checkIfUserIsCommentAuthor(long requesterId, Comment comment) {
-        if (comment.getAuthor().getId() != requesterId) {
-            throw new NotAuthorizedException("Пользователь с id '" + requesterId
+    private void checkIfUserIsCommentAuthor(String username, Comment comment) {
+        if (!comment.getAuthor().getUsername().equals(username)) {
+            throw new NotAuthorizedException("Пользователь с id '" + username
                     + "' не имеет прав на редактирование комментария с id '" + comment.getId() + "'.");
         }
     }

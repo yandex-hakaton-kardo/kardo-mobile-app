@@ -12,21 +12,25 @@ public interface UserService {
 
     User createUser(User userToAdd);
 
-    User updateUser(long requesterId, long userId, UserUpdateRequest userUpdateRequest);
+    User updateUser(long userId, UserUpdateRequest userUpdateRequest);
 
-    void deleteUser(long requesterId, long userId);
+    void deleteUser(String username, long userId);
 
     User findUserById(long userId);
 
-    DataFile uploadProfilePicture(long requesterId, long userId, MultipartFile avatar);
+    DataFile uploadProfilePicture(long userId, MultipartFile avatar);
 
     DataFile getProfilePicture(long userId);
 
-    void deleteProfilePicture(long requesterId, long userId);
+    void deleteProfilePicture(long userId);
 
     Friendship addFriend(long userId, long friendId);
 
     List<User> getFriendsList(long userId);
 
     void deleteFriend(long userId, long friendId);
+
+    User findByUsername(String username);
+
+    List<User> findAllUsers(Integer page, Integer size);
 }

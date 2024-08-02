@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-admin
+      author: vvbakhanovich
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: $2a$10$AbpGDoKtOV18Pfb5dOP/Kex63cdTDh8Jxph3jKdy00/AkMCO7uAZW
+              - column:
+                  name: email
+                  value: admin@mail.com
+              - column:
+                  name: role
+                  value: ADMIN

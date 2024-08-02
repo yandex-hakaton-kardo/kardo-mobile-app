@@ -1,5 +1,6 @@
 package ru.yandex.kardomoblieapp.user.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,13 +11,15 @@ import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "Краткое представление пользователя")
 public class ShortUserDto {
 
+    @Schema(description = "Идентификатор пользователя")
     private long id;
 
-    private String name;
+    @Schema(description = "Никнейм пользователя")
+    private String username;
 
-    private String surname;
-
+    @Schema(description = "Фотография профиля")
     private DataFileDto profilePicture;
 }

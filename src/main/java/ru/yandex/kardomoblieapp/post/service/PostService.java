@@ -9,25 +9,25 @@ import ru.yandex.kardomoblieapp.post.model.PostSort;
 import java.util.List;
 
 public interface PostService {
-    Post createPost(long requesterId, MultipartFile file, String content);
+    Post createPost(String username, MultipartFile file, String content);
 
-    Post updatePost(long requesterId, long postId, MultipartFile file, String content);
+    Post updatePost(String username, long postId, MultipartFile file, String content);
 
-    void deletePost(long requesterId, long postId);
+    void deletePost(String username, long postId);
 
     Post findPostById(long postId);
 
     List<Post> findPostsFromUser(long userId);
 
-    long addLikeToPost(long requesterId, long postId);
+    long addLikeToPost(String username, long postId);
 
     List<Post> getPostsFeed(Integer from, Integer size);
 
-    Comment addCommentToPost(long requesterId, long postId, Comment newComment);
+    Comment addCommentToPost(String username, long postId, Comment newComment);
 
-    Comment updateComment(long requesterId, long commentId, CommentRequest commentRequest);
+    Comment updateComment(String username, long commentId, CommentRequest commentRequest);
 
-    void deleteComment(long requesterId, long commentId);
+    void deleteComment(String username, long commentId);
 
-    List<Post> getRecommendations(long requesterId, Integer from, Integer size, PostSort sort);
+    List<Post> getRecommendations(String username, Integer from, Integer size, PostSort sort);
 }

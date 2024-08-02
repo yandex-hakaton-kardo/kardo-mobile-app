@@ -16,7 +16,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: username
-                  type: VARCHAR(20)
+                  type: VARCHAR(30)
                   constraints:
                     nullable: false
                     unique: true
@@ -24,7 +24,7 @@ databaseChangeLog:
                   name: name
                   type: VARCHAR(20)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: second_name
                   type: VARCHAR(20)
@@ -34,17 +34,17 @@ databaseChangeLog:
                   name: surname
                   type: VARCHAR(20)
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: date_of_birth
                   type: DATE
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: email
-                  type: VARCHAR(255)
+                  type: VARCHAR(50)
                   constraints:
-                    unique: false
+                    unique: true
                     uniqueConstraintName: unq_email
                     nullable: false
               - column:
@@ -58,15 +58,26 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: country
-                  type: VARCHAR(255)
+                  name: country_id
+                  type: BIGINT
                   constraints:
-                    nullable: false
+                    foreignKeyName: fk_users_countries
+                    references: countries(country_id)
+                    nullable: true
               - column:
-                  name: city
-                  type: VARCHAR(255)
+                  name: region_id
+                  type: BIGINT
                   constraints:
-                    nullable: false
+                    foreignKeyName: fk_users_regions
+                    references: regions(region_id)
+                    nullable: true
+              - column:
+                  name: city_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_cities
+                    references: cities(city_id)
+                    nullable: true
               - column:
                   name: gender
                   type: VARCHAR(10)
@@ -81,7 +92,7 @@ databaseChangeLog:
                     references: data_files(data_file_id)
               - column:
                   name: overview
-                  type: VARCHAR(1000)
+                  type: VARCHAR(500)
                   constraints:
                     nullable: true
               - column:
@@ -90,6 +101,6 @@ databaseChangeLog:
                   constraints:
                     nullable: true
               - column:
-                  name: is_admin
-                  type: BOOLEAN
-                  defaultValueBoolean: false
+                  name: role
+                  type: VARCHAR(10)
+                  defaultValue: USER
