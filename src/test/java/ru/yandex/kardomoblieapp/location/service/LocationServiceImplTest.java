@@ -1,7 +1,9 @@
 package ru.yandex.kardomoblieapp.location.service;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,9 +22,11 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.TestInstance.Lifecycle;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
+@TestInstance(Lifecycle.PER_CLASS)
 class LocationServiceImplTest {
 
     @Autowired
@@ -31,6 +35,11 @@ class LocationServiceImplTest {
     private long id = 1L;
 
     private long unknownId = 9999L;
+
+    @AfterAll
+    void deleteAll() {
+        locationService.deleteAllCities();
+    }
 
     @Test
     @DisplayName("Получение списка всех стран")

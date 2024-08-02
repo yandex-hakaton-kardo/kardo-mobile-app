@@ -68,6 +68,12 @@ public class LocationServiceImpl implements LocationService {
         return city;
     }
 
+    @Override
+    public void deleteAllCities() {
+        cityRepository.deleteAll();
+        log.info("Удаление всех городов.");
+    }
+
     private Country getCountry(long countryId) {
         return countryRepository.findById(countryId).orElseThrow(
                 () -> new NotFoundException("Страна с id '" + countryId + "' не найдена."));

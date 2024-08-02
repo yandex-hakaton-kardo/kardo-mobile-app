@@ -19,4 +19,6 @@ public interface LocationService {
     City addCity(City city);
 
     Optional<City> findCityByNameCountryAndRegion(String cityName, Long countryId, Long regionId);
+
+    void deleteAllCities();
 }
