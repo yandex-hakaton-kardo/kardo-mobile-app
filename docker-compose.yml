@@ -13,7 +13,7 @@ services:
       - POSTGRES_DB=kardo-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - FILE_STORAGE_PATH=/home/workshop/files
+      - FILE_STORAGE_PATH=/data
       - SSL_LOCATION=/etc/ssl/certs/keystore.p12
     volumes:
       - /home/workshop/kardo/files:/data
