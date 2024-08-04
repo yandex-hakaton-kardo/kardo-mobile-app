@@ -135,7 +135,7 @@ public class DataFileServiceImpl implements DataFileService {
             fileToUpload.transferTo(file);
             return dataFile;
         } catch (IOException e) {
-            throw new DataFileStorageException(e.getCause().getMessage());
+            throw new DataFileStorageException(e.getLocalizedMessage());
         }
     }
 }
