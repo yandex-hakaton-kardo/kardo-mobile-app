@@ -66,22 +66,41 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/users/**").hasRole(USER.name())
-                        .requestMatchers("/posts/**").hasRole(USER.name())
                         .requestMatchers("/users/register", HttpMethod.POST.name()).not().fullyAuthenticated()
-                        .requestMatchers("/users/register").hasRole(ADMIN.name())
-                        .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/users/{userId}", HttpMethod.GET.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/users/{userId}/friends", HttpMethod.GET.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/users/{userId}/avatar", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/posts/{postId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/posts/{postId}/comment/{commentId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
-                        .requestMatchers("/posts/**", HttpMethod.GET.name()).hasRole(ADMIN.name())
+                        .requestMatchers("/users/register").hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/users/{userId}", HttpMethod.GET.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/users/{userId}/friends", HttpMethod.GET.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/users/{userId}/avatar", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/users/**").hasRole(USER.name())
+                        .requestMatchers("/posts/{postId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/posts/{postId}/comment/{commentId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/posts/**", HttpMethod.GET.name()).hasAnyRole(ADMIN.name(), USER.name())
+                        .requestMatchers("/posts/**").hasRole(USER.name())
                         .requestMatchers("/swagger-ui").hasRole(ADMIN.name())
                         .requestMatchers("/actuator/**").hasRole(ADMIN.name())
                         .anyRequest().authenticated())
 
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/users/register"));
+
+//        .csrf(csrf -> csrf.ignoringRequestMatchers("/users/register"))
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/users/register").hasRole(ADMIN.name())
+//                        .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/users/{userId}", HttpMethod.GET.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/users/{userId}/friends", HttpMethod.GET.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/users/{userId}/avatar", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/users/**").hasRole(USER.name()))
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/users/{userId}/avatar", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/posts/{postId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/posts/{postId}/comment/{commentId}", HttpMethod.DELETE.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/posts/**", HttpMethod.GET.name()).hasRole(ADMIN.name())
+//                        .requestMatchers("/posts/**").hasRole(USER.name()))
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/swagger-ui").hasRole(ADMIN.name())
+//                        .requestMatchers("/actuator/**").hasRole(ADMIN.name())
+//                        .anyRequest().authenticated());
 
         return http.getOrBuild();
     }
