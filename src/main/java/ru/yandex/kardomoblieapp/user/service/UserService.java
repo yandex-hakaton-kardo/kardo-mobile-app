@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.user.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
+import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.User;
@@ -32,5 +33,5 @@ public interface UserService {
 
     User findByUsername(String username);
 
-    List<User> findAllUsers(Integer page, Integer size);
+    List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size);
 }

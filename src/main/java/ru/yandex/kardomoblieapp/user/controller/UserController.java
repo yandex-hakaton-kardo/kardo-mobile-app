@@ -28,6 +28,7 @@ import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
+import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.FriendshipMapper;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
@@ -155,13 +156,14 @@ public class UserController {
 
     @GetMapping
     @SecurityRequirement(name = "JWT")
-    @Operation(summary = "Удаление пользователя из друзей")
-    public List<UserDto> findAllUsers(@RequestParam(defaultValue = "0")
+    @Operation(summary = "Поиск пользователей")
+    public List<UserDto> findAllUsers(@Parameter(description = "Фильтр поиска") UserSearchFilter filter,
+                                      @RequestParam(defaultValue = "0")
                                       @Parameter(description = "Номер страницы") Integer page,
                                       @RequestParam(defaultValue = "10")
-                                      @Parameter(description = "Количество элементов на странце") Integer size) {
+                                      @Parameter(description = "Количество элементов на странице") Integer size) {
         log.info("Получение списка всех пользователей. page: '{}', size: '{}'.", page, size);
-        List<User> users = userService.findAllUsers(page, size);
+        List<User> users = userService.findAllUsers(filter, page, size);
         return userMapper.toDtoList(users);
     }
 }

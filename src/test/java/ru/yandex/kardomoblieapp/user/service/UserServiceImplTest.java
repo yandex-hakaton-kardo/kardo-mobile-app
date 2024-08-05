@@ -17,6 +17,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
+import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
@@ -326,6 +327,66 @@ class UserServiceImplTest {
 
         assertThat(friends, notNullValue());
         assertThat(friends, emptyIterable());
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по username")
+    void findAllUsers_whenFilterForUsername_shouldReturnUserWithDesiredUsername() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        UserSearchFilter filter = new UserSearchFilter(savedUser.getUsername());
+
+        List<User> users = userService.findAllUsers(filter, 0, 10);
+
+        assertThat(users, notNullValue());
+        assertThat(users.size(), is(1));
+        assertThat(users.get(0).getId(), is(savedUser.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по username")
+    void findAllUsers_whenFilterForNotFullUsername_shouldReturnUsersWithDesiredUsername() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        UserSearchFilter filter = new UserSearchFilter("username");
+
+        List<User> users = userService.findAllUsers(filter, 0, 10);
+
+        assertThat(users, notNullValue());
+        assertThat(users.size(), is(2));
+        assertThat(users.get(0).getId(), is(savedUser.getId()));
+        assertThat(users.get(1).getId(), is(savedUser2.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по email")
+    void findAllUsers_whenSearchForEmail_shouldReturnAllUsersWithDesiredEmail() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        UserSearchFilter filter = new UserSearchFilter("test@mail.ru");
+
+        List<User> users = userService.findAllUsers(filter, 0, 10);
+
+        assertThat(users, notNullValue());
+        assertThat(users.size(), is(2));
+        assertThat(users.get(0).getId(), is(savedUser.getId()));
+        assertThat(users.get(1).getId(), is(savedUser2.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по email")
+    void findAllUsers_whenFilterIsNull_shouldReturnAllUsersIncludingAdmin() {
+        User savedUser = userService.createUser(user1);
+        User savedUser2 = userService.createUser(user2);
+        UserSearchFilter filter = new UserSearchFilter(null);
+
+        List<User> users = userService.findAllUsers(filter, 0, 10);
+
+        assertThat(users, notNullValue());
+        assertThat(users.size(), is(3));
+        assertThat(users.get(0).getUsername(), is("admin"));
+        assertThat(users.get(1).getId(), is(savedUser.getId()));
+        assertThat(users.get(2).getId(), is(savedUser2.getId()));
     }
 
     private User createUser(int id) {
