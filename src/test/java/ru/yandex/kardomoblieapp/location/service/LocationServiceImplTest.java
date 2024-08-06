@@ -1,13 +1,16 @@
 package ru.yandex.kardomoblieapp.location.service;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.location.model.City;
 import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
@@ -23,11 +26,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.TestInstance.Lifecycle;
+import static ru.yandex.kardomoblieapp.TestUtils.POSTGRES_VERSION;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
-@TestInstance(Lifecycle.PER_CLASS)
 @Transactional
 class LocationServiceImplTest {
 
@@ -38,9 +40,23 @@ class LocationServiceImplTest {
 
     private long unknownId = 9999L;
 
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_VERSION);
+
+    @BeforeAll
+    static void beforeAll() {
+        postgres.start();
+    }
+
     @AfterAll
-    void deleteAll() {
-        locationService.deleteAllCities();
+    static void afterAll() {
+        postgres.stop();
+    }
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
     }
 
     @Test

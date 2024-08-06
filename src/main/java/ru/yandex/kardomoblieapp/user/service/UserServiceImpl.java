@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import ru.yandex.kardomoblieapp.location.model.Region;
 import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
+import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
@@ -25,9 +27,13 @@ import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.model.UserRole;
 import ru.yandex.kardomoblieapp.user.repository.FriendshipRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserRepository;
+import ru.yandex.kardomoblieapp.user.repository.UserSpecification;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -159,11 +165,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllUsers(Integer page, Integer size) {
+    public List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<User> users = userRepository.findAll(pageable).getContent();
+        List<Specification<User>> specifications = userSearchFilterToSpecifications(filter);
+        Specification<User> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
+        List<User> users = userRepository.findAll(resultSpec, pageable).getContent();
         log.info("Получен список всех пользователей");
         return users;
+    }
+
+    private List<Specification<User>> userSearchFilterToSpecifications(UserSearchFilter searchFilter) {
+        List<Specification<User>> resultSpecification = new ArrayList<>();
+        resultSpecification.add(UserSpecification.textInUsernameOrEmail(searchFilter.getName()));
+        return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private void deleteCurrentProfilePictureIfExists(User user) {

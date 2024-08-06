@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,6 +28,7 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleNotFoundException(NotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
@@ -36,6 +38,7 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleNotAuthorizedException(NotAuthorizedException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.FORBIDDEN.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
@@ -53,6 +56,7 @@ public class ApplicationExceptionHandler {
             exceptions.put(error.getField(), error.getDefaultMessage());
             log.error("Поле {} не прошло валидацию. Причина: {}.", error.getField(), error.getDefaultMessage());
         }
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
 
         return errorResponse;
     }
@@ -62,6 +66,7 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleConversionFailedException(MethodArgumentTypeMismatchException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("Неизвестное поле.", String.valueOf(e.getValue()));
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
@@ -72,6 +77,7 @@ public class ApplicationExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put(e.getHeaderName(), e.getLocalizedMessage());
         log.error(e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         return errorResponse;
     }
 
@@ -80,15 +86,18 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put(e.getParameterName(), e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
 
-    @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleHttpMediaTypeNotAcceptableException() {
+    public ErrorResponse handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("acceptable MIME type:", MediaType.APPLICATION_JSON_VALUE);
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        log.error(e.getLocalizedMessage());
         return errorResponse;
     }
 
@@ -97,6 +106,18 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleDataFileStorageException(DataFileStorageException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error while managing file", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.CONFLICT.value());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        errorResponse.getErrors().put("Maximum upload size:", String.valueOf(e.getMaxUploadSize()));
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
@@ -107,6 +128,7 @@ public class ApplicationExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("errorMessage", e.getLocalizedMessage());
         errorResponse.getErrors().put("stackTrace", getStackTraceAsString(e));
+        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
     }
