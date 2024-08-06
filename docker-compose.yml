@@ -1,8 +1,7 @@
 version: '3.1'
 services:
   kardo-backend-app:
-    build: .
-    image: kardo-image
+    image: vvbakh/kardo-mobile-app-back
     container_name: kardo-backend-app
     ports:
       - "443:443"
@@ -17,7 +16,7 @@ services:
       - SSL_LOCATION=/etc/ssl/certs/keystore.p12
     volumes:
       - /home/workshop/kardo/files:/data
-#      - /home/workshop/kardo/config:/etc/ssl/certs
+
   kardo-db:
     image: postgres:16-alpine
     container_name: kardo-db
