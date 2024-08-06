@@ -166,4 +166,13 @@ public class UserController {
         List<User> users = userService.findAllUsers(filter, page, size);
         return userMapper.toDtoList(users);
     }
+
+    @GetMapping("/info")
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Поиск пользователя по никнейму")
+    public UserDto findUserByUsername(@RequestParam @Parameter(description = "Идентификатор пользователя") String username) {
+        log.info("Получение данных пользователя с username '{}'.", username);
+        final User user = userService.findFullUserByUsername(username);
+        return userMapper.toDto(user);
+    }
 }

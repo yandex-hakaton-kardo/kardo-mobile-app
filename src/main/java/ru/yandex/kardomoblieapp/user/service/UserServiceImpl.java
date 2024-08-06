@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
         userMapper.updateUser(userUpdateRequest, user);
-        LocationInfo locationInfo = LocationInfo.builder()
+        final LocationInfo locationInfo = LocationInfo.builder()
                 .countryId(userUpdateRequest.getCountryId())
                 .regionId(userUpdateRequest.getRegionId())
                 .city(userUpdateRequest.getCity())
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     public DataFile uploadProfilePicture(long userId, MultipartFile picture) {
         final User user = getUser(userId);
 
-        DataFile uploadedFile = dataFileService.uploadFile(picture, userId);
+        final DataFile uploadedFile = dataFileService.uploadFile(picture, userId);
         user.setProfilePicture(uploadedFile);
         userRepository.save(user);
         log.info("Пользователь с id '{}' загрузил фотографию профиля с id '{}'.", userId, uploadedFile.getId());
@@ -120,10 +120,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Friendship addFriend(long userId, long friendId) {
-        User user = getUser(userId);
-        User friend = getUser(friendId);
-        List<Long> secondUserFriendsIds = friendshipRepository.findUsersFriendsIds(friendId);
-        Friendship friendship = new Friendship();
+        final User user = getUser(userId);
+        final User friend = getUser(friendId);
+        final List<Long> secondUserFriendsIds = friendshipRepository.findUsersFriendsIds(friendId);
+        final Friendship friendship = new Friendship();
         friendship.setId(FriendshipId.of(user, friend));
         if (secondUserFriendsIds.stream().anyMatch(id -> id == userId)) {
             friendship.setStatus(FriendshipStatus.FRIEND);
@@ -144,16 +144,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public List<User> getFriendsList(long userId) {
         getUser(userId);
-        List<Long> friendsIds = friendshipRepository.findUsersFriendsIds(userId);
-        List<User> friends = userRepository.findUsersWithIdsIn(friendsIds);
+        final List<Long> friendsIds = friendshipRepository.findUsersFriendsIds(userId);
+        final List<User> friends = userRepository.findUsersWithIdsIn(friendsIds);
         log.info("Получен список друзей пользователя с id '{}'. Всего друзей: '{}'.", userId, friends.size());
         return friends;
     }
 
     @Override
     public void deleteFriend(long userId, long friendId) {
-        User user = getUser(userId);
-        User friend = getUser(friendId);
+        final User user = getUser(userId);
+        final User friend = getUser(friendId);
         friendshipRepository.deleteById(FriendshipId.of(user, friend));
         log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
     }
@@ -166,16 +166,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<Specification<User>> specifications = userSearchFilterToSpecifications(filter);
-        Specification<User> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
-        List<User> users = userRepository.findAll(resultSpec, pageable).getContent();
+        final Pageable pageable = PageRequest.of(page, size);
+        final List<Specification<User>> specifications = userSearchFilterToSpecifications(filter);
+        final Specification<User> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
+        final List<User> users = userRepository.findAll(resultSpec, pageable).getContent();
         log.info("Получен список всех пользователей");
         return users;
     }
 
+    @Override
+    public User findFullUserByUsername(String username) {
+        final User user = userRepository.findFullUserByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Пользователь с никнеймом '" + username + "' не найден."));
+        log.info("Получен пользователь с username '{}'.", username);
+        return user;
+    }
+
     private List<Specification<User>> userSearchFilterToSpecifications(UserSearchFilter searchFilter) {
-        List<Specification<User>> resultSpecification = new ArrayList<>();
+        final List<Specification<User>> resultSpecification = new ArrayList<>();
         resultSpecification.add(UserSpecification.textInUsernameOrEmail(searchFilter.getName()));
         return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
