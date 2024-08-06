@@ -389,6 +389,28 @@ class UserServiceImplTest {
         assertThat(users.get(2).getId(), is(savedUser2.getId()));
     }
 
+    @Test
+    @DisplayName("Поиск пользователя по username")
+    void findFullUserByUsername_whenUserExists_shouldReturnUser() {
+        User savedUser = userService.createUser(user1);
+
+        User user = userService.findFullUserByUsername(savedUser.getUsername());
+
+        assertThat(user, notNullValue());
+        assertThat(user.getId(), is(savedUser.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск пользователя по username, пользователь не найден")
+    void findFullUserByUsername_whenUserNotExists_shouldThrowNotFoundException() {
+        String unknownUsername = "unknownUsername";
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> userService.findFullUserByUsername(unknownUsername));
+
+        assertThat(ex.getLocalizedMessage(), is("Пользователь с никнеймом '" + unknownUsername + "' не найден."));
+    }
+
     private User createUser(int id) {
         return User.builder()
                 .username("username" + id)

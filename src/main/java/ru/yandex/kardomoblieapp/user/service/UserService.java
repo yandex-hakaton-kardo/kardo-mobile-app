@@ -34,4 +34,6 @@ public interface UserService {
     User findByUsername(String username);
 
     List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size);
+
+    User findFullUserByUsername(String username);
 }
