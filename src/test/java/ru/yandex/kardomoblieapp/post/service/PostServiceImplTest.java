@@ -17,6 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
+import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
@@ -500,5 +501,32 @@ class PostServiceImplTest {
 
         assertThat(recommendations, notNullValue());
         assertThat(recommendations, emptyIterable());
+    }
+
+    @Test
+    @DisplayName("Поиск постов, title null")
+    void searchPosts_whenTitleIsNull_shouldReturnAllPosts() {
+        PostSearchFilter searchFilter = new PostSearchFilter(null);
+        postService.createPost(savedUser.getUsername(), file, content);
+        postService.createPost(savedUser.getUsername(), file, content);
+
+        List<Post> posts = postService.searchPosts(searchFilter, 0, 10);
+
+        assertThat(posts, notNullValue());
+        assertThat(posts.size(), is(2));
+    }
+
+    @Test
+    @DisplayName("Поиск постов")
+    void searchPosts_whenTitleIsNotNull_shouldReturnPost() {
+        PostSearchFilter searchFilter = new PostSearchFilter("PosT");
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
+        postService.createPost(savedUser.getUsername(), file, "new content");
+
+        List<Post> posts = postService.searchPosts(searchFilter, 0, 10);
+
+        assertThat(posts, notNullValue());
+        assertThat(posts.size(), is(1));
+        assertThat(posts.get(0).getId(), is(savedPost.getId()));
     }
 }
