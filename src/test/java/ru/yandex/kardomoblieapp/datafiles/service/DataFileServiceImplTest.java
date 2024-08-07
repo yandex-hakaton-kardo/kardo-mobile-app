@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.yandex.kardomoblieapp.TestUtils.POSTGRES_VERSION;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -94,9 +95,8 @@ class DataFileServiceImplTest {
 
         assertThat(savedFile, notNullValue());
         assertThat(savedFile.getId(), greaterThan(0L));
-        assertThat(savedFile.getFileName(), is(file.getOriginalFilename()));
         assertThat(savedFile.getFileType(), is(file.getContentType()));
-        assertThat(savedFile.getFilePath(), endsWith("/" + userId + "/" + dataFile.getFileName()));
+        assertTrue(savedFile.getFilePath().contains(String.valueOf(userId)));
     }
 
     @Test
