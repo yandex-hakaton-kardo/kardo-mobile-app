@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.post.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
+import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
@@ -30,4 +31,6 @@ public interface PostService {
     void deleteComment(String username, long commentId);
 
     List<Post> getRecommendations(String username, Integer from, Integer size, PostSort sort);
+
+    List<Post> searchPosts(PostSearchFilter searchFilter, Integer page, Integer size);
 }

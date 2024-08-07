@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
+import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostLike;
@@ -19,6 +21,7 @@ import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.repository.CommentRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostLikeRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostRepository;
+import ru.yandex.kardomoblieapp.post.repository.PostSpecification;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
@@ -26,7 +29,9 @@ import ru.yandex.kardomoblieapp.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -188,6 +193,22 @@ public class PostServiceImpl implements PostService {
         List<Post> recommendations = postRepository.findRecommendations(friendsIds, pageable);
         log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", user.getId(), recommendations.size());
         return recommendations;
+    }
+
+    @Override
+    public List<Post> searchPosts(PostSearchFilter searchFilter, Integer page, Integer size) {
+        final Pageable pageable = PageRequest.of(page, size);
+        final List<Specification<Post>> specifications = postSearchFilterToSpecifications(searchFilter);
+        final Specification<Post> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
+        final List<Post> posts = postRepository.findAll(resultSpec, pageable).getContent();
+        log.info("Получен список постов.");
+        return posts;
+    }
+
+    private List<Specification<Post>> postSearchFilterToSpecifications(PostSearchFilter searchFilter) {
+        final List<Specification<Post>> resultSpecification = new ArrayList<>();
+        resultSpecification.add(PostSpecification.textInPostTitle(searchFilter.getTitle()));
+        return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private Post getPost(long postId) {
