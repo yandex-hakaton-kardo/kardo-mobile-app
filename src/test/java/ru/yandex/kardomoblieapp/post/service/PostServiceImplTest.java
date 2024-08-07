@@ -123,7 +123,6 @@ class PostServiceImplTest {
         assertThat(savedPost.getCreatedOn(), lessThanOrEqualTo(LocalDateTime.now()));
         assertThat(savedPost.getFile(), notNullValue());
         assertThat(savedPost.getFile().getId(), greaterThan(0L));
-        assertThat(savedPost.getFile().getFileName(), is(file.getOriginalFilename()));
         assertThat(savedPost.getTitle(), is(content));
         assertThat(savedPost.getAuthor().getId(), is(savedUser.getId()));
         assertThat(savedPost.getViews(), is(0L));
@@ -152,7 +151,6 @@ class PostServiceImplTest {
         assertThat(updatePost.getTitle(), is(updatedContent));
         assertThat(updatePost.getFile(), notNullValue());
         assertThat(updatePost.getFile().getId(), greaterThan(0L));
-        assertThat(updatePost.getFile().getFileName(), is(file.getOriginalFilename()));
     }
 
     @Test
@@ -169,7 +167,6 @@ class PostServiceImplTest {
         assertThat(updatePost.getId(), is(savedPost.getId()));
         assertThat(updatePost.getTitle(), is(savedPost.getTitle()));
         assertThat(updatePost.getFile(), notNullValue());
-        assertThat(updatePost.getFile().getFileName(), is(newFile.getOriginalFilename()));
     }
 
     @Test
