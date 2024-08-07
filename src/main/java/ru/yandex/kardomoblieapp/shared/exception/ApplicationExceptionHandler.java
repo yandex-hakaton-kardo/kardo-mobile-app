@@ -93,6 +93,16 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIncorrectEventDatesException(IncorrectEventDatesException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("acceptable MIME type:", MediaType.APPLICATION_JSON_VALUE);

@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-locations-to-events
+      author: vvbakhanovich
+      changes:
+        - addColumn:
+            tableName: events
+            columns:
+              - column:
+                  name: master_event_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_master_event_event
+                    references: events(event_id)
+                    nullable: true
+              - column:
+                  name: country_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_countries
+                    references: countries(country_id)
+                    nullable: true
+              - column:
+                  name: region_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_regions
+                    references: regions(region_id)
+                    nullable: true
+              - column:
+                  name: city_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_cities
+                    references: cities(city_id)
+                    nullable: true

@@ -44,3 +44,9 @@ databaseChangeLog:
   - include:
       file: unq-cities.sql
       relativeToChangelogFile: true
+  - include:
+      file: add-locations-to-events.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: modify-events-columns.yaml
+      relativeToChangelogFile: true

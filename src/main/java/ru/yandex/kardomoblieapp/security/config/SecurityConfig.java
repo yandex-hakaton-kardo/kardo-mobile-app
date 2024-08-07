@@ -77,6 +77,7 @@ public class SecurityConfig {
                         .requestMatchers("/posts/{postId}/comment/{commentId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
                         .requestMatchers("/posts/**", HttpMethod.GET.name()).hasAnyRole(ADMIN.name(), USER.name())
                         .requestMatchers("/posts/**").hasRole(USER.name())
+                        .requestMatchers("/admin/**").hasRole(ADMIN.name())
                         .requestMatchers("/actuator/**").hasRole(ADMIN.name())
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html").hasRole(ADMIN.name())
                         .anyRequest().authenticated())
