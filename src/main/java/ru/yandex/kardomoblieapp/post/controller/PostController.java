@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.post.dto.CommentDto;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.dto.PostDto;
+import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.mapper.CommentMapper;
 import ru.yandex.kardomoblieapp.post.mapper.PostMapper;
 import ru.yandex.kardomoblieapp.post.model.Comment;
@@ -173,5 +174,18 @@ public class PostController {
                               @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь с id '{}' удаляет комментарий c id '{}'.", principal.getName(), commentId);
         postService.deleteComment(principal.getName(), commentId);
+    }
+
+    @GetMapping("/search")
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Поиск постов")
+    public List<PostDto> searchPosts(@Parameter(description = "Фильтр поиска") PostSearchFilter searchFilter,
+                                     @RequestParam(defaultValue = "0")
+                                     @Parameter(description = "Номер страницы") Integer page,
+                                     @RequestParam(defaultValue = "10")
+                                     @Parameter(description = "Количество постов на странице") Integer size) {
+        log.info("Поиск постов по фильтру");
+        final List<Post> posts = postService.searchPosts(searchFilter, page, size);
+        return postMapper.toDtoList(posts);
     }
 }
