@@ -1,6 +1,8 @@
 package ru.yandex.kardomoblieapp.shared.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.FieldError;
@@ -106,6 +108,25 @@ public class ApplicationExceptionHandler {
     public ErrorResponse handleDataFileStorageException(DataFileStorageException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error while managing file", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.CONFLICT.value());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConstraintViolationException(ConstraintViolationException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.CONFLICT.value());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put("error", e.getLocalizedMessage());
         errorResponse.setStatus(HttpStatus.CONFLICT.value());
         log.error(e.getLocalizedMessage());
         return errorResponse;
