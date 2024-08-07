@@ -2,6 +2,7 @@ package ru.yandex.kardomoblieapp.datafiles.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -125,14 +127,17 @@ public class DataFileServiceImpl implements DataFileService {
         try {
             final String userFileStorage = createUserDirectoryIfNotExists(userId);
 
-            final String filePath = userFileStorage + fileToUpload.getOriginalFilename();
+
+            final String fileExtension = FilenameUtils.getExtension(fileToUpload.getOriginalFilename());
+            final String fileName = UUID.randomUUID() + "." + fileExtension;
+            final String filePath = userFileStorage + fileName;
             final Path file = Paths.get(filePath);
             final DataFile dataFile = DataFile.builder()
-                    .fileName(fileToUpload.getOriginalFilename())
+                    .fileName(fileName)
                     .fileType(fileToUpload.getContentType())
                     .filePath(filePath)
                     .build();
-            fileToUpload.transferTo(file);
+            Files.copy(fileToUpload.getInputStream(), file);
             return dataFile;
         } catch (IOException e) {
             throw new DataFileStorageException(e.getLocalizedMessage());

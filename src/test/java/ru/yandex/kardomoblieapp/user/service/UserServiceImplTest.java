@@ -165,7 +165,6 @@ class UserServiceImplTest {
         DataFile savedFile = userService.uploadProfilePicture(savedUser.getId(), file);
 
         assertThat(savedFile, notNullValue());
-        assertThat(savedFile.getFileName(), is(file.getOriginalFilename()));
         assertThat(savedFile.getFileType(), is(file.getContentType()));
         assertThat(savedUser.getId(), greaterThan(0L));
     }
