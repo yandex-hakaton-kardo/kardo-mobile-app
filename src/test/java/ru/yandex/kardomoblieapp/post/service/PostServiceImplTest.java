@@ -21,6 +21,7 @@ import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
+import ru.yandex.kardomoblieapp.post.model.PostWithLike;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
@@ -36,7 +37,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.yandex.kardomoblieapp.TestUtils.POSTGRES_VERSION;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -196,7 +199,7 @@ class PostServiceImplTest {
         postService.deletePost(savedUser.getUsername(), savedPost.getId());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.findPostById(savedPost.getId()));
+                () -> postService.findPostById(savedPost.getId(), savedUser.getUsername()));
         assertThat(ex.getMessage(), is("Пост с id '" + savedPost.getId() + "' не найден."));
     }
 
@@ -223,23 +226,23 @@ class PostServiceImplTest {
     void findPostById() {
         Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        Post result = postService.findPostById(savedPost.getId());
+        PostWithLike result = postService.findPostById(savedPost.getId(), savedUser.getUsername());
 
         assertThat(result, notNullValue());
         assertThat(result.getId(), is(savedPost.getId()));
         assertThat(result.getTitle(), is(savedPost.getTitle()));
         assertThat(result.getAuthor().getId(), is(savedPost.getAuthor().getId()));
         assertThat(result.getFile().getId(), is(savedPost.getFile().getId()));
-        assertThat(result.getCreatedOn(), is(savedPost.getCreatedOn()));
         assertThat(result.getViews(), is(1L));
         assertThat(result.getLikes(), is(0L));
+        assertFalse(result.isLikedByUser());
     }
 
     @Test
     @DisplayName("Получение поста по id, пост не найден")
     void findPostById_whenPostNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.findPostById(unknownId));
+                () -> postService.findPostById(unknownId, savedUser.getUsername()));
 
         assertThat(ex.getMessage(), is("Пост с id '" + unknownId + "' не найден."));
     }
@@ -320,6 +323,11 @@ class PostServiceImplTest {
 
         assertThat(firstLike, is(1L));
         assertThat(secondLike, is(2L));
+
+        PostWithLike post = postService.findPostById(savedPost.getId(), savedUser.getUsername());
+
+        assertTrue(post.isLikedByUser());
+
     }
 
     @Test
@@ -376,7 +384,7 @@ class PostServiceImplTest {
         Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
         Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
-        postService.findPostById(savedPost1.getId());
+        postService.findPostById(savedPost1.getId(), savedUser.getUsername());
 
         List<Post> feed = postService.getPostsFeed(0, 10);
 
@@ -393,9 +401,9 @@ class PostServiceImplTest {
         Post savedPost1 = postService.createPost(savedUser.getUsername(), file, content);
         Post savedPost2 = postService.createPost(savedUser.getUsername(), file, content);
 
-        postService.findPostById(savedPost1.getId());
-        postService.findPostById(savedPost2.getId());
-        postService.findPostById(savedPost2.getId());
+        postService.findPostById(savedPost1.getId(), savedUser.getUsername());
+        postService.findPostById(savedPost2.getId(), savedUser.getUsername());
+        postService.findPostById(savedPost2.getId(), savedUser.getUsername());
 
         List<Post> feed = postService.getPostsFeed(0, 10);
 
@@ -433,7 +441,7 @@ class PostServiceImplTest {
         CommentRequest commentRequest = new CommentRequest("updated comment");
 
         Comment updatedComment = postService.updateComment(savedUser.getUsername(), savedComment.getId(), commentRequest);
-        Post post = postService.findPostById(savedPost.getId());
+        PostWithLike post = postService.findPostById(savedPost.getId(), savedUser.getUsername());
 
         assertThat(updatedComment, notNullValue());
         assertThat(updatedComment.getId(), is(savedComment.getId()));
