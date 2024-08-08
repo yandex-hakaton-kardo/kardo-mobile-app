@@ -4,6 +4,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import ru.yandex.kardomoblieapp.participation.dto.ParticipationRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
@@ -34,6 +35,12 @@ public interface UserMapper {
     @Mapping(target = "region", ignore = true)
     @Mapping(target = "city", ignore = true)
     void updateUser(UserUpdateRequest userUpdateRequest, @MappingTarget User user);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
+    @Mapping(target = "country", ignore = true)
+    @Mapping(target = "region", ignore = true)
+    @Mapping(target = "city", ignore = true)
+    void updateUser(ParticipationRequest participationRequest, @MappingTarget User user);
 
     List<ShortUserDto> toShortDtoList(List<User> friends);
 

@@ -50,3 +50,6 @@ databaseChangeLog:
   - include:
       file: modify-events-columns.yaml
       relativeToChangelogFile: true
+  - include:
+      file: create-participations.yaml
+      relativeToChangelogFile: true

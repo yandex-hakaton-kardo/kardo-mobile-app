@@ -2,8 +2,13 @@ package ru.yandex.kardomoblieapp.event.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.kardomoblieapp.event.dto.EventSearchFilter;
+import ru.yandex.kardomoblieapp.event.dto.EventSort;
 import ru.yandex.kardomoblieapp.event.dto.EventUpdateRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewEventRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewSubEventRequest;
@@ -20,7 +25,22 @@ import ru.yandex.kardomoblieapp.shared.exception.IncorrectEventDatesException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.eventStartInRange;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.eventTypeEquals;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.orderByEventStartDate;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.orderById;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.orderByPrize;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.textInActivityNameIgnoreCase;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.textInCityName;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.textInCountyName;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.textInNameOrDescription;
+import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.textInRegionName;
 
 @Service
 @RequiredArgsConstructor
@@ -98,9 +118,41 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event findEventById(long eventId) {
-        Event event = getFullEvent(eventId);
+        final Event event = getFullEvent(eventId);
         log.info("Найдено мероприятие с id '{}'.", eventId);
         return event;
+    }
+
+    @Override
+    public List<Event> searchEvents(EventSearchFilter searchFilter, Integer page, Integer size) {
+        final Pageable pageable = PageRequest.of(page, size);
+        final List<Specification<Event>> specifications = eventSearchFilterToSpecifications(searchFilter);
+        final Specification<Event> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
+        final List<Event> events = eventRepository.findAll(getSort(searchFilter.getSort(), resultSpec), pageable).getContent();
+        log.info("Получен список событий размером '{}'.", events.size());
+        return events;
+    }
+
+    private List<Specification<Event>> eventSearchFilterToSpecifications(EventSearchFilter searchFilter) {
+        List<Specification<Event>> resultSpecification = new ArrayList<>();
+        resultSpecification.add(eventTypeEquals(searchFilter.getTypes()));
+        resultSpecification.add(textInActivityNameIgnoreCase(searchFilter.getActivity()));
+        resultSpecification.add(eventStartInRange(searchFilter.getStartDate(), searchFilter.getEndDate()));
+        resultSpecification.add(textInNameOrDescription(searchFilter.getText()));
+        resultSpecification.add(textInCountyName(searchFilter.getCountry()));
+        resultSpecification.add(textInRegionName(searchFilter.getRegion()));
+        resultSpecification.add(textInCityName(searchFilter.getCity()));
+        return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    private Specification<Event> getSort(EventSort eventSort, Specification<Event> spec) {
+        if (eventSort == null) {
+            return orderById(spec);
+        }
+        return switch (eventSort) {
+            case EVENT_START -> orderByEventStartDate(spec);
+            case PRIZE -> orderByPrize(spec);
+        };
     }
 
     private Event getFullEvent(long eventId) {

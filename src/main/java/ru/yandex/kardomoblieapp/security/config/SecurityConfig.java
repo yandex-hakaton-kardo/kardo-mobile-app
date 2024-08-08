@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/content", HttpMethod.GET.name()).permitAll()
                         .requestMatchers("/users/register", HttpMethod.POST.name()).not().fullyAuthenticated()
                         .requestMatchers("/users/register").hasAnyRole(ADMIN.name(), USER.name())
                         .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())

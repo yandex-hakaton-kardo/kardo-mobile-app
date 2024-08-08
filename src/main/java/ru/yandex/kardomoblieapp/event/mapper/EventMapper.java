@@ -10,6 +10,8 @@ import ru.yandex.kardomoblieapp.event.dto.NewEventRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewSubEventRequest;
 import ru.yandex.kardomoblieapp.event.model.Event;
 
+import java.util.List;
+
 import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 
 @Mapper(componentModel = "spring")
@@ -48,4 +50,6 @@ public interface EventMapper {
     @Mapping(target = "region", ignore = true)
     @Mapping(target = "city", ignore = true)
     void createSubEvent(NewSubEventRequest newSubEventRequest, @MappingTarget Event event);
+
+    List<EventDto> toDtoList(List<Event> events);
 }

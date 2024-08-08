@@ -11,6 +11,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
+import ru.yandex.kardomoblieapp.event.dto.EventSearchFilter;
 import ru.yandex.kardomoblieapp.event.dto.EventUpdateRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewEventRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewSubEventRequest;
@@ -18,7 +19,9 @@ import ru.yandex.kardomoblieapp.event.model.Event;
 import ru.yandex.kardomoblieapp.event.model.EventType;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -62,18 +65,7 @@ class EventServiceImplTest {
                 .eventType(EventType.VIDEO_CONTEST)
                 .build();
 
-        newEventRequest = NewEventRequest.builder()
-                .activityId(4)
-                .eventName("event name")
-                .description("event description")
-                .eventType(EventType.VIDEO_CONTEST)
-                .eventStart(LocalDateTime.of(2024, 12, 12, 10, 10, 00))
-                .eventEnd(LocalDateTime.of(2024, 12, 23, 10, 10, 00))
-                .prize(100_000)
-                .countryId(4L)
-                .city("City 1")
-                .activityId(2L)
-                .build();
+        newEventRequest = createNewEventRequest(1);
 
         newSubEventRequest = NewSubEventRequest.builder()
                 .eventName("event name")
@@ -158,5 +150,77 @@ class EventServiceImplTest {
                 () -> eventService.findEventById(savedEvent.getId()));
 
         assertThat(ex.getMessage(), is("Мероприятие с id '" + savedEvent.getId() + "' не найдено."));
+    }
+
+    @Test
+    @DisplayName("Поиск событий по названию активности")
+    void searchEvents_whenFilterForActivityName_shouldReturnEventsWithThatActivityName() {
+        eventService.createEvent(newEventRequest);
+        NewEventRequest eventRequest = newEventRequest;
+        eventRequest.setActivityId(1);
+        Event secondEvent = eventService.createEvent(eventRequest);
+        EventSearchFilter filter = EventSearchFilter.builder()
+                .activity("брейк")
+                .build();
+
+        List<Event> events = eventService.searchEvents(filter, 0, 10);
+
+        assertThat(events, notNullValue());
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0).getId(), is(secondEvent.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск событий по типу")
+    void searchEvents_whenFilterForEventType_shouldReturnEventsWithThatEventType() {
+        Event firstEvent = eventService.createEvent(newEventRequest);
+        NewEventRequest eventRequest = newEventRequest;
+        eventRequest.setActivityId(1);
+        Event secondEvent = eventService.createEvent(eventRequest);
+        EventSearchFilter filter = EventSearchFilter.builder()
+                .types(List.of(EventType.VIDEO_CONTEST))
+                .build();
+
+        List<Event> events = eventService.searchEvents(filter, 0, 10);
+
+        assertThat(events, notNullValue());
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0).getId(), is(secondEvent.getId()));
+        assertThat(events.get(1).getId(), is(firstEvent.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск событий по типу")
+    void searchEvents_whenFilterForEventTypeAndStartDate_shouldReturnEventsWithThatEventTypeAndStartDateAfterDesired() {
+        Event firstEvent = eventService.createEvent(newEventRequest);
+        NewEventRequest eventRequest = newEventRequest;
+        eventRequest.setActivityId(1);
+        eventRequest.setEventStart(LocalDateTime.of(2024, 12, 15, 10, 10, 00));
+        Event secondEvent = eventService.createEvent(eventRequest);
+        EventSearchFilter filter = EventSearchFilter.builder()
+                .types(List.of(EventType.VIDEO_CONTEST))
+                .startDate(LocalDate.of(2024, 12, 13))
+                .build();
+
+        List<Event> events = eventService.searchEvents(filter, 0, 10);
+
+        assertThat(events, notNullValue());
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0).getId(), is(secondEvent.getId()));
+    }
+
+
+    private NewEventRequest createNewEventRequest(int id) {
+        return NewEventRequest.builder()
+                .activityId(4)
+                .eventName("event name" + id)
+                .description("event description" + id)
+                .eventType(EventType.VIDEO_CONTEST)
+                .eventStart(LocalDateTime.of(2024, 12, 12, 10, 10, 00))
+                .eventEnd(LocalDateTime.of(2024, 12, 23, 10, 10, 00))
+                .prize(100_000)
+                .countryId(4L)
+                .city("City " + id)
+                .build();
     }
 }
