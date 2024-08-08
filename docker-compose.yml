@@ -1,7 +1,9 @@
 version: '3.1'
 services:
   kardo-backend-app:
-    image: vvbakh/kardo-mobile-app-back
+#    image: vvbakh/kardo-mobile-app-back
+    build: .
+    image: kardo-backend-app-image
     container_name: kardo-backend-app
     ports:
       - "443:443"
@@ -23,7 +25,7 @@ services:
     image: postgres:16-alpine
     container_name: kardo-db
     ports:
-      - "5432:5432"
+      - "6432:5432"
     environment:
       - POSTGRES_DB=kardo-db
       - POSTGRES_USER=postgres

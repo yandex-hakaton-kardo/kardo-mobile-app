@@ -18,6 +18,7 @@ import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostLike;
 import ru.yandex.kardomoblieapp.post.model.PostLikeId;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
+import ru.yandex.kardomoblieapp.post.model.PostWithLike;
 import ru.yandex.kardomoblieapp.post.repository.CommentRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostLikeRepository;
 import ru.yandex.kardomoblieapp.post.repository.PostRepository;
@@ -99,14 +100,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post findPostById(long postId) {
+    @Transactional
+    public PostWithLike findPostById(long postId, String username) {
         final Post post = getPostWithComments(postId);
+        final User user = userService.findByUsername(username);
         post.addView();
         postRepository.save(post);
         long likes = postLikeRepository.findPostLikesCount(postId);
         post.setLikes(likes);
+        final boolean isPostLikedByUser = postLikeRepository.existsById(PostLikeId.of(post, user));
         log.info("Получение поста с id '{}'.", postId);
-        return post;
+        return new PostWithLike(post, isPostLikedByUser);
     }
 
     @Override

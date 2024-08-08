@@ -6,6 +6,7 @@ import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
+import ru.yandex.kardomoblieapp.post.model.PostWithLike;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface PostService {
 
     void deletePost(String username, long postId);
 
-    Post findPostById(long postId);
+    PostWithLike findPostById(long postId, String username);
 
     List<Post> findPostsFromUser(long userId);
 
