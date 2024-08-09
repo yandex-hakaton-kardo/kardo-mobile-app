@@ -26,11 +26,13 @@ import ru.yandex.kardomoblieapp.post.dto.CommentDto;
 import ru.yandex.kardomoblieapp.post.dto.CommentRequest;
 import ru.yandex.kardomoblieapp.post.dto.PostDto;
 import ru.yandex.kardomoblieapp.post.dto.PostSearchFilter;
+import ru.yandex.kardomoblieapp.post.dto.PostWithLikeDto;
 import ru.yandex.kardomoblieapp.post.mapper.CommentMapper;
 import ru.yandex.kardomoblieapp.post.mapper.PostMapper;
 import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
+import ru.yandex.kardomoblieapp.post.model.PostWithLike;
 import ru.yandex.kardomoblieapp.post.service.PostService;
 
 import java.security.Principal;
@@ -90,10 +92,10 @@ public class PostController {
     @GetMapping("/{postId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Поиск поста по идентификатору")
-    public PostDto getPostById(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
-                               @Parameter(hidden = true) Principal principal) {
+    public PostWithLikeDto getPostById(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
+                                        @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' запрашивает пост с id '{}'.", principal.getName(), postId);
-        final Post post = postService.findPostById(postId);
+        final PostWithLike post = postService.findPostById(postId, principal.getName());
         return postMapper.toDto(post);
     }
 
