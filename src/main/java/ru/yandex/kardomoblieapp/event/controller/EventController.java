@@ -81,8 +81,12 @@ public class EventController {
     }
 
     @PostMapping("/{eventId}/participation/{userId}")
-    public ParticipationDto addParticipation(@RequestBody ParticipationRequest participationRequest,
+    @Operation(summary = "Добавление заявки на участие в мероприятии")
+    public ParticipationDto addParticipation(@Parameter(description = "Заявка на участие")
+                                             @RequestBody ParticipationRequest participationRequest,
+                                             @Parameter(description = "Идентификатор мероприятия")
                                              @PathVariable long eventId,
+                                             @Parameter(description = "Идентификатор пользователя")
                                              @PathVariable long userId) {
         log.info("Пользователь с id '{} оставляет заявку на участие в мероприятии с id '{}'.", userId, eventId);
         Participation participation = participationService.addParticipation(participationRequest, eventId, userId);

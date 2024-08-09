@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ import ru.yandex.kardomoblieapp.user.model.User;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "participations")
+@Table(name = "participations", schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -37,12 +38,14 @@ public class Participation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
+    @ToString.Exclude
     private Event event;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private User user;
 
     @Enumerated(EnumType.STRING)
@@ -58,4 +61,8 @@ public class Participation {
 
     @Column(name = "link_to_file")
     private String linkToContestFile;
+
+
+    @Column(name = "avg_score", scale = 2)
+    private double avgScore;
 }

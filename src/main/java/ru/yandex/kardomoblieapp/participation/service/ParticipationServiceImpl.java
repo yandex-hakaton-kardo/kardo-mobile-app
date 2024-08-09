@@ -12,7 +12,9 @@ import ru.yandex.kardomoblieapp.participation.mapper.ParticipationMapper;
 import ru.yandex.kardomoblieapp.participation.model.ParticipantType;
 import ru.yandex.kardomoblieapp.participation.model.Participation;
 import ru.yandex.kardomoblieapp.participation.model.ParticipationStatus;
+import ru.yandex.kardomoblieapp.participation.model.Score;
 import ru.yandex.kardomoblieapp.participation.repository.ParticipationRepository;
+import ru.yandex.kardomoblieapp.participation.repository.ScoreRepository;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
@@ -21,9 +23,10 @@ import ru.yandex.kardomoblieapp.user.model.UserRole;
 import ru.yandex.kardomoblieapp.user.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ru.yandex.kardomoblieapp.participation.model.ParticipationStatus.APPROVED;
-import static ru.yandex.kardomoblieapp.participation.model.ParticipationStatus.PUBLISHED;
+import static ru.yandex.kardomoblieapp.participation.model.ParticipationStatus.CREATED;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,8 @@ import static ru.yandex.kardomoblieapp.participation.model.ParticipationStatus.P
 public class ParticipationServiceImpl implements ParticipationService {
 
     private final ParticipationRepository participationRepository;
+
+    private final ScoreRepository scoreRepository;
 
     private final ParticipationMapper participationMapper;
 
@@ -52,7 +57,7 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .linkToContestFile(participationRequest.getLinkToContestFile())
                 .build();
         setAutomaticApprove(participationRequest, participation);
-        Participation savedParticipation = participationRepository.save(participation);
+        final Participation savedParticipation = participationRepository.save(participation);
         log.info("Добавлена заявка на участие с id '{}'.", participation.getId());
         return savedParticipation;
     }
@@ -60,9 +65,9 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Override
     @Transactional
     public Participation changeParticipationStatus(long participationId, ParticipationStatus status) {
-        Participation participation = getParticipation(participationId);
+        final Participation participation = getParticipation(participationId);
         participation.setStatus(status);
-        Participation savedParticipation = participationRepository.save(participation);
+        final Participation savedParticipation = participationRepository.save(participation);
         log.info("Статус заявки с id '{}' изменен на '{}'.", participationId, status.name());
         return savedParticipation;
     }
@@ -104,14 +109,38 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Participation findParticipationById(long participationId) {
-        Participation participation = getParticipation(participationId);
+        final Participation participation = getParticipation(participationId);
         log.info("Получена заявка с id '{}'.", participationId);
         return participation;
     }
 
+    @Override
+    @Transactional
+    public Participation rateParticipation(long participationId, Score score, String username) {
+        final Participation participation = getParticipation(participationId);
+        final User judge = userService.findByUsername(username);
+        checkIfUserCanRateParticipation(participation, judge);
+        score.setParticipation(participation);
+        score.setJudge(judge);
+        scoreRepository.save(score);
+        participation.setAvgScore(scoreRepository.findAvgRatingOfParticipation(participationId));
+        final Participation result = participationRepository.save(participation);
+        log.info("Оценка для заявки с id '{}' сохранена.", participationId);
+        return result;
+    }
+
+    private void checkIfUserCanRateParticipation(Participation participation, User user) {
+        Optional<Participation> userParticipation = participationRepository.findByEventIdUserIdAndParticipantType(participation.getEvent().getId(),
+                user.getId(), ParticipantType.JUDGE);
+        if (userParticipation.isEmpty() || !participation.getStatus().equals(APPROVED)) {
+            throw new NotAuthorizedException("Пользователь с id '" + user.getId() + "' не может судить " +
+                    "мероприятие с id '" + participation.getEvent().getId() + "'.");
+        }
+    }
+
     private void checkIfUserCanModifyParticipation(Participation participation, User user) {
         if (!user.getRole().equals(UserRole.ADMIN)) {
-            if (!participation.getUser().getId().equals(user.getId()) || !participation.getStatus().equals(PUBLISHED)) {
+            if (!participation.getUser().getId().equals(user.getId()) || !participation.getStatus().equals(CREATED)) {
                 throw new NotAuthorizedException("Пользователь не имеет прав на редактирование заявки!");
             }
         }
@@ -125,7 +154,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     private void setAutomaticApprove(ParticipationRequest participationRequest, Participation participation) {
         switch (participationRequest.getType()) {
             case SPECTATOR -> participation.setStatus(APPROVED);
-            case JUDGE, SPONSOR, PARTICIPANT -> participation.setStatus(PUBLISHED);
+            case JUDGE, SPONSOR, PARTICIPANT -> participation.setStatus(CREATED);
         }
     }
 }

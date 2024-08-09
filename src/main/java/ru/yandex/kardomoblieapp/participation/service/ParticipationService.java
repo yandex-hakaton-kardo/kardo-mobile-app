@@ -5,6 +5,7 @@ import ru.yandex.kardomoblieapp.participation.dto.ParticipationUpdateRequest;
 import ru.yandex.kardomoblieapp.participation.model.ParticipantType;
 import ru.yandex.kardomoblieapp.participation.model.Participation;
 import ru.yandex.kardomoblieapp.participation.model.ParticipationStatus;
+import ru.yandex.kardomoblieapp.participation.model.Score;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface ParticipationService {
     List<Participation> findUsersParticipations(long userId, ParticipantType type);
 
     Participation findParticipationById(long participationId);
+
+    Participation rateParticipation(long participationId, Score score, String name);
 }
