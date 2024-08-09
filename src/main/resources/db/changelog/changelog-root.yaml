@@ -1,55 +1,58 @@
 databaseChangeLog:
   - include:
-      file: create-countries.yaml
+      file: locations/create-countries.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-regions.yaml
+      file: locations/create-regions.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-cities.yaml
+      file: locations/create-cities.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-datafiles.yaml
+      file: datafiles/create-datafiles.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-users.yaml
+      file: users/create-users.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-activities.yaml
+      file: events/create-activities.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-events.yaml
+      file: events/create-events.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-posts.yaml
+      file: posts/create-posts.yaml
       relativeToChangelogFile: true
   - include:
-      file: add-post_id-to-datafiles.yaml
+      file: datafiles/add-post_id-to-datafiles.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-post_likes.yaml
+      file: posts/create-post_likes.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-comments.yaml
+      file: posts/create-comments.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-friendship.yaml
+      file: users/create-friendship.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-deactivated_tokens.yaml
+      file: misc/create-deactivated_tokens.yaml
       relativeToChangelogFile: true
   - include:
-      file: insert-admin.yaml
+      file: users/insert-admin.yaml
       relativeToChangelogFile: true
   - include:
-      file: unq-cities.sql
+      file: locations/unq-cities.sql
       relativeToChangelogFile: true
   - include:
-      file: add-locations-to-events.yaml
+      file: events/add-locations-to-events.yaml
       relativeToChangelogFile: true
   - include:
-      file: modify-events-columns.yaml
+      file: events/modify-events-columns.yaml
       relativeToChangelogFile: true
   - include:
-      file: create-participations.yaml
+      file: events/create-participations.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: events/create-scores.yaml
       relativeToChangelogFile: true
