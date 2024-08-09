@@ -40,15 +40,15 @@ public class UserUpdateRequest {
     private String surname;
 
     @Email(regexp = "^((?!\\.)[\\w-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$", message = "Некорректный формат электронной почты.")
-    @Size(min = 5, max = 50, message = "Некорректный формат электронной почты.")
+    @Size(min = 6, max = 50, message = "Некорректный формат электронной почты.")
     @Schema(description = "Электронная почта пользователя")
     private String email;
 
     @Schema(description = "Пол")
     private Gender gender;
 
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$",
-            message = "Пароль не может быть пустым и должен содержать от 8 до 15 символов.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?])[a-zA-Z0-9!@#$%^&*?]{6,15}$",
+            message = "Пароль не может быть пустым и должен содержать от 6 до 15 символов.")
     @Schema(description = "Пароль", minLength = 8, maxLength = 15)
     private String password;
 
@@ -78,6 +78,6 @@ public class UserUpdateRequest {
 
     @Size(min = 2, max = 50, message = "Ссылка не может быть пустой и должна содержать от 2 до 50 символов.")
     @Schema(description = "Ссылка на соцсети")
-    @Pattern(regexp = "^[a-z0-9:/@.#$%&?,*]{2,30}$", message = "Никнейм не может быть пустым и должен содержать от 2 до 30 символов.")
+    @Pattern(regexp = "^[a-z0-9:/@.#$%&?,*]{2,50}$", message = "Ссылка не может быть пустой и должна содержать от 2 до 50 символов.")
     private String website;
 }

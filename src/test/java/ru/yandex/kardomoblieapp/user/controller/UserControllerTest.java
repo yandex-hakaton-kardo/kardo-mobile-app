@@ -149,6 +149,8 @@ class UserControllerTest {
         when(userMapper.toNewUserDto(user))
                 .thenReturn(newUserResponse);
 
+        newUserRequest.setPassword("OhZ8?y1");
+
         mvc.perform(post("/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUserRequest))

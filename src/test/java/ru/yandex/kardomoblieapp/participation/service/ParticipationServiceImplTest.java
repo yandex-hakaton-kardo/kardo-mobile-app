@@ -123,7 +123,7 @@ class ParticipationServiceImplTest {
         assertThat(participation, notNullValue());
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
-        assertThat(participation.getAvgScore(), is("0.00"));
+        assertThat(participation.getAvgScore(), closeTo(0.0, 0.01));
         assertThat(user.getName(), is(participationRequest.getName()));
         assertThat(user.getOverview(), is(participationRequest.getOverview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
