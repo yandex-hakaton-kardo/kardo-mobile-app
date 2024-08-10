@@ -29,9 +29,9 @@ public class NewUserRequest {
     private String email;
 
 
-    @NotBlank(message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$",
-            message = "Пароль не может быть пустым и должен содержать от 6 до 100 символов.")
-    @Schema(description = "Пароль", minLength = 8, maxLength = 15)
+    @NotBlank(message = "Пароль не может быть пустым и должен содержать от 6 до 15 символов.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?])[a-zA-Z0-9!@#$%^&*?]{6,15}$",
+            message = "Пароль не может быть пустым и должен содержать от 6 до 15 символов.")
+    @Schema(description = "Пароль", minLength = 6, maxLength = 15)
     private String password;
 }

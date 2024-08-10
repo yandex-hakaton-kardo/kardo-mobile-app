@@ -16,7 +16,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: text
-                  type: VARCHAR(100)
+                  type: VARCHAR(230)
                   constraints:
                     nullable: false
               - column:

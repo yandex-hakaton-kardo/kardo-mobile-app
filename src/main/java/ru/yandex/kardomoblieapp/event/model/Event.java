@@ -1,20 +1,30 @@
 package ru.yandex.kardomoblieapp.event.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Formula;
-import java.util.List;
-
+import ru.yandex.kardomoblieapp.location.model.City;
+import ru.yandex.kardomoblieapp.location.model.Country;
+import ru.yandex.kardomoblieapp.location.model.Region;
 
 import java.time.LocalDateTime;
 
-//@Entity
-//@Table(name = "events")
+@Entity
+@Table(name = "events")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -32,23 +42,41 @@ public class Event {
 
     private String description;
 
-    @Column(name = "start_date")
+    @Column(name = "event_start")
     private LocalDateTime eventStart;
 
-    @Column(name = "end_date")
+    @Column(name = "event_end")
     private LocalDateTime eventEnd;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Formula("(SELECT a.name FROM activities a WHERE a.activity_id = activity_id)")
-    private String activity;
+    @JoinColumn(name = "activity_id")
+    @ToString.Exclude
+    private Activity activity;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @Formula("(SELECT et.name FROM event_types et WHERE et.event_type_id = event_type_id)")
-    private String eventType;
+    @Enumerated(EnumType.STRING)
+    @ToString.Exclude
+    private EventType eventType;
 
-    @OneToMany(mappedBy = "masterEvent")
-    private List<Event> subEvents;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "master_event_id")
+    @ToString.Exclude
+    private Event masterEvent;
 
     @JoinColumn(name = "prize")
-    private String prize;
+    private int prize;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
+    @ToString.Exclude
+    private Country country;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    @ToString.Exclude
+    private Region region;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
+    @ToString.Exclude
+    private City city;
 }

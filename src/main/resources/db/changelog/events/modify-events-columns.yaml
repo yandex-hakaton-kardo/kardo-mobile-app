@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: modify-events-columns
+      author: vvbakhanovich
+      changes:
+        - modifyDataType:
+            tableName: events
+            columnName: event_name
+            newDataType: VARCHAR(100)
+        - modifyDataType:
+            tableName: events
+            columnName: prize
+            newDataType: INTEGER
+        - modifyDataType:
+            tableName: events
+            columnName: event_start
+            newDataType: TIMESTAMP
+        - modifyDataType:
+            tableName: events
+            columnName: event_end
+            newDataType: TIMESTAMP
+        - renameColumn:
+            tableName: events
+            oldColumnName: stage
+            newColumnName: event_type
+        - modifyDataType:
+            tableName: events
+            columnName: event_type
+            newDataType: VARCHAR(15)

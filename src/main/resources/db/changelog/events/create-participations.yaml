@@ -1,0 +1,59 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-participations
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: participations
+            columns:
+              - column:
+                  name: participation_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_participants
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_participants_events
+                    references: events(event_id)
+                    unique: true
+                    uniqueConstraintName: unq_events_users_participations
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_participants_users
+                    references: users(user_id)
+                    unique: true
+                    uniqueConstraintName: unq_events_users_participations
+              - column:
+                  name: participant_type
+                  type: VARCHAR(11)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(9)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_on
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: link_to_file
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: avg_score
+                  type: DECIMAL
+                  constraints:
+                    nullable: true

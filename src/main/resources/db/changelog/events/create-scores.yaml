@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-scores
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: scores
+            columns:
+              - column:
+                  name: score_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_scores
+                    nullable: false
+              - column:
+                  name: participation_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_scores_participations
+                    references: participations(participation_id)
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: unq_participation_judge
+              - column:
+                  name: judge_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_scores_users
+                    references: users(user_id)
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: unq_participation_judge
+              - column:
+                  name: score_type1
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_type2
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: score_type3
+                  type: INTEGER
+                  constraints:
+                    nullable: false

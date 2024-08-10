@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Новый комментарий")
 public class CommentRequest {
 
-    @NotBlank(message = "Имя поста не может быть пустым и должно содержать от 2 до 20 символов.")
-    @Size(min = 2, max = 20, message = "Имя поста не может быть пустым и должно содержать от 2 до 20 символов.")
+    @NotBlank(message = "Имя поста не может быть пустым и должно содержать от 2 до 230 символов.")
+    @Size(min = 2, max = 230, message = "Имя поста не может быть пустым и должно содержать от 2 до 230 символов.")
     @Schema(description = "Содержание комментария")
     private String text;
 }
