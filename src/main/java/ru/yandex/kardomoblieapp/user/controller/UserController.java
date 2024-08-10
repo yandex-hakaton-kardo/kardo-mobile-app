@@ -23,11 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
+import ru.yandex.kardomoblieapp.security.jwt.model.TokensResponse;
 import ru.yandex.kardomoblieapp.user.dto.FriendshipDto;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
+import ru.yandex.kardomoblieapp.user.dto.UserLoginDetails;
 import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.FriendshipMapper;
@@ -62,6 +64,20 @@ public class UserController {
         final User userToAdd = userMapper.toModel(newUser);
         final User addedUser = userService.createUser(userToAdd);
         return userMapper.toNewUserDto(addedUser);
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Аутентификация пользователя")
+    public TokensResponse fakeLogin(@Parameter(description = "Данные пользователя") @RequestBody UserLoginDetails email) {
+        throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "JWT")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Выход из приложения")
+    public void fakeLogout() {
+        throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
     }
 
     @PatchMapping("/{userId}")
