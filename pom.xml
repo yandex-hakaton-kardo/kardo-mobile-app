@@ -119,7 +119,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <finalName>kardo-mobile-app-back</finalName>
                 </configuration>
             </plugin>
         </plugins>
