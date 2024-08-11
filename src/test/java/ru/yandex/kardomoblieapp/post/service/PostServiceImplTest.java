@@ -197,7 +197,7 @@ class PostServiceImplTest {
     void deletePost() {
         Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
 
-        postService.deletePost(savedUser.getUsername(), savedPost.getId());
+        postService.deletePost(savedPost.getId(), savedUser.getUsername());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> postService.findPostById(savedPost.getId(), savedUser.getUsername()));
@@ -208,7 +208,7 @@ class PostServiceImplTest {
     @DisplayName("Удаление поста, пост не найден")
     void deletePost_whenPostNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.deletePost(savedUser.getUsername(), unknownId));
+                () -> postService.deletePost(unknownId, savedUser.getUsername()));
 
         assertThat(ex.getMessage(), is("Пост с id '" + unknownId + "' не найден."));
     }
@@ -217,7 +217,7 @@ class PostServiceImplTest {
     @DisplayName("Удаление поста, пользователь не найден")
     void deletePost_whenUserNotFound_shouldThrowNotFoundException() {
         NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> postService.deletePost(unknownUsername, unknownId));
+                () -> postService.deletePost(unknownId, unknownUsername));
 
         assertThat(ex.getMessage(), is("Пользователь с именем '" + unknownUsername + "' не найден."));
     }

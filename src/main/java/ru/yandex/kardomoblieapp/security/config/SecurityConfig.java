@@ -67,6 +67,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/content/**", HttpMethod.GET.name()).permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/users/register", HttpMethod.POST.name()).not().fullyAuthenticated()
                         .requestMatchers("/users/register").hasAnyRole(ADMIN.name(), USER.name())
                         .requestMatchers("/users/{userId}", HttpMethod.DELETE.name()).hasAnyRole(ADMIN.name(), USER.name())
@@ -84,7 +85,6 @@ public class SecurityConfig {
                         .requestMatchers("/participations/**").hasRole(USER.name())
                         .requestMatchers("/admin/**").hasRole(ADMIN.name())
                         .requestMatchers("/actuator/**").hasRole(ADMIN.name())
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html").hasRole(ADMIN.name())
                         .anyRequest().authenticated())
 
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/users/register"));

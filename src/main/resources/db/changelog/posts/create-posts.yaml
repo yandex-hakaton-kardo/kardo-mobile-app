@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: DEV-1
+      id: create-posts
       author: vvbakhanovich
       changes:
         - createTable:

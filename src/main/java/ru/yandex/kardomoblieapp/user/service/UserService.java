@@ -6,6 +6,7 @@ import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.User;
+import ru.yandex.kardomoblieapp.user.model.UserRole;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface UserService {
 
     User updateUser(long userId, UserUpdateRequest userUpdateRequest);
 
-    void deleteUser(String username, long userId);
+    void deleteUser(long userId);
 
     User findUserById(long userId);
 
@@ -36,4 +37,6 @@ public interface UserService {
     List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size);
 
     User findFullUserByUsername(String username);
+
+    User changeUserRole(long userId, UserRole newRole);
 }

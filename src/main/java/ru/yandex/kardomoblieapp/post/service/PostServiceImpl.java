@@ -49,6 +49,14 @@ public class PostServiceImpl implements PostService {
 
     private final CommentRepository commentRepository;
 
+    /**
+     * Создание поста пользователем.
+     *
+     * @param username никнейм пользователя, создающего пост
+     * @param file     файл, прикрепленный к посту
+     * @param content  содержание поста
+     * @return созданный пост
+     */
     @Override
     @Transactional
     public Post createPost(String username, MultipartFile file, String content) {
@@ -66,6 +74,14 @@ public class PostServiceImpl implements PostService {
         return savedPost;
     }
 
+    /**
+     * Обновление поста.
+     *
+     * @param username никнейм пользователя, обновляющего пост
+     * @param file     новый файл
+     * @param content  новое содержание поста
+     * @return обновленный пост
+     */
     @Override
     @Transactional
     public Post updatePost(String username, long postId, MultipartFile file, String content) {
@@ -89,9 +105,15 @@ public class PostServiceImpl implements PostService {
         return postToUpdate;
     }
 
+    /**
+     * Удаление поста по идентификатору.
+     *
+     * @param postId   идентификатор поста
+     * @param username никнейм пользователя, делающего запрос
+     */
     @Override
     @Transactional
-    public void deletePost(String username, long postId) {
+    public void deletePost(long postId, String username) {
         userService.findByUsername(username);
         final Post postToDelete = getPost(postId);
         DataFile file = postToDelete.getFile();
@@ -99,6 +121,12 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(postId);
     }
 
+    /**
+     * Поиск поста по идентификатору.
+     *
+     * @param postId   идентификатор поста
+     * @param username никнейм пользователя, делающего запрос
+     */
     @Override
     @Transactional
     public PostWithLike findPostById(long postId, String username) {
@@ -113,6 +141,12 @@ public class PostServiceImpl implements PostService {
         return new PostWithLike(post, isPostLikedByUser);
     }
 
+    /**
+     * Получение всех постов пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @return список постов пользователя
+     */
     @Override
     public List<Post> findPostsFromUser(long userId) {
         List<Post> posts = postRepository.findPostsByAuthorId(userId);
@@ -120,6 +154,14 @@ public class PostServiceImpl implements PostService {
         return posts;
     }
 
+    /**
+     * Добавление лайка посту. Пользователь может поставить только один лайк посту. При попытке повторно поставить лайк
+     * предыдущий лайк будет удален.
+     *
+     * @param username никнейм пользователя
+     * @param postId   идентификатор поста
+     * @return количество лайков поста
+     */
     @Override
     @Transactional
     public long addLikeToPost(String username, long postId) {
@@ -146,6 +188,13 @@ public class PostServiceImpl implements PostService {
         return likesCount;
     }
 
+    /**
+     * Получение ленты постов. Посты возвращаются постранично, с сортировкой по количеству просмотров и дате добавления.
+     *
+     * @param page номер страницы
+     * @param size количество элементов на странице
+     * @return лента постов
+     */
     @Override
     public List<Post> getPostsFeed(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size,
@@ -155,6 +204,14 @@ public class PostServiceImpl implements PostService {
         return feed;
     }
 
+    /**
+     * Добавление комментария к посту.
+     *
+     * @param username   никнейм пользователя, оставляющий комментарий
+     * @param postId     идентификатор поста
+     * @param newComment комментарий
+     * @return сохраненный комментарий
+     */
     @Override
     @Transactional
     public Comment addCommentToPost(String username, long postId, Comment newComment) {
@@ -169,6 +226,14 @@ public class PostServiceImpl implements PostService {
         return savedComment;
     }
 
+    /**
+     * Обновление комментария.
+     *
+     * @param username       никнейм пользователя, обновляющий комментарий
+     * @param commentId      идентификатор комментария
+     * @param commentRequest обновленные данные комментария
+     * @return обновленный комментарий
+     */
     @Override
     public Comment updateComment(String username, long commentId, CommentRequest commentRequest) {
         Comment comment = getCommentWithAuthor(commentId);
@@ -179,6 +244,12 @@ public class PostServiceImpl implements PostService {
         return savedComment;
     }
 
+    /**
+     * Удаление комментария по идентификатору.
+     *
+     * @param username  никнейм пользователя, делающего запрос
+     * @param commentId идентификатор комментария
+     */
     @Override
     public void deleteComment(String username, long commentId) {
         userService.findByUsername(username);
@@ -188,6 +259,16 @@ public class PostServiceImpl implements PostService {
         log.info("Пользователь с id '{}' удалил комментарий с id '{}'.", username, commentId);
     }
 
+    /**
+     * Получение рекомендаций. В качестве списка рекомендаций возвращается список постов пользователей, на которых не
+     * подписан пользователь. Собственные посты пользователя также не отображаются в рекомендациях.
+     *
+     * @param username никнейм пользователя, для которого запрашиваются рекомендации
+     * @param page     номер страницы
+     * @param size     количество элементов на странице
+     * @param sort     тип сортировки списка
+     * @return список рекомендаций
+     */
     @Override
     public List<Post> getRecommendations(String username, Integer page, Integer size, PostSort sort) {
         User user = userService.findByUsername(username);
@@ -199,6 +280,14 @@ public class PostServiceImpl implements PostService {
         return recommendations;
     }
 
+    /**
+     * Поиск постов по фильтру. Список возвращается постранично.
+     *
+     * @param searchFilter фильтр поиска
+     * @param page         номер страницы
+     * @param size         количество элементов на странице
+     * @return список найденных постов, соответствующих фильтру
+     */
     @Override
     public List<Post> searchPosts(PostSearchFilter searchFilter, Integer page, Integer size) {
         final Pageable pageable = PageRequest.of(page, size);

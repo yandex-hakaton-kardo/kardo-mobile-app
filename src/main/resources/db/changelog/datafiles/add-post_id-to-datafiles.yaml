@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: DEV-1
+      id: add-post_id-to-datafiles
       author: vvbakhanovich
       changes:
         - addColumn:

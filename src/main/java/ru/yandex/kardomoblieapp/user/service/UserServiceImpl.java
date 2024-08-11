@@ -52,6 +52,13 @@ public class UserServiceImpl implements UserService {
 
     private final LocationService locationService;
 
+    /**
+     * Регистрация нового пользователя в приложении. Пользователь создается с ролью USER. При сохранении
+     * в БД пароль пользователя кодируется.
+     *
+     * @param userToAdd данные нового пользователя
+     * @return добавленный пользователь с назначенным id
+     */
     @Override
     public User createUser(User userToAdd) {
         userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
@@ -61,6 +68,13 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
+    /**
+     * Обновление данных пользователя.
+     *
+     * @param userId            идентификатор пользователя, который обновляет данные
+     * @param userUpdateRequest обновленные данные
+     * @return пользователь с обновленными данными
+     */
     @Override
     @Transactional
     public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
@@ -77,13 +91,24 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    /**
+     * Удаление пользователя по идентификатору.
+     *
+     * @param userId идентификатор пользователя
+     */
     @Override
     @Transactional
-    public void deleteUser(String username, long userId) {
+    public void deleteUser(long userId) {
         getUser(userId);
         userRepository.deleteById(userId);
     }
 
+    /**
+     * Поиск пользователя по идентификатору.
+     *
+     * @param userId идентификатор пользователя
+     * @return найденный пользователь
+     */
     @Override
     public User findUserById(long userId) {
         final User user = getUser(userId);
@@ -91,6 +116,14 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    /**
+     * Загрузка фотографии профиля. Имя файла при сохранении заменяется на UUID. В БД сохраняется имя и путь до файла,
+     * а сам файл перемещается в локальное хранилище.
+     *
+     * @param userId  идентификатор пользователя, который загружает фотографию
+     * @param picture файл с изображением
+     * @return данные о загруженном файле
+     */
     @Override
     @Transactional
     public DataFile uploadProfilePicture(long userId, MultipartFile picture) {
@@ -103,6 +136,12 @@ public class UserServiceImpl implements UserService {
         return uploadedFile;
     }
 
+    /**
+     * Получение данных о местоположении фотографии профиля.
+     *
+     * @param userId идентификатор пользователя
+     * @return данные о местоположении фотографии профиля
+     */
     @Override
     public DataFile getProfilePicture(long userId) {
         final User user = getUser(userId);
@@ -111,12 +150,25 @@ public class UserServiceImpl implements UserService {
         return profilePicture;
     }
 
+    /**
+     * Удаление фотографии профиля.
+     *
+     * @param userId идентификатор пользователя
+     */
     @Override
     public void deleteProfilePicture(long userId) {
         final User user = getUser(userId);
         deleteCurrentProfilePictureIfExists(user);
     }
 
+    /**
+     * Добавление пользователя в список друзей. По умолчанию пользователь, добавленный в список друзей, получает статус
+     * ПОДПИСЧИК. Если оба пользователя добавляют друг друга в список друзей, то статус изменятся на ДРУГ.
+     *
+     * @param userId   идентификатор пользователя, добавляющий друга
+     * @param friendId идентификатор пользователя, которого добавляют в список друзей
+     * @return состояние дружбы между пользователями
+     */
     @Override
     @Transactional
     public Friendship addFriend(long userId, long friendId) {
@@ -140,6 +192,12 @@ public class UserServiceImpl implements UserService {
         return friendship;
     }
 
+    /**
+     * Получение списка друзей пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @return список друзей пользователя
+     */
     @Override
     @Transactional
     public List<User> getFriendsList(long userId) {
@@ -150,6 +208,12 @@ public class UserServiceImpl implements UserService {
         return friends;
     }
 
+    /**
+     * Удаление пользователя из списка друзей.
+     *
+     * @param userId   идентификатор пользователя, делающий запрос
+     * @param friendId идентификатор пользователя из списка друзей
+     */
     @Override
     public void deleteFriend(long userId, long friendId) {
         final User user = getUser(userId);
@@ -158,12 +222,26 @@ public class UserServiceImpl implements UserService {
         log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
     }
 
+    /**
+     * Поиск пользователя по никнейму.
+     *
+     * @param username никнейм пользователя
+     * @return найденный пользователь
+     */
     @Override
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь с именем '" + username + "' не найден."));
     }
 
+    /**
+     * Поиск пользователей по фильтру. Список пользователей возвращается постранично, согласно заданным параметрам.
+     *
+     * @param filter фильтр поиска
+     * @param page   номер страницы
+     * @param size   количество элементов на странице
+     * @return найденный список пользователей
+     */
     @Override
     public List<User> findAllUsers(UserSearchFilter filter, Integer page, Integer size) {
         final Pageable pageable = PageRequest.of(page, size);
@@ -174,12 +252,34 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
+    /**
+     * Получение полных данных пользователя по никнейму.
+     *
+     * @param username никнейм пользователя
+     * @return найденный пользователь
+     */
     @Override
     public User findFullUserByUsername(String username) {
         final User user = userRepository.findFullUserByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь с никнеймом '" + username + "' не найден."));
         log.info("Получен пользователь с username '{}'.", username);
         return user;
+    }
+
+    /**
+     * Изменение роли пользователя.
+     *
+     * @param userId  идентификатор пользователя
+     * @param newRole новая роль пользователя
+     * @return измененный пользователь
+     */
+    @Override
+    public User changeUserRole(long userId, UserRole newRole) {
+        User user = getUser(userId);
+        user.setRole(newRole);
+        User savedUser = userRepository.save(user);
+        log.info("У пользователя с id '{}' новая роль '{}'.", userId, newRole.name());
+        return savedUser;
     }
 
     private List<Specification<User>> userSearchFilterToSpecifications(UserSearchFilter searchFilter) {

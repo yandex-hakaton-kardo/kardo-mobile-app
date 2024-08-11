@@ -43,6 +43,16 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     private final UserService userService;
 
+    /**
+     * Создание заявки на участии в мероприятии. Для участников, судей и спонсоров заявка получается статус СОЗДАНА и
+     * требует подтверждения со стороны администратора. Для зрителей дополнительного подтверждения не требуется, заявка
+     * сразу получает статус ПОДТВЕРЖДЕНА.
+     *
+     * @param participationRequest заявка на участие
+     * @param eventId              идентификатор мероприятия
+     * @param userId               идентификатор пользователя
+     * @return сохраненная заявка на участие
+     */
     @Override
     @Transactional
     public Participation addParticipation(ParticipationRequest participationRequest, long eventId, long userId) {
@@ -62,6 +72,13 @@ public class ParticipationServiceImpl implements ParticipationService {
         return savedParticipation;
     }
 
+    /**
+     * Изменение статуса заявки.
+     *
+     * @param participationId идентификатор заявки на участие
+     * @param status          новый статус заявки
+     * @return обновленная заявка
+     */
     @Override
     @Transactional
     public Participation changeParticipationStatus(long participationId, ParticipationStatus status) {
@@ -72,6 +89,15 @@ public class ParticipationServiceImpl implements ParticipationService {
         return savedParticipation;
     }
 
+    /**
+     * Обновление данных заявки. Пользователь может вносить изменения в заявку до того, как она получит статус ПОДТВЕРЖДЕНА.
+     * После получения данного статуса модификация возможно только администратором.
+     *
+     * @param participationId идентификатор заявки
+     * @param updateRequest   новые данные заявки
+     * @param username        никнейм пользователя, делающего запрос
+     * @return обновленная заявка
+     */
     @Override
     @Transactional
     public Participation updateParticipation(long participationId, ParticipationUpdateRequest updateRequest, String username) {
@@ -84,6 +110,13 @@ public class ParticipationServiceImpl implements ParticipationService {
         return updatedParticipation;
     }
 
+    /**
+     * Удаление заявки. Пользователь может удалить заявку до того, как она получит статус ПОДТВЕРЖДЕНА. После получения
+     * данного статуса удаление возможно только администратором.
+     *
+     * @param participationId идентификатор заявки
+     * @param username        никнейм пользователя, делащего запрос
+     */
     @Override
     @Transactional
     public void deleteParticipation(long participationId, String username) {
@@ -94,6 +127,14 @@ public class ParticipationServiceImpl implements ParticipationService {
         log.info("Заявка с id '{}' удалена.", participationId);
     }
 
+    /**
+     * Поиск заявок пользователя. Может быть указана роль пользователя в заявках. Если роль не указана, возвращаются все
+     * заявки пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param type   роль пользователя в мероприятии
+     * @return список заявок пользователя
+     */
     @Override
     public List<Participation> findUsersParticipations(long userId, ParticipantType type) {
         userService.findUserById(userId);
@@ -107,6 +148,12 @@ public class ParticipationServiceImpl implements ParticipationService {
         return participations;
     }
 
+    /**
+     * Поиск заявки на участие по идентификатору.
+     *
+     * @param participationId идентификатор заявки
+     * @return найденная заявка
+     */
     @Override
     public Participation findParticipationById(long participationId) {
         final Participation participation = getParticipation(participationId);
@@ -114,6 +161,14 @@ public class ParticipationServiceImpl implements ParticipationService {
         return participation;
     }
 
+    /**
+     * Установка оценки заявки судьей. Общая оценка формируется как средняя из трех пунктов, которые подлежат оценки.
+     *
+     * @param participationId идентификатор заявки
+     * @param score           оценка
+     * @param username        никнейм пользователя, выставляющего оценку
+     * @return оцененная заявка
+     */
     @Override
     @Transactional
     public Participation rateParticipation(long participationId, Score score, String username) {

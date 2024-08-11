@@ -13,6 +13,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepository;
 
+    /**
+     * Получение списка всех направлений.
+     *
+     * @return список направлений
+     */
     @Override
     public List<Activity> findAll() {
         return activityRepository.findAll();
