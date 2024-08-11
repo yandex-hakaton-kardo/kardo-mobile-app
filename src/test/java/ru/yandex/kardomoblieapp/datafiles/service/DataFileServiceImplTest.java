@@ -17,11 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
+import ru.yandex.kardomoblieapp.post.model.Post;
+import ru.yandex.kardomoblieapp.post.service.PostService;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
+import ru.yandex.kardomoblieapp.user.model.User;
+import ru.yandex.kardomoblieapp.user.service.UserService;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,12 +47,23 @@ class DataFileServiceImplTest {
     @Autowired
     private DataFileService dataFileService;
 
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private UserService userService;
+
+    private User savedUser;
+
     private DataFile dataFile;
+
     private DataFile dataFile1;
 
     private long userId;
 
     private long unknownId;
+
+    private MockMultipartFile file;
 
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_VERSION);
 
@@ -68,7 +85,7 @@ class DataFileServiceImplTest {
     }
 
     @BeforeEach
-    void init() {
+    void init() throws IOException {
         dataFile = DataFile.builder()
                 .fileName("fileName")
                 .fileType(MediaType.IMAGE_JPEG_VALUE)
@@ -82,6 +99,18 @@ class DataFileServiceImplTest {
 
         userId = 1L;
         unknownId = 99999L;
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("test.jpg");
+        file = new MockMultipartFile("file", "fileName", MediaType.IMAGE_JPEG_VALUE, inputStream);
+        User user = User.builder()
+                .name("Имя")
+                .username("username")
+                .secondName("Отчество")
+                .surname("Фамилия")
+                .email("test@mail.ru")
+                .password("password")
+                .dateOfBirth(LocalDate.of(1990, 12, 12))
+                .build();
+        savedUser = userService.createUser(user);
     }
 
     @Test
@@ -178,6 +207,18 @@ class DataFileServiceImplTest {
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> dataFileService.findDataFileById(unknownId));
         assertThat(ex.getMessage(), is("Файл с id '" + unknownId + "' не найден."));
+    }
+
+    @Test
+    @DisplayName("Получение файла, прикрепленного к посту")
+    void findDataFileFromPost_whenFilesExists_shouldReturnFilesAttachedToPost() {
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, "content");
+
+        List<DataFile> files = dataFileService.findFilesFromPost(savedPost.getId());
+
+        assertThat(files, notNullValue());
+        assertThat(files.size(), is(1));
+        assertThat(files.get(0).getId(), is(savedPost.getFile().getId()));
     }
 
     @Test

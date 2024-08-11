@@ -109,7 +109,7 @@ public class EventSpecification {
     public static Specification<Event> orderByEventStartDate(Specification<Event> spec) {
         return (root, query, criteriaBuilder) -> {
             query.orderBy(
-                    criteriaBuilder.desc(root.get("eventStart")));
+                    criteriaBuilder.asc(root.get("eventStart")));
             return spec.toPredicate(root, query, criteriaBuilder);
         };
     }

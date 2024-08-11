@@ -64,5 +64,5 @@ public class Participation {
 
 
     @Column(name = "avg_score", scale = 2)
-    private double avgScore;
+    private Double avgScore;
 }

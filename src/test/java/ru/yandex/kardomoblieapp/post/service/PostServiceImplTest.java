@@ -22,6 +22,7 @@ import ru.yandex.kardomoblieapp.post.model.Comment;
 import ru.yandex.kardomoblieapp.post.model.Post;
 import ru.yandex.kardomoblieapp.post.model.PostSort;
 import ru.yandex.kardomoblieapp.post.model.PostWithLike;
+import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.model.User;
 import ru.yandex.kardomoblieapp.user.service.UserService;
@@ -452,6 +453,23 @@ class PostServiceImplTest {
     }
 
     @Test
+    @DisplayName("Попытка обновить комментарий не автором")
+    void updatedComment_whenNotAuthorTriesToUpdate_shouldThrowNotAuthorizedException() {
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
+        Comment comment = Comment.builder()
+                .text("comment")
+                .build();
+        Comment savedComment = postService.addCommentToPost(savedUser.getUsername(), savedPost.getId(), comment);
+        CommentRequest commentRequest = new CommentRequest("updated comment");
+
+        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
+                () -> postService.updateComment(savedUser2.getUsername(), savedComment.getId(), commentRequest));
+
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + savedUser2.getUsername()
+                + "' не имеет прав на редактирование комментария с id '" + comment.getId() + "'."));
+    }
+
+    @Test
     @DisplayName("Удаление комментария")
     void deleteComment() {
         Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
@@ -467,6 +485,22 @@ class PostServiceImplTest {
                 () -> postService.updateComment(savedUser.getUsername(), savedComment.getId(), commentRequest));
 
         assertThat(ex.getMessage(), is("Комментарий с id '" + savedComment.getId() + "' не найден."));
+    }
+
+    @Test
+    @DisplayName("Попытка удалить комментарий не автором")
+    void deleteComment_whenNotAuthorTriesToDelete_shouldThrowNotAuthorizedException() {
+        Post savedPost = postService.createPost(savedUser.getUsername(), file, content);
+        Comment comment = Comment.builder()
+                .text("comment")
+                .build();
+        Comment savedComment = postService.addCommentToPost(savedUser.getUsername(), savedPost.getId(), comment);
+
+        NotAuthorizedException ex = assertThrows(NotAuthorizedException.class,
+                () -> postService.deleteComment(savedUser2.getUsername(), savedComment.getId()));
+
+        assertThat(ex.getMessage(), is("Пользователь с именем '" + savedUser2.getUsername()
+                + "' не имеет прав на редактирование комментария с id '" + comment.getId() + "'."));
     }
 
     @Test
