@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.yandex.kardomoblieapp.TestUtils.POSTGRES_VERSION;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -199,5 +200,31 @@ class LocationServiceImplTest {
         Optional<City> cityOptional = locationService.findCityByNameCountryAndRegion(null, null, null);
 
         assertThat(cityOptional.isEmpty(), is(true));
+    }
+
+    @Test
+    @DisplayName("Добавление города без страны и региона")
+    void deleteAllCities_shouldDeleteAll() {
+        City city1 = City.builder()
+                .country(null)
+                .name("city1")
+                .region(null)
+                .build();
+        City addedCity1 = locationService.addCity(city1);
+
+        City city2 = City.builder()
+                .country(null)
+                .name("city2")
+                .region(null)
+                .build();
+        City addedCity2 = locationService.addCity(city2);
+
+        locationService.deleteAllCities();
+
+        Optional<City> optionalCity1 = locationService.findCityByNameCountryAndRegion("city1", null, null);
+        Optional<City> optionalCity2 = locationService.findCityByNameCountryAndRegion("city2", null, null);
+
+        assertTrue(optionalCity1.isEmpty());
+        assertTrue(optionalCity2.isEmpty());
     }
 }

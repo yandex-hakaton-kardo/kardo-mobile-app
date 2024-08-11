@@ -227,7 +227,7 @@ public class PostServiceImpl implements PostService {
 
     private void checkIfUserIsCommentAuthor(String username, Comment comment) {
         if (!comment.getAuthor().getUsername().equals(username)) {
-            throw new NotAuthorizedException("Пользователь с id '" + username
+            throw new NotAuthorizedException("Пользователь с именем '" + username
                     + "' не имеет прав на редактирование комментария с id '" + comment.getId() + "'.");
         }
     }

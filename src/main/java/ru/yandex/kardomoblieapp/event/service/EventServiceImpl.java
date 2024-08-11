@@ -56,6 +56,7 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
 
     @Override
+    @Transactional
     public Event createEvent(NewEventRequest newEvent) {
         final Activity activity = getActivity(newEvent.getActivityId());
         final Event event = new Event();

@@ -31,5 +31,5 @@ public class ParticipationDto {
     private ParticipationStatus status;
 
     @Schema(description = "Средняя оценка")
-    private double avgRating;
+    private Double avgRating;
 }

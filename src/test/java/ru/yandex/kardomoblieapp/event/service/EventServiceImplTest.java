@@ -12,11 +12,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.event.dto.EventSearchFilter;
+import ru.yandex.kardomoblieapp.event.dto.EventSort;
 import ru.yandex.kardomoblieapp.event.dto.EventUpdateRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewEventRequest;
 import ru.yandex.kardomoblieapp.event.dto.NewSubEventRequest;
 import ru.yandex.kardomoblieapp.event.model.Event;
 import ru.yandex.kardomoblieapp.event.model.EventType;
+import ru.yandex.kardomoblieapp.shared.exception.IncorrectEventDatesException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 
 import java.time.LocalDate;
@@ -39,6 +41,8 @@ class EventServiceImplTest {
 
     private Event event;
 
+    private long unknownId;
+
     private EventUpdateRequest eventUpdateRequest;
 
     private NewEventRequest newEventRequest;
@@ -54,6 +58,7 @@ class EventServiceImplTest {
                 .eventEnd(LocalDateTime.of(2024, 12, 23, 10, 10, 00))
                 .prize(100_000)
                 .build();
+        unknownId = 999L;
 
         eventUpdateRequest = EventUpdateRequest.builder()
                 .eventName("updated name")
@@ -109,7 +114,18 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Создание этапа события")
+    @DisplayName("Создание мероприятия, направление не найдено")
+    void createEvent_whenActivityNotFound_shouldThrowNotFoundException() {
+        newEventRequest.setActivityId(unknownId);
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> eventService.createEvent(newEventRequest));
+
+        assertThat(ex.getLocalizedMessage(), is("Направление с id '" + unknownId + "' не найдено."));
+    }
+
+    @Test
+    @DisplayName("Создание этапа мероприятия")
     void createSubEvent_shouldReturnEventWithPositiveIdAndMasterId() {
         Event savedEvent = eventService.createEvent(newEventRequest);
 
@@ -125,7 +141,41 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Обновление события")
+    @DisplayName("Создание этапа мероприятия, главное мероприятие не найдено")
+    void createSubEvent_whenMasterEventNotFound_shouldThrowNotFoundException() {
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> eventService.createSubEvent(unknownId, newSubEventRequest));
+
+        assertThat(ex.getLocalizedMessage(), is("Мероприятие с id '" + unknownId + "' не найдено."));
+    }
+
+    @Test
+    @DisplayName("Создание этапа мероприятия, дата начала этапа раньше дата начала главного мероприятия")
+    void createSubEvent_whenSubEventStartBeforeMasterEventStart_shouldThrowIncorrectEventDatesException() {
+        Event savedEvent = eventService.createEvent(newEventRequest);
+
+        newSubEventRequest.setEventStart(LocalDateTime.of(2022, 12, 12, 11, 00, 00));
+        IncorrectEventDatesException ex = assertThrows(IncorrectEventDatesException.class,
+                () -> eventService.createSubEvent(savedEvent.getId(), newSubEventRequest));
+
+        assertThat(ex.getLocalizedMessage(), is("Этап мероприятия должен быть в рамках главного мероприятия"));
+    }
+
+    @Test
+    @DisplayName("Создание этапа мероприятия, дата начала этапа раньше дата начала главного мероприятия")
+    void createSubEvent_whenSubEventEndAfterMasterEventEnd_shouldThrowIncorrectEventDatesException() {
+        Event savedEvent = eventService.createEvent(newEventRequest);
+
+        newSubEventRequest.setEventEnd(LocalDateTime.of(2025, 12, 12, 11, 00, 00));
+        IncorrectEventDatesException ex = assertThrows(IncorrectEventDatesException.class,
+                () -> eventService.createSubEvent(savedEvent.getId(), newSubEventRequest));
+
+        assertThat(ex.getLocalizedMessage(), is("Этап мероприятия должен быть в рамках главного мероприятия"));
+    }
+
+    @Test
+    @DisplayName("Обновление мероприятия")
     void updateEvent_shouldUpdateNotNullFields() {
         Event savedEvent = eventService.createEvent(newEventRequest);
 
@@ -140,7 +190,17 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Удаление события")
+    @DisplayName("Обновление мероприятия, событие не найдено")
+    void updateEvent_whenEventNotFound_shouldThrowNotFoundException() {
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> eventService.updateEvent(unknownId, eventUpdateRequest));
+
+        assertThat(ex.getLocalizedMessage(), is("Мероприятие с id '" + unknownId + "' не найдено."));
+    }
+
+    @Test
+    @DisplayName("Удаление мероприятия")
     void deleteEvent() {
         Event savedEvent = eventService.createEvent(newEventRequest);
 
@@ -153,7 +213,41 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Поиск событий по названию активности")
+    @DisplayName("Удаление мероприятия, событие не найдено")
+    void deleteEvent_whenEventNotFound_shouldThrowNotFoundException() {
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> eventService.deleteEvent(unknownId));
+
+        assertThat(ex.getMessage(), is("Мероприятие с id '" + unknownId + "' не найдено."));
+    }
+
+    @Test
+    @DisplayName("Поиск мероприятия по id")
+    void findEventById_whenEventExits_shouldReturnEvent() {
+        Event savedEvent = eventService.createEvent(newEventRequest);
+
+        Event event = eventService.findEventById(savedEvent.getId());
+
+        assertThat(event, notNullValue());
+        assertThat(event.getId(), is(savedEvent.getId()));
+        assertThat(event.getEventName(), is(savedEvent.getEventName()));
+        assertThat(event.getEventStart(), is(savedEvent.getEventStart()));
+    }
+
+    @Test
+    @DisplayName("Поиск мероприятия по id, событие не найдено")
+    void findEventById_whenEventNotExits_shouldThrowNotFoundException() {
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> eventService.findEventById(unknownId));
+
+        assertThat(ex.getMessage(), is("Мероприятие с id '" + unknownId + "' не найдено."));
+    }
+
+
+    @Test
+    @DisplayName("Поиск мероприятий по названию активности")
     void searchEvents_whenFilterForActivityName_shouldReturnEventsWithThatActivityName() {
         eventService.createEvent(newEventRequest);
         NewEventRequest eventRequest = newEventRequest;
@@ -171,12 +265,32 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Поиск событий по типу")
+    @DisplayName("Поиск мероприятий по типу c сортировкой по дате старта")
+    void searchEvents_whenFilterForEventTypeOrderByEventStart_shouldReturnEventsWithThatEventType() {
+        Event firstEvent = eventService.createEvent(newEventRequest);
+        newEventRequest.setActivityId(1);
+        newEventRequest.setEventStart(newEventRequest.getEventStart().plusDays(2));
+        Event secondEvent = eventService.createEvent(newEventRequest);
+        EventSearchFilter filter = EventSearchFilter.builder()
+                .types(List.of(EventType.VIDEO_CONTEST))
+                .sort(EventSort.EVENT_START)
+                .build();
+
+        List<Event> events = eventService.searchEvents(filter, 0, 10);
+
+        assertThat(events, notNullValue());
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0).getId(), is(firstEvent.getId()));
+        assertThat(events.get(1).getId(), is(secondEvent.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск мероприятий по типу c сортировкой по умолчанию")
     void searchEvents_whenFilterForEventType_shouldReturnEventsWithThatEventType() {
         Event firstEvent = eventService.createEvent(newEventRequest);
-        NewEventRequest eventRequest = newEventRequest;
-        eventRequest.setActivityId(1);
-        Event secondEvent = eventService.createEvent(eventRequest);
+        newEventRequest.setActivityId(1);
+        newEventRequest.setEventStart(newEventRequest.getEventStart().minusDays(2));
+        Event secondEvent = eventService.createEvent(newEventRequest);
         EventSearchFilter filter = EventSearchFilter.builder()
                 .types(List.of(EventType.VIDEO_CONTEST))
                 .build();
@@ -190,7 +304,28 @@ class EventServiceImplTest {
     }
 
     @Test
-    @DisplayName("Поиск событий по типу")
+    @DisplayName("Поиск мероприятий по типу c сортировкой по умолчанию")
+    void searchEvents_whenFilterForEventTypeOrderByPrize_shouldReturnEventsWithThatEventType() {
+        newEventRequest.setPrize(10);
+        Event firstEvent = eventService.createEvent(newEventRequest);
+        newEventRequest.setActivityId(1);
+        newEventRequest.setPrize(5);
+        Event secondEvent = eventService.createEvent(newEventRequest);
+        EventSearchFilter filter = EventSearchFilter.builder()
+                .types(List.of(EventType.VIDEO_CONTEST))
+                .sort(EventSort.PRIZE)
+                .build();
+
+        List<Event> events = eventService.searchEvents(filter, 0, 10);
+
+        assertThat(events, notNullValue());
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0).getId(), is(firstEvent.getId()));
+        assertThat(events.get(1).getId(), is(secondEvent.getId()));
+    }
+
+    @Test
+    @DisplayName("Поиск мероприятий по типу")
     void searchEvents_whenFilterForEventTypeAndStartDate_shouldReturnEventsWithThatEventTypeAndStartDateAfterDesired() {
         Event firstEvent = eventService.createEvent(newEventRequest);
         NewEventRequest eventRequest = newEventRequest;

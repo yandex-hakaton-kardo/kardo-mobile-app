@@ -14,7 +14,8 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     @Query("SELECT p FROM Participation p LEFT JOIN FETCH p.event e LEFT JOIN FETCH p.user u  WHERE p.id = ?1")
     Optional<Participation> findFullParticipationById(long participationId);
 
-    @Query("SELECT p FROM Participation p LEFT JOIN FETCH p.event e LEFT JOIN FETCH p.user u WHERE u.id = ?1")
+    @Query("SELECT p FROM Participation p LEFT JOIN FETCH p.event e LEFT JOIN FETCH p.user u WHERE u.id = ?1 " +
+            "ORDER BY p.event.eventStart ASC")
     List<Participation> findUsersParticipations(long userId);
 
     @Query("SELECT p FROM Participation p LEFT JOIN FETCH p.event e LEFT JOIN FETCH p.user u WHERE u.id = ?1 AND " +

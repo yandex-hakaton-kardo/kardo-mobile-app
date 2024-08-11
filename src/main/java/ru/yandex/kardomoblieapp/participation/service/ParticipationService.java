@@ -16,11 +16,11 @@ public interface ParticipationService {
 
     Participation updateParticipation(long participationId, ParticipationUpdateRequest updateRequest, String username);
 
-    void deleteParticipation(long participationId, String name);
+    void deleteParticipation(long participationId, String username);
 
     List<Participation> findUsersParticipations(long userId, ParticipantType type);
 
     Participation findParticipationById(long participationId);
 
-    Participation rateParticipation(long participationId, Score score, String name);
+    Participation rateParticipation(long participationId, Score score, String username);
 }

@@ -133,10 +133,45 @@ class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("Обновление страны, региона и города")
+    void updateUser_whenCountryRegionAndCityNotNull_shouldUpdateAllFields() {
+        User savedUser = userService.createUser(user1);
+        updateRequest.setCountryId(1L);
+        updateRequest.setRegionId(2L);
+        updateRequest.setCity("City");
+        User updatedUser = userService.updateUser(savedUser.getId(), updateRequest);
+
+        assertThat(updatedUser, notNullValue());
+        assertThat(updatedUser.getId(), is(savedUser.getId()));
+        assertThat(updatedUser.getName(), is(savedUser.getName()));
+        assertThat(updatedUser.getEmail(), is(updateRequest.getEmail()));
+        assertThat(updatedUser.getCountry().getId(), is(1L));
+        assertThat(updatedUser.getRegion().getId(), is(2L));
+        assertThat(updatedUser.getCity().getId(), greaterThan(0L));
+        assertThat(updatedUser.getCity().getName(), is("City"));
+    }
+
+    @Test
+    @DisplayName("Обновление страны и города")
+    void updateUser_whenCountryAndCityNotNull_shouldUpdateCountryAndRegion() {
+        User savedUser = userService.createUser(user1);
+        updateRequest.setCountryId(1L);
+        updateRequest.setCity("City");
+        User updatedUser = userService.updateUser(savedUser.getId(), updateRequest);
+
+        assertThat(updatedUser, notNullValue());
+        assertThat(updatedUser.getId(), is(savedUser.getId()));
+        assertThat(updatedUser.getName(), is(savedUser.getName()));
+        assertThat(updatedUser.getEmail(), is(updateRequest.getEmail()));
+        assertThat(updatedUser.getCountry().getId(), is(1L));
+        assertThat(updatedUser.getRegion(), nullValue());
+        assertThat(updatedUser.getCity().getId(), greaterThan(0L));
+        assertThat(updatedUser.getCity().getName(), is("City"));
+    }
+
+    @Test
     @DisplayName("Обновление пользователя, пользователь не найден")
     void updateUser_whenUnknownId_ShouldThrowNotFoundException() {
-        User savedUser = userService.createUser(user1);
-
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> userService.updateUser(unknownId, updateRequest));
 

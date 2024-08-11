@@ -86,9 +86,9 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     @Transactional
-    public void deleteParticipation(long participationId, String name) {
+    public void deleteParticipation(long participationId, String username) {
         final Participation participation = getParticipation(participationId);
-        final User user = userService.findByUsername(name);
+        final User user = userService.findByUsername(username);
         checkIfUserCanModifyParticipation(participation, user);
         participationRepository.deleteById(participationId);
         log.info("Заявка с id '{}' удалена.", participationId);
