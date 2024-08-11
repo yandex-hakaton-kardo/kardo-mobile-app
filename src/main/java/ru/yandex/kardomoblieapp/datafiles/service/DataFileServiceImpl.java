@@ -30,6 +30,13 @@ public class DataFileServiceImpl implements DataFileService {
 
     private final DataFileRepository dataFileRepository;
 
+    /**
+     * Загрузка и сохранение файла.
+     *
+     * @param fileToUpload файл
+     * @param userId       идентификатор пользователя, загружающий файл
+     * @return данные о загруженном файле.
+     */
     @Override
     public DataFile uploadFile(MultipartFile fileToUpload, long userId) {
         final DataFile uploadedFile = createDataFileAndMoveToUserDirectory(fileToUpload, userId);
@@ -38,6 +45,13 @@ public class DataFileServiceImpl implements DataFileService {
         return savedFile;
     }
 
+    /**
+     * Загрузка и сохранение нескольких файлов.
+     *
+     * @param files  список файлов для сохранения
+     * @param userId идентификатор пользователя, загружающий файлы
+     * @return данные о загруженных файлах.
+     */
     @Override
     public List<DataFile> uploadMultipleFiles(List<MultipartFile> files, long userId) {
         final List<DataFile> dataFiles = new ArrayList<>();
@@ -47,6 +61,11 @@ public class DataFileServiceImpl implements DataFileService {
         return savedFiles;
     }
 
+    /**
+     * Удаление файла по идентификатору.
+     *
+     * @param fileId идентификатор файла
+     */
     @Override
     @Transactional
     public void deleteFile(long fileId) {
@@ -55,6 +74,12 @@ public class DataFileServiceImpl implements DataFileService {
         deleteFileFromLocalStorage(fileToDelete);
     }
 
+    /**
+     * Скачивание файла.
+     *
+     * @param fileId идентификатор файла
+     * @return массив данных
+     */
     @Override
     public byte[] downloadFileBytesById(long fileId) {
         try {
@@ -67,6 +92,12 @@ public class DataFileServiceImpl implements DataFileService {
         }
     }
 
+    /**
+     * Получение данных о сохраненном файле по идентификатору.
+     *
+     * @param fileId идентификатор файла
+     * @return данные о сохраненном файле
+     */
     @Override
     public DataFile findDataFileById(long fileId) {
         DataFile file = findFile(fileId);
@@ -74,6 +105,12 @@ public class DataFileServiceImpl implements DataFileService {
         return file;
     }
 
+    /**
+     * Поиск файлов, прикрепленных к посту.
+     *
+     * @param postId идентификатор поста
+     * @return список файлов, прикрепленных к посту
+     */
     @Override
     public List<DataFile> findFilesFromPost(long postId) {
         List<DataFile> filesFromPost = dataFileRepository.findAllFilesByPostId(postId);
@@ -81,6 +118,12 @@ public class DataFileServiceImpl implements DataFileService {
         return filesFromPost;
     }
 
+    /**
+     * Сохранение списка данных о файлах.
+     *
+     * @param dataFiles список данных о файлах
+     * @return сохраненный список данных о файлах
+     */
     @Override
     public List<DataFile> saveDataFiles(List<DataFile> dataFiles) {
         List<DataFile> savedFiles = dataFileRepository.saveAll(dataFiles);
@@ -88,6 +131,11 @@ public class DataFileServiceImpl implements DataFileService {
         return savedFiles;
     }
 
+    /**
+     * Удаление списка данных о файлах вместе с файлами, находящимися в хранилище.
+     *
+     * @param files список файлов
+     */
     @Override
     public void deleteFiles(List<DataFile> files) {
         List<Long> oldFileIds = files.stream()

@@ -86,7 +86,7 @@ public class PostController {
     public void deletePost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
                            @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь c id '{}' удаляет пост с id '{}'.", principal.getName(), postId);
-        postService.deletePost(principal.getName(), postId);
+        postService.deletePost(postId, principal.getName());
     }
 
     @GetMapping("/{postId}")

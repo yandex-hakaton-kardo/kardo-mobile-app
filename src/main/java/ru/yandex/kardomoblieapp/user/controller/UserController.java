@@ -95,10 +95,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Удаление профиля пользователя")
-    public void deleteUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
-                           @Parameter(hidden = true) Principal principal) {
+    public void deleteUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Удаление пользователя с id '{}'.", userId);
-        userService.deleteUser(principal.getName(), userId);
+        userService.deleteUser(userId);
     }
 
     @GetMapping("/{userId}")

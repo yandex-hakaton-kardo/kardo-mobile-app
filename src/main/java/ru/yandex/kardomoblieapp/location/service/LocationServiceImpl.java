@@ -25,7 +25,11 @@ public class LocationServiceImpl implements LocationService {
 
     private final CityRepository cityRepository;
 
-
+    /**
+     * Получение списка всех стран.
+     *
+     * @return список стран
+     */
     @Override
     public List<Country> getAllCountries() {
         List<Country> countries = countryRepository.findAllCountriesOrderByName();
@@ -33,6 +37,12 @@ public class LocationServiceImpl implements LocationService {
         return countries;
     }
 
+    /**
+     * Получение страны по идентификатору.
+     *
+     * @param countryId идентификатор страны
+     * @return найденная страна
+     */
     @Override
     public Country getCountryById(long countryId) {
         Country country = getCountry(countryId);
@@ -40,6 +50,12 @@ public class LocationServiceImpl implements LocationService {
         return country;
     }
 
+    /**
+     * Получение списка регионов страны.
+     *
+     * @param countryId идентификатор страны
+     * @return список регионов страны
+     */
     @Override
     public List<Region> getAllCountryRegions(long countryId) {
         List<Region> regions = regionRepository.findAllByCountryIdOrderByName(countryId);
@@ -47,6 +63,12 @@ public class LocationServiceImpl implements LocationService {
         return regions;
     }
 
+    /**
+     * Получение региона по идентификатору.
+     *
+     * @param regionId идентификатор региона
+     * @return найденный регион
+     */
     @Override
     public Region getRegionById(long regionId) {
         Region region = getRegion(regionId);
@@ -54,6 +76,12 @@ public class LocationServiceImpl implements LocationService {
         return region;
     }
 
+    /**
+     * Добавление города.
+     *
+     * @param city город
+     * @return сохраненный город
+     */
     @Override
     public City addCity(City city) {
         City savedCity = cityRepository.save(city);
@@ -61,6 +89,14 @@ public class LocationServiceImpl implements LocationService {
         return savedCity;
     }
 
+    /**
+     * Поиск города по его названию, стране и региону.
+     *
+     * @param cityName  название города
+     * @param countryId идентификатор страны
+     * @param regionId  идентификатор региона
+     * @return найденный город
+     */
     @Override
     public Optional<City> findCityByNameCountryAndRegion(String cityName, Long countryId, Long regionId) {
         Optional<City> city = cityRepository.findByNameAndCountryIdAndRegionId(cityName, countryId, regionId);
@@ -68,6 +104,9 @@ public class LocationServiceImpl implements LocationService {
         return city;
     }
 
+    /**
+     * Удаление всех добавленных городов.
+     */
     @Override
     public void deleteAllCities() {
         cityRepository.deleteAll();

@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.yandex.kardomoblieapp.TestUtils.POSTGRES_VERSION;
 
@@ -128,7 +129,7 @@ class ParticipationServiceImplTest {
         assertThat(participation, notNullValue());
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
-        assertThat(participation.getAvgScore(), closeTo(0.0, 0.01));
+        assertThat(participation.getAvgScore(), nullValue());
         assertThat(user.getName(), is(participationRequest.getName()));
         assertThat(user.getOverview(), is(participationRequest.getOverview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
@@ -148,7 +149,7 @@ class ParticipationServiceImplTest {
         assertThat(participation, notNullValue());
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
-        assertThat(participation.getAvgScore(), closeTo(0.0, 0.01));
+        assertThat(participation.getAvgScore(), nullValue());
         assertThat(user.getName(), is(participationRequest.getName()));
         assertThat(user.getOverview(), is(participationRequest.getOverview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
@@ -168,7 +169,7 @@ class ParticipationServiceImplTest {
         assertThat(participation, notNullValue());
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
-        assertThat(participation.getAvgScore(), closeTo(0.0, 0.01));
+        assertThat(participation.getAvgScore(), nullValue());
         assertThat(user.getName(), is(participationRequest.getName()));
         assertThat(user.getOverview(), is(participationRequest.getOverview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
@@ -188,7 +189,7 @@ class ParticipationServiceImplTest {
         assertThat(participation, notNullValue());
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.APPROVED));
-        assertThat(participation.getAvgScore(), closeTo(0.0, 0.01));
+        assertThat(participation.getAvgScore(), nullValue());
         assertThat(user.getName(), is(participationRequest.getName()));
         assertThat(user.getOverview(), is(participationRequest.getOverview()));
         assertThat(user.getEmail(), is("test@mail.ru"));

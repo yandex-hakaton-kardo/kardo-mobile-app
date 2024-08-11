@@ -101,11 +101,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
@@ -124,6 +119,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <finalName>kardo-mobile-app-back</finalName>
                 </configuration>
             </plugin>
         </plugins>

@@ -22,6 +22,7 @@ import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
 import ru.yandex.kardomoblieapp.user.model.FriendshipStatus;
 import ru.yandex.kardomoblieapp.user.model.User;
+import ru.yandex.kardomoblieapp.user.model.UserRole;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -182,7 +183,7 @@ class UserServiceImplTest {
     @DisplayName("Удаление пользователя")
     void deleteUser() {
         User savedUser = userService.createUser(user1);
-        userService.deleteUser(savedUser.getUsername(), savedUser.getId());
+        userService.deleteUser(savedUser.getId());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> userService.findUserById(savedUser.getId()));
@@ -443,6 +444,20 @@ class UserServiceImplTest {
                 () -> userService.findFullUserByUsername(unknownUsername));
 
         assertThat(ex.getLocalizedMessage(), is("Пользователь с никнеймом '" + unknownUsername + "' не найден."));
+    }
+
+    @Test
+    @DisplayName("Изменение роли пользователя")
+    void changeUserRole_whenChangedToAdmin_shouldReturnUserWithAdminRole() {
+        User savedUser = userService.createUser(user1);
+
+        assertThat(savedUser.getRole(), is(UserRole.USER));
+
+        User changed = userService.changeUserRole(savedUser.getId(), UserRole.ADMIN);
+
+        assertThat(changed, notNullValue());
+        assertThat(changed.getId(), is(savedUser.getId()));
+        assertThat(changed.getRole(), is(UserRole.ADMIN));
     }
 
     private User createUser(int id) {

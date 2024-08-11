@@ -55,6 +55,12 @@ public class EventServiceImpl implements EventService {
 
     private final LocationService locationService;
 
+    /**
+     * Добавление нового мероприятия.
+     *
+     * @param newEvent данные о новом мероприятии
+     * @return сохраненное мероприятие
+     */
     @Override
     @Transactional
     public Event createEvent(NewEventRequest newEvent) {
@@ -73,6 +79,13 @@ public class EventServiceImpl implements EventService {
         return savedEvent;
     }
 
+    /**
+     * Добавление нового этапа мероприятия.
+     *
+     * @param masterEventId идентификатор основного мероприятия
+     * @param newSubEvent   данные о новом этапе
+     * @return сохраненный этап мероприятия
+     */
     @Override
     @Transactional
     public Event createSubEvent(long masterEventId, NewSubEventRequest newSubEvent) {
@@ -94,6 +107,13 @@ public class EventServiceImpl implements EventService {
         return savedSubEvent;
     }
 
+    /**
+     * Обновление данных о мероприятии.
+     *
+     * @param eventId     идентификатор мероприятия
+     * @param updateEvent обновленные данные о мероприятии
+     * @return обновленное мероприятие
+     */
     @Override
     @Transactional
     public Event updateEvent(long eventId, EventUpdateRequest updateEvent) {
@@ -110,6 +130,11 @@ public class EventServiceImpl implements EventService {
         return updatedEvent;
     }
 
+    /**
+     * Удаление мероприятие по идентификатору.
+     *
+     * @param eventId идентификатор мероприятия
+     */
     @Override
     public void deleteEvent(long eventId) {
         getEvent(eventId);
@@ -117,6 +142,12 @@ public class EventServiceImpl implements EventService {
         log.info("Удалено мероприятие с id '{}'.", eventId);
     }
 
+    /**
+     * Поиск мероприятия по идентификатору.
+     *
+     * @param eventId идентификатор мероприятия
+     * @return найденное мероприятие
+     */
     @Override
     public Event findEventById(long eventId) {
         final Event event = getFullEvent(eventId);
@@ -124,6 +155,14 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
+    /**
+     * Поиск мероприятий по фильтру. Найденные мероприятия возвращаются постранично.
+     *
+     * @param searchFilter фильтр поиска
+     * @param page         номер страницы
+     * @param size         количество элементов на странице
+     * @return список найденных мероприятий
+     */
     @Override
     public List<Event> searchEvents(EventSearchFilter searchFilter, Integer page, Integer size) {
         final Pageable pageable = PageRequest.of(page, size);

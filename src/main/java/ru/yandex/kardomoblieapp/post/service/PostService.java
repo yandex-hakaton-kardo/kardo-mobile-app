@@ -15,7 +15,7 @@ public interface PostService {
 
     Post updatePost(String username, long postId, MultipartFile file, String content);
 
-    void deletePost(String username, long postId);
+    void deletePost(long postId, String username);
 
     PostWithLike findPostById(long postId, String username);
 
