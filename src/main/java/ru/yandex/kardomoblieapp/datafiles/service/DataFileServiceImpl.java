@@ -106,19 +106,6 @@ public class DataFileServiceImpl implements DataFileService {
     }
 
     /**
-     * Поиск файлов, прикрепленных к посту.
-     *
-     * @param postId идентификатор поста
-     * @return список файлов, прикрепленных к посту
-     */
-    @Override
-    public List<DataFile> findFilesFromPost(long postId) {
-        List<DataFile> filesFromPost = dataFileRepository.findAllFilesByPostId(postId);
-        log.info("Получение файлов, прикрепленных к посту с id '{}. Количество файлов: '{}'.", postId, filesFromPost.size());
-        return filesFromPost;
-    }
-
-    /**
      * Сохранение списка данных о файлах.
      *
      * @param dataFiles список данных о файлах

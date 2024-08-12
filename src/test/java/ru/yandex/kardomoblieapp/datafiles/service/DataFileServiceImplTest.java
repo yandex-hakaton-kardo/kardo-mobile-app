@@ -210,18 +210,6 @@ class DataFileServiceImplTest {
     }
 
     @Test
-    @DisplayName("Получение файла, прикрепленного к посту")
-    void findDataFileFromPost_whenFilesExists_shouldReturnFilesAttachedToPost() {
-        Post savedPost = postService.createPost(savedUser.getUsername(), file, "content");
-
-        List<DataFile> files = dataFileService.findFilesFromPost(savedPost.getId());
-
-        assertThat(files, notNullValue());
-        assertThat(files.size(), is(1));
-        assertThat(files.get(0).getId(), is(savedPost.getFile().getId()));
-    }
-
-    @Test
     @DisplayName("Сохранение нескольких файлов")
     @SneakyThrows
     void saveDataFiles_shouldReturnDataFilesWithNotNullId() {

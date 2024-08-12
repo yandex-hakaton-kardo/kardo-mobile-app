@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -95,6 +96,16 @@ public class ApplicationExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.getErrors().put(e.getRequestPartName(), e.getLocalizedMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        log.error(e.getLocalizedMessage());
+        return errorResponse;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectEventDatesException(IncorrectEventDatesException e) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.getErrors().put("error", e.getLocalizedMessage());
@@ -123,6 +134,7 @@ public class ApplicationExceptionHandler {
         return errorResponse;
     }
 
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleConstraintViolationException(ConstraintViolationException e) {
         ErrorResponse errorResponse = new ErrorResponse();

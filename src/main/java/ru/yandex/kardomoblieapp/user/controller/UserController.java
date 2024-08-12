@@ -2,12 +2,18 @@ package ru.yandex.kardomoblieapp.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +30,7 @@ import ru.yandex.kardomoblieapp.datafiles.dto.DataFileDto;
 import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.security.jwt.model.TokensResponse;
+import ru.yandex.kardomoblieapp.shared.exception.ErrorResponse;
 import ru.yandex.kardomoblieapp.user.dto.FriendshipDto;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
@@ -59,6 +66,17 @@ public class UserController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Регистрация пользователя в приложении")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Новый пользователь зарегистрирован", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = NewUserResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Введены некорректные данные", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "409", description = "Пользователь с данным именем или электронной почтой уже " +
+                    "существует", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public NewUserResponse createUser(@RequestBody @Valid @Parameter(description = "Регистрационные данные") NewUserRequest newUser) {
         log.info("Регистрация нового пользователя с email '{}'.", newUser.getEmail());
         final User userToAdd = userMapper.toModel(newUser);
@@ -68,6 +86,14 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "Аутентификация пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь успешно аутентифицировался, получены токены доступа",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = TokensResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не найден или введены неверный логин/пароль", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public TokensResponse fakeLogin(@Parameter(description = "Данные пользователя") @RequestBody UserLoginDetails email) {
         throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
     }
@@ -76,6 +102,13 @@ public class UserController {
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Выход из приложения")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Пользователь вышел из учетной записи"),
+            @ApiResponse(responseCode = "401", description = "Пользователь с введенным refresh токеном не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public void fakeLogout() {
         throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
     }
@@ -83,6 +116,18 @@ public class UserController {
     @PatchMapping("/{userId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Редактирование данных пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные пользователя успешно обновлены", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Введены некорректные данные", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public UserDto updateUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
                               @RequestBody @Valid @Parameter(description = "Обновленные параметры") UserUpdateRequest userUpdateRequest,
                               @Parameter(hidden = true) Principal principal) {
@@ -95,6 +140,16 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Удаление профиля пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Пользователь успешно удален", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public void deleteUser(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Удаление пользователя с id '{}'.", userId);
         userService.deleteUser(userId);
@@ -103,15 +158,39 @@ public class UserController {
     @GetMapping("/{userId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Поиск пользователя по идентификатору")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public UserDto findUserById(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение данных пользователя с id '{}'.", userId);
         final User user = userService.findUserById(userId);
         return userMapper.toDto(user);
     }
 
-    @PostMapping("/{userId}/avatar")
+    @PostMapping(value = "/{userId}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Обновление фотографии профиля")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Фотография профиля успешно загружена", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = DataFileDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Введены некорректные данные или не прикреплен файл", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "409", description = "Ошибка при сохранении файла", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public DataFileDto uploadProfilePicture(@PathVariable long userId,
                                             @RequestParam("avatar")
                                             @Parameter(description = "Файл фотографии") MultipartFile avatar,
@@ -124,6 +203,16 @@ public class UserController {
     @GetMapping(value = "/{userId}/avatar")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Получение фотографии профиля")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Фотография профиля найдена", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = DataFileDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Фотография профиля не найдена", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public DataFileDto getUserProfilePicture(@PathVariable
                                              @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
@@ -135,6 +224,17 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Удаление фотографии профиля")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Фотография профиля успешно удалена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "409", description = "Ошибка при удалении файла из локального хранилища", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public void deleteProfilePicture(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
                                      @Parameter(hidden = true) Principal principal) {
         log.info("Пользователь с id '{}' удаляет фотографию профиля.", userId);
@@ -144,6 +244,16 @@ public class UserController {
     @PutMapping("/{userId}/friends/{friendId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Добавление пользователя в друзья")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь добавлен в друзья", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = FriendshipDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public FriendshipDto addFriend(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
                                    @PathVariable @Parameter(description = "Идентификатор друга") long friendId) {
         log.info("Пользователь с id '{}' добавляет в друзья пользователя c id '{}'.", userId, friendId);
@@ -154,6 +264,16 @@ public class UserController {
     @GetMapping("/{userId}/friends")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Получение списка друзей пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Получен список друзей пользователя", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ShortUserDto.class)))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public List<ShortUserDto> getFriendsList(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
         log.info("Получение списка друзей пользователя с id '{}'.", userId);
         List<User> friends = userService.getFriendsList(userId);
@@ -163,6 +283,15 @@ public class UserController {
     @DeleteMapping("/{userId}/friends/{friendId}")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Удаление пользователя из друзей")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь удален из списка друзей"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public void deleteFriend(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId,
                              @PathVariable @Parameter(description = "Идентификатор друга") long friendId) {
         log.info("Пользователь с id '{}' удалил из друзей пользователя с id '{}'.", userId, friendId);
@@ -172,6 +301,14 @@ public class UserController {
     @GetMapping
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Поиск пользователей")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Получен список пользователей", content = {
+                    @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = UserDto.class)))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public List<UserDto> findAllUsers(@Parameter(description = "Фильтр поиска") UserSearchFilter filter,
                                       @RequestParam(defaultValue = "0")
                                       @Parameter(description = "Номер страницы") Integer page,
@@ -185,6 +322,16 @@ public class UserController {
     @GetMapping("/info")
     @SecurityRequirement(name = "JWT")
     @Operation(summary = "Поиск пользователя по никнейму")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Пользователь найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Пользователь не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public UserDto findUserByUsername(@RequestParam @Parameter(description = "Идентификатор пользователя") String username) {
         log.info("Получение данных пользователя с username '{}'.", username);
         final User user = userService.findFullUserByUsername(username);

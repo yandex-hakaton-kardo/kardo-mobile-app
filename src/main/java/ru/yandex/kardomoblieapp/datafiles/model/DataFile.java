@@ -5,8 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +12,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.yandex.kardomoblieapp.post.model.Post;
 
 @Entity
 @Table(name = "data_files")
@@ -39,8 +36,4 @@ public class DataFile {
 
     @Column(name = "file_path")
     private String filePath;
-
-    @OneToOne(mappedBy = "file")
-    @JoinColumn(name = "post_id")
-    private Post post;
 }
