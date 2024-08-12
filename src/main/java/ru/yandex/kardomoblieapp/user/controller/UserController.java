@@ -36,7 +36,6 @@ import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.ShortUserDto;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
-import ru.yandex.kardomoblieapp.user.dto.UserLoginDetails;
 import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.FriendshipMapper;
@@ -86,6 +85,7 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "Аутентификация пользователя")
+    @SecurityRequirement(name = "basicAuth")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователь успешно аутентифицировался, получены токены доступа",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = TokensResponse.class))}),
@@ -94,7 +94,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
-    public TokensResponse fakeLogin(@Parameter(description = "Данные пользователя") @RequestBody UserLoginDetails email) {
+    public TokensResponse fakeLogin() {
         throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
     }
 
