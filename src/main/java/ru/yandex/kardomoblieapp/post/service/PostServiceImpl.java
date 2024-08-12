@@ -68,7 +68,6 @@ public class PostServiceImpl implements PostService {
 
         DataFile uploadedFile = dataFileService.uploadFile(file, author.getId());
         newPost.setFile(uploadedFile);
-        uploadedFile.setPost(newPost);
         Post savedPost = postRepository.save(newPost);
         log.info("Пользователь с id '{}' создал пост с id '{}'.", author.getId(), savedPost.getId());
         return savedPost;

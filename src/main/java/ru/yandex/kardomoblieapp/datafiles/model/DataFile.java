@@ -39,8 +39,4 @@ public class DataFile {
 
     @Column(name = "file_path")
     private String filePath;
-
-    @OneToOne(mappedBy = "file")
-    @JoinColumn(name = "post_id")
-    private Post post;
 }

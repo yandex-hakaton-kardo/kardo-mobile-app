@@ -2,6 +2,10 @@ package ru.yandex.kardomoblieapp.event.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,6 +27,7 @@ import ru.yandex.kardomoblieapp.event.dto.NewSubEventRequest;
 import ru.yandex.kardomoblieapp.event.mapper.EventMapper;
 import ru.yandex.kardomoblieapp.event.model.Event;
 import ru.yandex.kardomoblieapp.event.service.EventService;
+import ru.yandex.kardomoblieapp.shared.exception.ErrorResponse;
 import ru.yandex.kardomoblieapp.shared.exception.IncorrectEventDatesException;
 
 import java.time.LocalDateTime;
@@ -42,6 +47,16 @@ public class EventAdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Создание нового мероприятия")
     @SecurityRequirement(name = "JWT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Мероприятие успешно создано", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = EventDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные мероприятия", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public EventDto createEvent(@RequestBody @Valid @Parameter(description = "Новое мероприятие") NewEventRequest newEvent) {
         log.info("Добавление нового мероприятия.");
         validateDateRange(newEvent.getEventStart(), newEvent.getEventEnd());
@@ -50,8 +65,21 @@ public class EventAdminController {
     }
 
     @PostMapping("/{masterEventId}")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Создание нового этапа мероприятия")
     @SecurityRequirement(name = "JWT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Этап мероприятие успешно создан", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = EventDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные мероприятия", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Мероприятие не найдено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public EventDto createSubEvent(@PathVariable
                                    @Parameter(description = "Идентификатор родительского мероприятия")
                                    long masterEventId,
@@ -66,6 +94,18 @@ public class EventAdminController {
     @PatchMapping("/{eventId}")
     @Operation(summary = "Обновление данных мероприятия")
     @SecurityRequirement(name = "JWT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Мероприятие успешно обновлено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = EventDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Некорректные данные мероприятия", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Мероприятие не найдено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public EventDto updateEvent(@PathVariable @Parameter(description = "Идентификатор мероприятия") long eventId,
                                 @RequestBody @Valid @Parameter(description = "Обновленное мероприятие") EventUpdateRequest updateRequest) {
         log.info("Обновление данных мероприятия c id '{}'.", eventId);
@@ -77,6 +117,16 @@ public class EventAdminController {
     @Operation(summary = "Удаление мероприятия")
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Мероприятие успешно удалено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = EventDto.class))}),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Срок действия токена доступа истек"),
+            @ApiResponse(responseCode = "404", description = "Мероприятие не найдено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
     public void deleteEvent(@PathVariable @Parameter(description = "Идентификатор мероприятия") long eventId) {
         log.info("Обновление данных мероприятия c id '{}'.", eventId);
         eventService.deleteEvent(eventId);
