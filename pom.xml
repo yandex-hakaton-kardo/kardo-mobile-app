@@ -108,6 +108,7 @@
     </dependencies>
 
     <build>
+        <finalName>kardo-mobile-app-back</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
