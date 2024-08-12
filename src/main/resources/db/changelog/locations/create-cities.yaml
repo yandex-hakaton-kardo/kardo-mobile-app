@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-cities
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: cities
+            columns:
+              - column:
+                  name: city_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_cities
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: country_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_cities_countries
+                    references: countries(country_id)
+              - column:
+                  name: region_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_cities_regions
+                    references: regions(region_id)

@@ -1,0 +1,106 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-users
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_users
+                    nullable: false
+              - column:
+                  name: username
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: second_name
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: surname
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: date_of_birth
+                  type: DATE
+                  constraints:
+                    nullable: true
+              - column:
+                  name: email
+                  type: VARCHAR(50)
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: unq_email
+                    nullable: false
+              - column:
+                  name: password
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone_number
+                  type: VARCHAR(15)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: country_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_countries
+                    references: countries(country_id)
+                    nullable: true
+              - column:
+                  name: region_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_regions
+                    references: regions(region_id)
+                    nullable: true
+              - column:
+                  name: city_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_cities
+                    references: cities(city_id)
+                    nullable: true
+              - column:
+                  name: gender
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: profile_picture_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_users_data_files
+                    references: data_files(data_file_id)
+              - column:
+                  name: overview
+                  type: VARCHAR(500)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: website
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: role
+                  type: VARCHAR(10)
+                  defaultValue: USER

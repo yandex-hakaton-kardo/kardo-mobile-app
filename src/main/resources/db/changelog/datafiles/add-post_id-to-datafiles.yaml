@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-post_id-to-datafiles
+      author: vvbakhanovich
+      changes:
+        - addColumn:
+            tableName: data_files
+            columns:
+              - column:
+                  name: post_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_posts_datafiles
+                    references: posts(post_id)

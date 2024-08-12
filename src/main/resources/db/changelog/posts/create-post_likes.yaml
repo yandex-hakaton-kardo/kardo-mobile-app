@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-post_likes
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: post_likes
+            columns:
+              - column:
+                  name: post_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_posts_post_likes
+                    references: posts(post_id)
+                    primaryKey: true
+                    primaryKeyName: pk_post_likes
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_users_post_likes
+                    references: users(user_id)
+                    primaryKey: true
+                    primaryKeyName: pk_post_likes

@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-friendship
+      author: vvbakhanovich
+      changes:
+        - createTable:
+            tableName: friendship
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_friendship_users
+                    references: users(user_id)
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_friendship_users
+              - column:
+                  name: friend_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_friendship_friends
+                    references: users(user_id)
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_friendship_users
+              - column:
+                  name: status
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
