@@ -43,7 +43,8 @@ public class EventSpecification {
             return eventStartAfter(startRange);
         }
 
-        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("eventStart"), startRange, endRange);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("eventStart"), startRange,
+                endRange.plusDays(1));
     }
 
     public static Specification<Event> textInNameOrDescription(String text) {

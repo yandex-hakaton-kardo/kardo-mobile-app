@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-more-activities
+      author: admin
+      changes:
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'BMX'
+        - insert:
+            tableName: activities
+            columns:
+              - column:
+                  name: name
+                  value: 'Кикскутеринг'
