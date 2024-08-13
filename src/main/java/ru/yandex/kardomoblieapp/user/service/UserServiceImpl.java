@@ -15,6 +15,7 @@ import ru.yandex.kardomoblieapp.location.model.City;
 import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
 import ru.yandex.kardomoblieapp.location.service.LocationService;
+import ru.yandex.kardomoblieapp.shared.exception.InvalidDateOfBirthException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
 import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
@@ -29,6 +30,7 @@ import ru.yandex.kardomoblieapp.user.repository.FriendshipRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserRepository;
 import ru.yandex.kardomoblieapp.user.repository.UserSpecification;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +41,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
+
+    private static final int OLDEST_AGE = 100;
+
+    private static final int YOUNGEST_AGE = 6;
 
     private final UserRepository userRepository;
 
@@ -79,6 +85,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateUser(long userId, UserUpdateRequest userUpdateRequest) {
         final User user = getUser(userId);
+        validateDateOfBirth(userUpdateRequest.getDateOfBirth());
         userMapper.updateUser(userUpdateRequest, user);
         final LocationInfo locationInfo = LocationInfo.builder()
                 .countryId(userUpdateRequest.getCountryId())
@@ -328,6 +335,17 @@ public class UserServiceImpl implements UserService {
                         .build();
                 City savedCity = locationService.addCity(newCity);
                 user.setCity(savedCity);
+            }
+        }
+    }
+
+    private void validateDateOfBirth(LocalDate dateOfBirth) {
+        if (dateOfBirth != null) {
+            final LocalDate currentDate = LocalDate.now();
+            final LocalDate youngerThanDate = currentDate.minusYears(OLDEST_AGE);
+            final LocalDate olderThanDate = currentDate.minusYears(YOUNGEST_AGE);
+            if (dateOfBirth.isBefore(youngerThanDate) || dateOfBirth.isAfter(olderThanDate)) {
+                throw new InvalidDateOfBirthException("Недопустимое значение даты рождения '" + dateOfBirth + "'.");
             }
         }
     }
