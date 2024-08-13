@@ -56,3 +56,6 @@ databaseChangeLog:
   - include:
       file: events/create-scores.yaml
       relativeToChangelogFile: true
+  - include:
+      file: events/modify-link-length.yaml
+      relativeToChangelogFile: true

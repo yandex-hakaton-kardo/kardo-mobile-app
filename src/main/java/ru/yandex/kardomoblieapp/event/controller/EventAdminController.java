@@ -128,7 +128,7 @@ public class EventAdminController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public void deleteEvent(@PathVariable @Parameter(description = "Идентификатор мероприятия") long eventId) {
-        log.info("Обновление данных мероприятия c id '{}'.", eventId);
+        log.info("Удаление мероприятия c id '{}'.", eventId);
         eventService.deleteEvent(eventId);
     }
 
