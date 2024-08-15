@@ -1,4 +1,4 @@
-# Backernd для мобильного приложения КАРДО
+# Backend для мобильного приложения КАРДО
 
 ### Приложение разрабатывали:
 Владимир Баханович ([vvbakhanovich](https://github.com/vvbakhanovich)), Руслан Якупов ([YakupovRR](https://github.com/YakupovRR)).
