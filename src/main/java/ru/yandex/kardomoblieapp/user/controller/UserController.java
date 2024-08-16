@@ -77,7 +77,7 @@ public class UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public NewUserResponse createUser(@RequestBody @Valid @Parameter(description = "Регистрационные данные") NewUserRequest newUser) {
-        log.info("Регистрация нового пользователя с email '{}'.", newUser.getEmail());
+        log.debug("Регистрация нового пользователя с email '{}'.", newUser.getEmail());
         final User userToAdd = userMapper.toModel(newUser);
         final User addedUser = userService.createUser(userToAdd);
         return userMapper.toNewUserDto(addedUser);
@@ -169,7 +169,7 @@ public class UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public UserDto findUserById(@PathVariable @Parameter(description = "Идентификатор пользователя") long userId) {
-        log.info("Получение данных пользователя с id '{}'.", userId);
+        log.debug("Получение данных пользователя с id '{}'.", userId);
         final User user = userService.findUserById(userId);
         return userMapper.toDto(user);
     }
@@ -215,7 +215,7 @@ public class UserController {
     })
     public DataFileDto getUserProfilePicture(@PathVariable
                                              @Parameter(description = "Идентификатор пользователя") long userId) {
-        log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
+        log.debug("Получение фотографии профиля пользователя с id '{}'.", userId);
         DataFile profilePicture = userService.getProfilePicture(userId);
         return dataFileMapper.toDto(profilePicture);
     }
@@ -314,7 +314,7 @@ public class UserController {
                                       @Parameter(description = "Номер страницы") Integer page,
                                       @RequestParam(defaultValue = "10")
                                       @Parameter(description = "Количество элементов на странице") Integer size) {
-        log.info("Получение списка всех пользователей. page: '{}', size: '{}'.", page, size);
+        log.debug("Получение списка всех пользователей. page: '{}', size: '{}'.", page, size);
         List<User> users = userService.findAllUsers(filter, page, size);
         return userMapper.toDtoList(users);
     }
@@ -333,7 +333,7 @@ public class UserController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public UserDto findUserByUsername(@RequestParam @Parameter(description = "Идентификатор пользователя") String username) {
-        log.info("Получение данных пользователя с username '{}'.", username);
+        log.debug("Получение данных пользователя с username '{}'.", username);
         final User user = userService.findFullUserByUsername(username);
         return userMapper.toDto(user);
     }

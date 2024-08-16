@@ -74,6 +74,7 @@ public class DataFileServiceImpl implements DataFileService {
         final DataFile fileToDelete = findFile(fileId);
         dataFileRepository.deleteById(fileId);
         deleteFileFromLocalStorage(fileToDelete);
+        log.info("Файл с id '{}' был удален.", fileId);
     }
 
     /**
@@ -104,7 +105,7 @@ public class DataFileServiceImpl implements DataFileService {
     @Override
     public DataFile findDataFileById(long fileId) {
         DataFile file = findFile(fileId);
-        log.info("Получение файла с id '{}'.", fileId);
+        log.debug("Получение файла с id '{}'.", fileId);
         return file;
     }
 

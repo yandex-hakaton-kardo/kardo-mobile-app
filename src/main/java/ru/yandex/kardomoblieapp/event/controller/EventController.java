@@ -71,7 +71,7 @@ public class EventController {
     })
     @SecurityRequirement(name = "JWT")
     public EventDto findEventById(@PathVariable @Parameter(description = "Идентификатор мероприятия") long eventId) {
-        log.info("Поиск мероприятия с id '{}'.", eventId);
+        log.debug("Поиск мероприятия с id '{}'.", eventId);
         final Event event = eventService.findEventById(eventId);
         return eventMapper.toDto(event);
     }
@@ -92,7 +92,7 @@ public class EventController {
                                        @Parameter(description = "Номер страницы") Integer page,
                                        @RequestParam(defaultValue = "10")
                                        @Parameter(description = "Количество постов на странице") Integer size) {
-        log.info("Поиск мероприятий.");
+        log.debug("Поиск мероприятий.");
         final List<Event> events = eventService.searchEvents(searchFilter, page, size);
         return eventMapper.toDtoList(events);
     }
@@ -109,7 +109,7 @@ public class EventController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public List<ActivityDto> findAllActivities() {
-        log.info("Получение списка направлений");
+        log.debug("Получение списка направлений");
         final List<Activity> activities = activityService.findAll();
         return activityMapper.toDtoList(activities);
     }
@@ -136,7 +136,7 @@ public class EventController {
                                              @PathVariable long eventId,
                                              @Parameter(description = "Идентификатор пользователя")
                                              @PathVariable long userId) {
-        log.info("Пользователь с id '{} оставляет заявку на участие в мероприятии с id '{}'.", userId, eventId);
+        log.debug("Пользователь с id '{} оставляет заявку на участие в мероприятии с id '{}'.", userId, eventId);
         Participation participation = participationService.addParticipation(participationRequest, eventId, userId);
         return participationMapper.toDto(participation);
     }

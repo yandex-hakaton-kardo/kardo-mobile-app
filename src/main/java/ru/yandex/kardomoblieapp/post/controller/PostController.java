@@ -163,7 +163,7 @@ public class PostController {
     })
     public PostWithLikeDto getPostById(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
                                        @Parameter(hidden = true) Principal principal) {
-        log.info("Пользователь c id '{}' запрашивает пост с id '{}'.", principal.getName(), postId);
+        log.debug("Пользователь c id '{}' запрашивает пост с id '{}'.", principal.getName(), postId);
         final PostWithLike post = postService.findPostById(postId, principal.getName());
         return postMapper.toDto(post);
     }
@@ -180,7 +180,7 @@ public class PostController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public List<PostDto> getAllPostByUser(@RequestParam @Parameter(description = "Идентификатор поста") long userId) {
-        log.info("Получение всех постов пользователя.");
+        log.debug("Получение всех постов пользователя с id '{}'.", userId);
         List<Post> userPosts = postService.findPostsFromUser(userId);
         return postMapper.toDtoList(userPosts);
     }
@@ -202,7 +202,7 @@ public class PostController {
     })
     public long addLikeToPost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
                               @Parameter(hidden = true) Principal principal) {
-        log.info("Пользователь с id '{}' ставит лайк посту с id '{}'.", principal.getName(), postId);
+        log.debug("Пользователь с id '{}' ставит лайк посту с id '{}'.", principal.getName(), postId);
         return postService.addLikeToPost(principal.getName(), postId);
     }
 
@@ -221,7 +221,7 @@ public class PostController {
                                       @Parameter(description = "Номер страницы") Integer page,
                                       @RequestParam(defaultValue = "10")
                                       @Parameter(description = "Количество постов на странице") Integer size) {
-        log.info("Получение ленты постов. from = '{}', size = '{}'.", page, size);
+        log.debug("Получение ленты постов. from = '{}', size = '{}'.", page, size);
         List<Post> feed = postService.getPostsFeed(page, size);
         return postMapper.toDtoList(feed);
     }
@@ -244,7 +244,7 @@ public class PostController {
                                             @RequestParam(defaultValue = "LIKES")
                                             @Parameter(description = "Тип сортировки") PostSort sort,
                                             @Parameter(hidden = true) Principal principal) {
-        log.info("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
+        log.debug("Получение рекомендаций. from: '{}, size: '{}', sort: '{}'.", page, size, sort);
         List<Post> recommendations = postService.getRecommendations(principal.getName(), page, size, sort);
         return postMapper.toDtoList(recommendations);
     }
@@ -267,7 +267,7 @@ public class PostController {
     public CommentDto addCommentToPost(@PathVariable @Parameter(description = "Идентификатор поста") long postId,
                                        @RequestBody @Valid @Parameter(description = "Новый комментарий") CommentRequest commentRequest,
                                        @Parameter(hidden = true) Principal principal) {
-        log.info("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", principal.getName(), postId);
+        log.debug("Пользователь с id '{}' добавляет комментарий к посту с id '{}'.", principal.getName(), postId);
         Comment newComment = commentMapper.toModel(commentRequest);
         Comment comment = postService.addCommentToPost(principal.getName(), postId, newComment);
         return commentMapper.toDto(comment);
@@ -341,7 +341,6 @@ public class PostController {
                                      @Parameter(description = "Номер страницы") Integer page,
                                      @RequestParam(defaultValue = "10")
                                      @Parameter(description = "Количество постов на странице") Integer size) {
-        log.info("Поиск постов по фильтру");
         final List<Post> posts = postService.searchPosts(searchFilter, page, size);
         return postMapper.toDtoList(posts);
     }

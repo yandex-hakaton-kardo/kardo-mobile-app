@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
         userToAdd.setPassword(passwordEncoder.encode(userToAdd.getPassword()));
         userToAdd.setRole(UserRole.USER);
         final User savedUser = userRepository.save(userToAdd);
-        log.info("Пользователь с id '{}' был сохранен.", savedUser.getId());
+        log.debug("Пользователь с id '{}' был сохранен.", savedUser.getId());
         return savedUser;
     }
 
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserById(long userId) {
         final User user = getUser(userId);
-        log.info("Получены данные пользователя с id '{}'.", userId);
+        log.debug("Получены данные пользователя с id '{}'.", userId);
         return user;
     }
 
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
     public DataFile getProfilePicture(long userId) {
         final User user = getUser(userId);
         final DataFile profilePicture = user.getProfilePicture();
-        log.info("Получение фотографии профиля пользователя с id '{}'.", userId);
+        log.debug("Получение фотографии профиля пользователя с id '{}'.", userId);
         return profilePicture;
     }
 
@@ -254,9 +254,7 @@ public class UserServiceImpl implements UserService {
         final Pageable pageable = PageRequest.of(page, size);
         final List<Specification<User>> specifications = userSearchFilterToSpecifications(filter);
         final Specification<User> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
-        final List<User> users = userRepository.findAll(resultSpec, pageable).getContent();
-        log.info("Получен список всех пользователей");
-        return users;
+        return userRepository.findAll(resultSpec, pageable).getContent();
     }
 
     /**
@@ -269,7 +267,7 @@ public class UserServiceImpl implements UserService {
     public User findFullUserByUsername(String username) {
         final User user = userRepository.findFullUserByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Пользователь с никнеймом '" + username + "' не найден."));
-        log.info("Получен пользователь с username '{}'.", username);
+        log.debug("Получен пользователь с username '{}'.", username);
         return user;
     }
 

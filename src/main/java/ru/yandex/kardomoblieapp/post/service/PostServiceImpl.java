@@ -69,7 +69,7 @@ public class PostServiceImpl implements PostService {
         DataFile uploadedFile = dataFileService.uploadFile(file, author.getId());
         newPost.setFile(uploadedFile);
         Post savedPost = postRepository.save(newPost);
-        log.info("Пользователь с id '{}' создал пост с id '{}'.", author.getId(), savedPost.getId());
+        log.debug("Пользователь с id '{}' создал пост с id '{}'.", author.getId(), savedPost.getId());
         return savedPost;
     }
 
@@ -136,7 +136,7 @@ public class PostServiceImpl implements PostService {
         long likes = postLikeRepository.findPostLikesCount(postId);
         post.setLikes(likes);
         final boolean isPostLikedByUser = postLikeRepository.existsById(PostLikeId.of(post, user));
-        log.info("Получение поста с id '{}'.", postId);
+        log.debug("Получение поста с id '{}'.", postId);
         return new PostWithLike(post, isPostLikedByUser);
     }
 
@@ -149,7 +149,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> findPostsFromUser(long userId) {
         List<Post> posts = postRepository.findPostsByAuthorId(userId);
-        log.info("Получение постов пользователя с id '{}'. Количество постов: '{}'.", userId, posts.size());
+        log.debug("Получение постов пользователя с id '{}'. Количество постов: '{}'.", userId, posts.size());
         return posts;
     }
 
@@ -172,18 +172,18 @@ public class PostServiceImpl implements PostService {
 
         if (like.isEmpty()) {
             postLikeRepository.save(new PostLike(likeId));
-            log.info("Пользователь с id '{}' поставил лайк посту с id '{}'.", user.getId(),
+            log.debug("Пользователь с id '{}' поставил лайк посту с id '{}'.", user.getId(),
                     postId);
         } else {
             postLikeRepository.deleteById(likeId);
-            log.info("Пользователь с id '{}' попытался повторно поставить лайк посту с id '{}'. Лайк удален.",
+            log.debug("Пользователь с id '{}' попытался повторно поставить лайк посту с id '{}'. Лайк удален.",
                     user.getId(), postId);
         }
 
         long likesCount = postLikeRepository.findPostLikesCount(postId);
         post.setLikes(likesCount);
         postRepository.save(post);
-        log.info("Количество лайков поста с id '{}': '{}'.", postId, likesCount);
+        log.debug("Количество лайков поста с id '{}': '{}'.", postId, likesCount);
         return likesCount;
     }
 
@@ -199,7 +199,7 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(page, size,
                 Sort.by("views", "createdOn").descending());
         List<Post> feed = postRepository.getPostsFeed(pageable);
-        log.info("Получен фид постов размером ");
+        log.debug("Получен фид постов размером ");
         return feed;
     }
 
@@ -221,7 +221,7 @@ public class PostServiceImpl implements PostService {
         Comment savedComment = commentRepository.save(newComment);
         post.addComment(savedComment);
         postRepository.save(post);
-        log.info("Пользователь с id '{} оставил комментарий на пост с id '{}'.", author.getId(), postId);
+        log.debug("Пользователь с id '{} оставил комментарий на пост с id '{}'.", author.getId(), postId);
         return savedComment;
     }
 
@@ -275,7 +275,7 @@ public class PostServiceImpl implements PostService {
         friendsIds.add(user.getId());
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.name().toLowerCase()).descending());
         List<Post> recommendations = postRepository.findRecommendations(friendsIds, pageable);
-        log.info("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", user.getId(), recommendations.size());
+        log.debug("Получен список рекомендаций для пользователя с id '{}' длиной '{}'.", user.getId(), recommendations.size());
         return recommendations;
     }
 
@@ -292,9 +292,7 @@ public class PostServiceImpl implements PostService {
         final Pageable pageable = PageRequest.of(page, size);
         final List<Specification<Post>> specifications = postSearchFilterToSpecifications(searchFilter);
         final Specification<Post> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
-        final List<Post> posts = postRepository.findAll(resultSpec, pageable).getContent();
-        log.info("Получен список постов.");
-        return posts;
+        return postRepository.findAll(resultSpec, pageable).getContent();
     }
 
     private List<Specification<Post>> postSearchFilterToSpecifications(PostSearchFilter searchFilter) {

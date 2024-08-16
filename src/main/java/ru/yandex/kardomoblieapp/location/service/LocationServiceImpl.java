@@ -33,7 +33,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public List<Country> getAllCountries() {
         List<Country> countries = countryRepository.findAllCountriesOrderByName();
-        log.info("Получен список всех стран");
+        log.debug("Получен список всех стран");
         return countries;
     }
 
@@ -46,7 +46,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public Country getCountryById(long countryId) {
         Country country = getCountry(countryId);
-        log.info("Получена страна с id '{}'.", countryId);
+        log.debug("Получена страна с id '{}'.", countryId);
         return country;
     }
 
@@ -59,7 +59,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public List<Region> getAllCountryRegions(long countryId) {
         List<Region> regions = regionRepository.findAllByCountryIdOrderByName(countryId);
-        log.info("Получены все регионы страны с id '{}'.", countryId);
+        log.debug("Получены все регионы страны с id '{}'.", countryId);
         return regions;
     }
 
@@ -72,7 +72,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public Region getRegionById(long regionId) {
         Region region = getRegion(regionId);
-        log.info("Получен регион с id '{}'.", regionId);
+        log.debug("Получен регион с id '{}'.", regionId);
         return region;
     }
 
@@ -85,7 +85,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public City addCity(City city) {
         City savedCity = cityRepository.save(city);
-        log.info("Добавлен город c id '{}'.", savedCity.getId());
+        log.debug("Добавлен город c id '{}'.", savedCity.getId());
         return savedCity;
     }
 
@@ -100,7 +100,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public Optional<City> findCityByNameCountryAndRegion(String cityName, Long countryId, Long regionId) {
         Optional<City> city = cityRepository.findByNameAndCountryIdAndRegionId(cityName, countryId, regionId);
-        log.info("Поиск наличия города с названием '{}' и регионом с id'{}'.", cityName, regionId);
+        log.debug("Поиск наличия города с названием '{}' и регионом с id'{}'.", cityName, regionId);
         return city;
     }
 
