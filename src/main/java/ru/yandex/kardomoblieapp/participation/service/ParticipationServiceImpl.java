@@ -68,7 +68,7 @@ public class ParticipationServiceImpl implements ParticipationService {
                 .build();
         setAutomaticApprove(participationRequest, participation);
         final Participation savedParticipation = participationRepository.save(participation);
-        log.info("Добавлена заявка на участие с id '{}'.", participation.getId());
+        log.debug("Добавлена заявка на участие с id '{}'.", participation.getId());
         return savedParticipation;
     }
 
@@ -144,7 +144,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         } else {
             participations = participationRepository.findParticipationsByUserIdAndType(userId, type);
         }
-        log.info("Получен список заявок пользователя с id '{}'.", userId);
+        log.debug("Получен список заявок пользователя с id '{}'.", userId);
         return participations;
     }
 
@@ -157,7 +157,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Override
     public Participation findParticipationById(long participationId) {
         final Participation participation = getParticipation(participationId);
-        log.info("Получена заявка с id '{}'.", participationId);
+        log.debug("Получена заявка с id '{}'.", participationId);
         return participation;
     }
 

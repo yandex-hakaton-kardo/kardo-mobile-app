@@ -120,7 +120,7 @@ public class ParticipationController {
                                                           @RequestParam(required = false)
                                                           @Parameter(description = "Роль пользователя в мероприятии")
                                                           ParticipantType type) {
-        log.info("Получение заявок пользователя c id '{} и ролью '{}'.", userId, type);
+        log.debug("Получение заявок пользователя c id '{} и ролью '{}'.", userId, type);
         final List<Participation> participations = participationService.findUsersParticipations(userId, type);
         return participationMapper.toDtoList(participations);
     }
@@ -140,7 +140,7 @@ public class ParticipationController {
     })
     public ParticipationDto findParticipationById(@Parameter(description = "Идентификатор заявки")
                                                   @PathVariable long participationId) {
-        log.info("Получение заявки c id '{}'.", participationId);
+        log.debug("Получение заявки c id '{}'.", participationId);
         final Participation participation = participationService.findParticipationById(participationId);
         return participationMapper.toDto(participation);
     }
