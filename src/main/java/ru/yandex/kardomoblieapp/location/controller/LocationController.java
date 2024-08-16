@@ -52,7 +52,7 @@ public class LocationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public List<CountryDto> getAllCountries() {
-        log.info("Получение списка стран.");
+        log.debug("Получение списка стран.");
         List<Country> countries = locationService.getAllCountries();
         return countryMapper.toDtoList(countries);
     }
@@ -70,7 +70,7 @@ public class LocationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public CountryDto getCountryById(@PathVariable @Parameter(description = "Идентификатор страны") long countryId) {
-        log.info("Получение списка стран.");
+        log.debug("Получение списка стран.");
         Country country = locationService.getCountryById(countryId);
         return countryMapper.toDto(country);
     }
@@ -88,7 +88,7 @@ public class LocationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public List<RegionDto> getAllRegionsByCountryId(@PathVariable @Parameter(description = "Идентификатор страны") long countryId) {
-        log.info("Получение списка регионов страны с id '{}'.", countryId);
+        log.debug("Получение списка регионов страны с id '{}'.", countryId);
         List<Region> regions = locationService.getAllCountryRegions(countryId);
         return regionMapper.toDtoList(regions);
     }
@@ -107,7 +107,7 @@ public class LocationController {
     })
     public RegionDto getRegionById(@PathVariable @Parameter(description = "Идентификатор страны") long countryId,
                                    @PathVariable @Parameter(description = "Идентификатор региона") long regionId) {
-        log.info("Получение региона с id '{}' страны с id '{}'.", regionId, countryId);
+        log.debug("Получение региона с id '{}' страны с id '{}'.", regionId, countryId);
         Region region = locationService.getRegionById(regionId);
         return regionMapper.toDto(region);
     }

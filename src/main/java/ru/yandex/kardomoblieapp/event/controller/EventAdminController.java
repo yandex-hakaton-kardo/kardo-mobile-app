@@ -58,7 +58,7 @@ public class EventAdminController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
     })
     public EventDto createEvent(@RequestBody @Valid @Parameter(description = "Новое мероприятие") NewEventRequest newEvent) {
-        log.info("Добавление нового мероприятия.");
+        log.debug("Добавление нового мероприятия.");
         validateDateRange(newEvent.getEventStart(), newEvent.getEventEnd());
         final Event savedEvent = eventService.createEvent(newEvent);
         return eventMapper.toDto(savedEvent);
@@ -85,7 +85,7 @@ public class EventAdminController {
                                    long masterEventId,
                                    @RequestBody @Valid @Parameter(description = "Новый этап мероприятия")
                                    NewSubEventRequest subEventDto) {
-        log.info("Добавление нового этапа мероприятия с id '{}'.", masterEventId);
+        log.debug("Добавление нового этапа мероприятия с id '{}'.", masterEventId);
         validateDateRange(subEventDto.getEventStart(), subEventDto.getEventEnd());
         final Event savedSubEvent = eventService.createSubEvent(masterEventId, subEventDto);
         return eventMapper.toDto(savedSubEvent);

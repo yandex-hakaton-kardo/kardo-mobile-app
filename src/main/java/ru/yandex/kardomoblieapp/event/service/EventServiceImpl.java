@@ -75,7 +75,7 @@ public class EventServiceImpl implements EventService {
                 .build();
         setLocationToEvent(locationInfo, event);
         final Event savedEvent = eventRepository.save(event);
-        log.info("Добавлено новое мероприятие с id '{}'.", savedEvent.getId());
+        log.debug("Добавлено новое мероприятие с id '{}'.", savedEvent.getId());
         return savedEvent;
     }
 
@@ -103,7 +103,7 @@ public class EventServiceImpl implements EventService {
         setLocationToEvent(locationInfo, subEvent);
         validateSubEventDates(subEvent, masterEvent);
         final Event savedSubEvent = eventRepository.save(subEvent);
-        log.info("Добавлен этап с id '{}' для мероприятия с id '{}'.", savedSubEvent.getId(), masterEventId);
+        log.debug("Добавлен этап с id '{}' для мероприятия с id '{}'.", savedSubEvent.getId(), masterEventId);
         return savedSubEvent;
     }
 
@@ -151,7 +151,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event findEventById(long eventId) {
         final Event event = getFullEvent(eventId);
-        log.info("Найдено мероприятие с id '{}'.", eventId);
+        log.debug("Найдено мероприятие с id '{}'.", eventId);
         return event;
     }
 
@@ -169,7 +169,7 @@ public class EventServiceImpl implements EventService {
         final List<Specification<Event>> specifications = eventSearchFilterToSpecifications(searchFilter);
         final Specification<Event> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
         final List<Event> events = eventRepository.findAll(getSort(searchFilter.getSort(), resultSpec), pageable).getContent();
-        log.info("Получен список событий размером '{}'.", events.size());
+        log.debug("Получен список событий размером '{}'.", events.size());
         return events;
     }
 

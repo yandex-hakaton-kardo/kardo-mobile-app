@@ -38,6 +38,7 @@ public class DataFileServiceImpl implements DataFileService {
      * @return данные о загруженном файле.
      */
     @Override
+    @Transactional
     public DataFile uploadFile(MultipartFile fileToUpload, long userId) {
         final DataFile uploadedFile = createDataFileAndMoveToUserDirectory(fileToUpload, userId);
         final DataFile savedFile = dataFileRepository.save(uploadedFile);
@@ -53,6 +54,7 @@ public class DataFileServiceImpl implements DataFileService {
      * @return данные о загруженных файлах.
      */
     @Override
+    @Transactional
     public List<DataFile> uploadMultipleFiles(List<MultipartFile> files, long userId) {
         final List<DataFile> dataFiles = new ArrayList<>();
         files.forEach(file -> dataFiles.add(createDataFileAndMoveToUserDirectory(file, userId)));
@@ -72,6 +74,7 @@ public class DataFileServiceImpl implements DataFileService {
         final DataFile fileToDelete = findFile(fileId);
         dataFileRepository.deleteById(fileId);
         deleteFileFromLocalStorage(fileToDelete);
+        log.info("Файл с id '{}' был удален.", fileId);
     }
 
     /**
@@ -81,6 +84,7 @@ public class DataFileServiceImpl implements DataFileService {
      * @return массив данных
      */
     @Override
+    @Transactional
     public byte[] downloadFileBytesById(long fileId) {
         try {
             DataFile file = findFile(fileId);
@@ -101,7 +105,7 @@ public class DataFileServiceImpl implements DataFileService {
     @Override
     public DataFile findDataFileById(long fileId) {
         DataFile file = findFile(fileId);
-        log.info("Получение файла с id '{}'.", fileId);
+        log.debug("Получение файла с id '{}'.", fileId);
         return file;
     }
 
@@ -124,6 +128,7 @@ public class DataFileServiceImpl implements DataFileService {
      * @param files список файлов
      */
     @Override
+    @Transactional
     public void deleteFiles(List<DataFile> files) {
         List<Long> oldFileIds = files.stream()
                 .map(DataFile::getId)
