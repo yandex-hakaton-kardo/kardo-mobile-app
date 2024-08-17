@@ -98,6 +98,20 @@ public class UserController {
         throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
     }
 
+    @PostMapping("/tokens/refresh")
+    @SecurityRequirement(name = "JWT")
+    @Operation(summary = "Получение нового access токена на основе текущего refresh токена пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Получен новый access токен на основе текущего refresh токена"),
+            @ApiResponse(responseCode = "401", description = "Пользователь с введенным refresh токеном не найден", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Произошла неизвестная ошибка", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    public void fakeGetNewAccessToken() {
+        throw new IllegalStateException("Данный эндпоинт реализован на уровне Spring Security.");
+    }
+
     @PostMapping("/logout")
     @SecurityRequirement(name = "JWT")
     @ResponseStatus(HttpStatus.NO_CONTENT)
