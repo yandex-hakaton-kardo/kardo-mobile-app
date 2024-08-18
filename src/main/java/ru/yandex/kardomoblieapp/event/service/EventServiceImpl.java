@@ -17,18 +17,14 @@ import ru.yandex.kardomoblieapp.event.model.Activity;
 import ru.yandex.kardomoblieapp.event.model.Event;
 import ru.yandex.kardomoblieapp.event.repository.ActivityRepository;
 import ru.yandex.kardomoblieapp.event.repository.EventRepository;
-import ru.yandex.kardomoblieapp.location.model.City;
-import ru.yandex.kardomoblieapp.location.model.Country;
-import ru.yandex.kardomoblieapp.location.model.Region;
+import ru.yandex.kardomoblieapp.location.dto.Location;
 import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.IncorrectEventDatesException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.kardomoblieapp.event.repository.EventSpecification.eventStartInRange;
@@ -68,12 +64,7 @@ public class EventServiceImpl implements EventService {
         final Event event = new Event();
         eventMapper.createNewEvent(newEvent, event);
         event.setActivity(activity);
-        final LocationInfo locationInfo = LocationInfo.builder()
-                .countryId(newEvent.getCountryId())
-                .regionId(newEvent.getRegionId())
-                .city(newEvent.getCity())
-                .build();
-        setLocationToEvent(locationInfo, event);
+        setLocationToEvent(event, newEvent.getCountryId(), newEvent.getRegionId(), newEvent.getCity());
         final Event savedEvent = eventRepository.save(event);
         log.debug("Добавлено новое мероприятие с id '{}'.", savedEvent.getId());
         return savedEvent;
@@ -95,12 +86,7 @@ public class EventServiceImpl implements EventService {
         subEvent.setEventType(masterEvent.getEventType());
         subEvent.setActivity(masterEvent.getActivity());
         subEvent.setMasterEvent(masterEvent);
-        final LocationInfo locationInfo = LocationInfo.builder()
-                .countryId(newSubEvent.getCountryId())
-                .regionId(newSubEvent.getRegionId())
-                .city(newSubEvent.getCity())
-                .build();
-        setLocationToEvent(locationInfo, subEvent);
+        setLocationToEvent(subEvent, newSubEvent.getCountryId(), newSubEvent.getRegionId(), newSubEvent.getCity());
         validateSubEventDates(subEvent, masterEvent);
         final Event savedSubEvent = eventRepository.save(subEvent);
         log.debug("Добавлен этап с id '{}' для мероприятия с id '{}'.", savedSubEvent.getId(), masterEventId);
@@ -119,12 +105,7 @@ public class EventServiceImpl implements EventService {
     public Event updateEvent(long eventId, EventUpdateRequest updateEvent) {
         final Event event = getEvent(eventId);
         eventMapper.updateEvent(updateEvent, event);
-        final LocationInfo locationInfo = LocationInfo.builder()
-                .countryId(updateEvent.getCountryId())
-                .regionId(updateEvent.getRegionId())
-                .city(updateEvent.getCity())
-                .build();
-        setLocationToEvent(locationInfo, event);
+        setLocationToEvent(event, updateEvent.getCountryId(), updateEvent.getRegionId(), updateEvent.getCity());
         final Event updatedEvent = eventRepository.save(event);
         log.info("Обновлено мероприятие с id '{}'.", eventId);
         return updatedEvent;
@@ -216,33 +197,17 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void setLocationToEvent(LocationInfo locationInfo, Event event) {
-        if (locationInfo.getCountryId() != null) {
-            Country country = locationService.getCountryById(locationInfo.getCountryId());
-            event.setCountry(country);
+    private void setLocationToEvent(Event event, Long countryId, Long regionId, String cityName) {
+        final Location location = locationService.getLocation(countryId,
+                regionId, cityName);
+        if (location.getCountry() != null) {
+            event.setCountry(location.getCountry());
         }
-
-        if (locationInfo.getRegionId() != null) {
-            Region region = locationService.getRegionById(locationInfo.getRegionId());
-            event.setRegion(region);
+        if (location.getRegion() != null) {
+            event.setRegion(location.getRegion());
         }
-
-        if (locationInfo.getCity() != null) {
-            Optional<City> city = locationService.findCityByNameCountryAndRegion(locationInfo.getCity(),
-                    event.getCountry() != null ? event.getCountry().getId() : null,
-                    event.getRegion() != null ? event.getRegion().getId() : null);
-
-            if (city.isPresent()) {
-                event.setCity(city.get());
-            } else {
-                City newCity = City.builder()
-                        .name(locationInfo.getCity())
-                        .country(event.getCountry())
-                        .region(event.getRegion())
-                        .build();
-                City savedCity = locationService.addCity(newCity);
-                event.setCity(savedCity);
-            }
+        if (location.getCity() != null) {
+            event.setCity(location.getCity());
         }
     }
 }

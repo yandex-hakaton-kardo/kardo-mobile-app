@@ -11,13 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.datafiles.service.DataFileService;
-import ru.yandex.kardomoblieapp.location.model.City;
-import ru.yandex.kardomoblieapp.location.model.Country;
-import ru.yandex.kardomoblieapp.location.model.Region;
+import ru.yandex.kardomoblieapp.location.dto.Location;
 import ru.yandex.kardomoblieapp.location.service.LocationService;
 import ru.yandex.kardomoblieapp.shared.exception.InvalidDateOfBirthException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.mapper.UserMapper;
@@ -34,7 +31,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,12 +83,8 @@ public class UserServiceImpl implements UserService {
         final User user = getUser(userId);
         validateDateOfBirth(userUpdateRequest.getDateOfBirth());
         userMapper.updateUser(userUpdateRequest, user);
-        final LocationInfo locationInfo = LocationInfo.builder()
-                .countryId(userUpdateRequest.getCountryId())
-                .regionId(userUpdateRequest.getRegionId())
-                .city(userUpdateRequest.getCity())
-                .build();
-        setLocationToUser(locationInfo, user);
+        setLocationToUser(user, userUpdateRequest.getCountryId(), userUpdateRequest.getRegionId(),
+                userUpdateRequest.getCity());
         userRepository.save(user);
         log.info("Профиль пользователя с id '{}' был обновлен.", userId);
         return user;
@@ -307,36 +299,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id '" + userId + "' не найден."));
     }
 
-    private void setLocationToUser(LocationInfo locationInfo, User user) {
-        if (locationInfo.getCountryId() != null) {
-            Country country = locationService.getCountryById(locationInfo.getCountryId());
-            user.setCountry(country);
-        }
-
-        if (locationInfo.getRegionId() != null) {
-            Region region = locationService.getRegionById(locationInfo.getRegionId());
-            user.setRegion(region);
-        }
-
-        if (locationInfo.getCity() != null) {
-            Optional<City> city = locationService.findCityByNameCountryAndRegion(locationInfo.getCity(),
-                    user.getCountry() != null ? user.getCountry().getId() : null,
-                    user.getRegion() != null ? user.getRegion().getId() : null);
-
-            if (city.isPresent()) {
-                user.setCity(city.get());
-            } else {
-                City newCity = City.builder()
-                        .name(locationInfo.getCity())
-                        .country(user.getCountry())
-                        .region(user.getRegion())
-                        .build();
-                City savedCity = locationService.addCity(newCity);
-                user.setCity(savedCity);
-            }
-        }
-    }
-
     private void validateDateOfBirth(LocalDate dateOfBirth) {
         if (dateOfBirth != null) {
             final LocalDate currentDate = LocalDate.now();
@@ -345,6 +307,19 @@ public class UserServiceImpl implements UserService {
             if (dateOfBirth.isBefore(youngerThanDate) || dateOfBirth.isAfter(olderThanDate)) {
                 throw new InvalidDateOfBirthException("Недопустимое значение даты рождения '" + dateOfBirth + "'.");
             }
+        }
+    }
+
+    private void setLocationToUser(User user, Long countryId, Long regionId, String cityName) {
+        final Location location = locationService.getLocation(countryId, regionId, cityName);
+        if (location.getCountry() != null) {
+            user.setCountry(location.getCountry());
+        }
+        if (location.getRegion() != null) {
+            user.setRegion(location.getRegion());
+        }
+        if (location.getCity() != null) {
+            user.setCity(location.getCity());
         }
     }
 }

@@ -3,6 +3,7 @@ package ru.yandex.kardomoblieapp.location.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.kardomoblieapp.location.dto.Location;
 import ru.yandex.kardomoblieapp.location.model.City;
 import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
@@ -111,6 +112,39 @@ public class LocationServiceImpl implements LocationService {
     public void deleteAllCities() {
         cityRepository.deleteAll();
         log.info("Удаление всех городов.");
+    }
+
+    @Override
+    public Location getLocation(Long countryId, Long regionId, String cityName) {
+        final Location location = new Location();
+
+        Country country = null;
+        if (countryId != null) {
+            country = getCountryById(countryId);
+            location.setCountry(country);
+        }
+        Region region = null;
+        if (regionId != null) {
+            region = getRegionById(regionId);
+            location.setRegion(region);
+        }
+
+        if (cityName != null) {
+            Optional<City> city = findCityByNameCountryAndRegion(cityName, countryId, regionId);
+
+            if (city.isPresent()) {
+                location.setCity(city.get());
+            } else {
+                final City newCity = City.builder()
+                        .name(cityName)
+                        .country(country)
+                        .region(region)
+                        .build();
+                City savedCity = addCity(newCity);
+                location.setCity(savedCity);
+            }
+        }
+        return location;
     }
 
     private Country getCountry(long countryId) {

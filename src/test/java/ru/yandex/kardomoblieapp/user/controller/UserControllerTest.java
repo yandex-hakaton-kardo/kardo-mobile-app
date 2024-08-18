@@ -20,7 +20,6 @@ import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
@@ -92,8 +91,6 @@ class UserControllerTest {
 
     private DataFileDto dataFileDto;
 
-    private LocationInfo locationInfo;
-
     @BeforeEach
     void init() {
         newUserRequest = NewUserRequest.builder()
@@ -134,7 +131,6 @@ class UserControllerTest {
                 .fileName("fileName")
                 .id(23L)
                 .build();
-        locationInfo = new LocationInfo();
     }
 
     @Test
