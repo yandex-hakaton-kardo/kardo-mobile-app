@@ -149,20 +149,20 @@ public class EventServiceImpl implements EventService {
         final Pageable pageable = PageRequest.of(page, size);
         final List<Specification<Event>> specifications = eventSearchFilterToSpecifications(searchFilter);
         final Specification<Event> resultSpec = specifications.stream().reduce(Specification::and).orElse(null);
-        final List<Event> events = eventRepository.findAll(getSort(searchFilter.getSort(), resultSpec), pageable).getContent();
+        final List<Event> events = eventRepository.findAll(getSort(searchFilter.sort(), resultSpec), pageable).getContent();
         log.debug("Получен список событий размером '{}'.", events.size());
         return events;
     }
 
     private List<Specification<Event>> eventSearchFilterToSpecifications(EventSearchFilter searchFilter) {
         List<Specification<Event>> resultSpecification = new ArrayList<>();
-        resultSpecification.add(eventTypeEquals(searchFilter.getTypes()));
-        resultSpecification.add(textInActivityNameIgnoreCase(searchFilter.getActivity()));
-        resultSpecification.add(eventStartInRange(searchFilter.getStartDate(), searchFilter.getEndDate()));
-        resultSpecification.add(textInNameOrDescription(searchFilter.getText()));
-        resultSpecification.add(textInCountyName(searchFilter.getCountry()));
-        resultSpecification.add(textInRegionName(searchFilter.getRegion()));
-        resultSpecification.add(textInCityName(searchFilter.getCity()));
+        resultSpecification.add(eventTypeEquals(searchFilter.types()));
+        resultSpecification.add(textInActivityNameIgnoreCase(searchFilter.activity()));
+        resultSpecification.add(eventStartInRange(searchFilter.startDate(), searchFilter.endDate()));
+        resultSpecification.add(textInNameOrDescription(searchFilter.text()));
+        resultSpecification.add(textInCountyName(searchFilter.country()));
+        resultSpecification.add(textInRegionName(searchFilter.region()));
+        resultSpecification.add(textInCityName(searchFilter.city()));
         return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 

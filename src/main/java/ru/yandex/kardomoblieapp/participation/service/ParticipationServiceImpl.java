@@ -63,8 +63,8 @@ public class ParticipationServiceImpl implements ParticipationService {
         final Participation participation = Participation.builder()
                 .event(event)
                 .user(user)
-                .type(participationRequest.getType())
-                .linkToContestFile(participationRequest.getLinkToContestFile())
+                .type(participationRequest.type())
+                .linkToContestFile(participationRequest.linkToContestFile())
                 .build();
         setAutomaticApprove(participationRequest, participation);
         final Participation savedParticipation = participationRepository.save(participation);
@@ -102,7 +102,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         final Participation participation = getParticipation(participationId);
         final User user = userService.findByUsername(username);
         checkIfUserCanModifyParticipation(participation, user);
-        participation.setLinkToContestFile(updateRequest.getLinkToContestFile());
+        participation.setLinkToContestFile(updateRequest.linkToContestFile());
         final Participation updatedParticipation = participationRepository.save(participation);
         log.info("Заявка с id '{}' обновлена.", participationId);
         return updatedParticipation;
@@ -204,7 +204,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     }
 
     private void setAutomaticApprove(ParticipationRequest participationRequest, Participation participation) {
-        switch (participationRequest.getType()) {
+        switch (participationRequest.type()) {
             case SPECTATOR -> participation.setStatus(APPROVED);
             case JUDGE, SPONSOR, PARTICIPANT -> participation.setStatus(CREATED);
         }

@@ -281,7 +281,7 @@ public class UserServiceImpl implements UserService {
 
     private List<Specification<User>> userSearchFilterToSpecifications(UserSearchFilter searchFilter) {
         final List<Specification<User>> resultSpecification = new ArrayList<>();
-        resultSpecification.add(UserSpecification.textInUsernameOrEmail(searchFilter.getName()));
+        resultSpecification.add(UserSpecification.textInUsernameOrEmail(searchFilter.name()));
         return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 

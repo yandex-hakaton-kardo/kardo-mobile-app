@@ -130,8 +130,8 @@ class ParticipationServiceImplTest {
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
         assertThat(participation.getAvgScore(), nullValue());
-        assertThat(user.getName(), is(participationRequest.getName()));
-        assertThat(user.getOverview(), is(participationRequest.getOverview()));
+        assertThat(user.getName(), is(participationRequest.name()));
+        assertThat(user.getOverview(), is(participationRequest.overview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
     }
 
@@ -150,8 +150,8 @@ class ParticipationServiceImplTest {
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
         assertThat(participation.getAvgScore(), nullValue());
-        assertThat(user.getName(), is(participationRequest.getName()));
-        assertThat(user.getOverview(), is(participationRequest.getOverview()));
+        assertThat(user.getName(), is(participationRequest.name()));
+        assertThat(user.getOverview(), is(participationRequest.overview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
     }
 
@@ -170,8 +170,8 @@ class ParticipationServiceImplTest {
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.CREATED));
         assertThat(participation.getAvgScore(), nullValue());
-        assertThat(user.getName(), is(participationRequest.getName()));
-        assertThat(user.getOverview(), is(participationRequest.getOverview()));
+        assertThat(user.getName(), is(participationRequest.name()));
+        assertThat(user.getOverview(), is(participationRequest.overview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
     }
 
@@ -190,8 +190,8 @@ class ParticipationServiceImplTest {
         assertThat(participation.getId(), greaterThan(0L));
         assertThat(participation.getStatus(), is(ParticipationStatus.APPROVED));
         assertThat(participation.getAvgScore(), nullValue());
-        assertThat(user.getName(), is(participationRequest.getName()));
-        assertThat(user.getOverview(), is(participationRequest.getOverview()));
+        assertThat(user.getName(), is(participationRequest.name()));
+        assertThat(user.getOverview(), is(participationRequest.overview()));
         assertThat(user.getEmail(), is("test@mail.ru"));
     }
 
@@ -316,7 +316,7 @@ class ParticipationServiceImplTest {
         assertThat(result, notNullValue());
         assertThat(result.getId(), is(participation.getId()));
         assertThat(result.getCreatedOn(), is(participation.getCreatedOn()));
-        assertThat(result.getLinkToContestFile(), is(updateRequest.getLinkToContestFile()));
+        assertThat(result.getLinkToContestFile(), is(updateRequest.linkToContestFile()));
     }
 
     @Test
