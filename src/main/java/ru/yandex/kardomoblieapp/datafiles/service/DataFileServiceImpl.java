@@ -166,8 +166,6 @@ public class DataFileServiceImpl implements DataFileService {
     private DataFile createDataFileAndMoveToUserDirectory(MultipartFile fileToUpload, long userId) {
         try {
             final String userFileStorage = createUserDirectoryIfNotExists(userId);
-
-
             final String fileExtension = FilenameUtils.getExtension(fileToUpload.getOriginalFilename());
             final String fileName = UUID.randomUUID() + "." + fileExtension;
             final String filePath = userFileStorage + fileName;

@@ -80,7 +80,6 @@ public class ParticipationServiceImpl implements ParticipationService {
      * @return обновленная заявка
      */
     @Override
-    @Transactional
     public Participation changeParticipationStatus(long participationId, ParticipationStatus status) {
         final Participation participation = getParticipation(participationId);
         participation.setStatus(status);
@@ -99,7 +98,6 @@ public class ParticipationServiceImpl implements ParticipationService {
      * @return обновленная заявка
      */
     @Override
-    @Transactional
     public Participation updateParticipation(long participationId, ParticipationUpdateRequest updateRequest, String username) {
         final Participation participation = getParticipation(participationId);
         final User user = userService.findByUsername(username);
@@ -118,7 +116,6 @@ public class ParticipationServiceImpl implements ParticipationService {
      * @param username        никнейм пользователя, делащего запрос
      */
     @Override
-    @Transactional
     public void deleteParticipation(long participationId, String username) {
         final Participation participation = getParticipation(participationId);
         final User user = userService.findByUsername(username);
