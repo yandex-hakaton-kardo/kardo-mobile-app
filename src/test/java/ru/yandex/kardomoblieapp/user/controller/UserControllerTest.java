@@ -20,7 +20,6 @@ import ru.yandex.kardomoblieapp.datafiles.mapper.DataFileMapper;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotAuthorizedException;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.NewUserRequest;
 import ru.yandex.kardomoblieapp.user.dto.NewUserResponse;
 import ru.yandex.kardomoblieapp.user.dto.UserDto;
@@ -92,8 +91,6 @@ class UserControllerTest {
 
     private DataFileDto dataFileDto;
 
-    private LocationInfo locationInfo;
-
     @BeforeEach
     void init() {
         newUserRequest = NewUserRequest.builder()
@@ -134,7 +131,6 @@ class UserControllerTest {
                 .fileName("fileName")
                 .id(23L)
                 .build();
-        locationInfo = new LocationInfo();
     }
 
     @Test
@@ -156,8 +152,8 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(newUserRequest))
                         .with(csrf()))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(newUserResponse.getId()), Long.class))
-                .andExpect(jsonPath("$.email", is(newUserResponse.getEmail())));
+                .andExpect(jsonPath("$.id", is(newUserResponse.id()), Long.class))
+                .andExpect(jsonPath("$.email", is(newUserResponse.email())));
 
         verify(userMapper, times(1)).toModel(newUserRequest);
         verify(userService, times(1)).createUser(user);
@@ -280,8 +276,8 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(userUpdateRequest))
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+                .andExpect(jsonPath("$.id", is(userDto.id()), Long.class))
+                .andExpect(jsonPath("$.email", is(userDto.email())));
 
         verify(userService, times(1)).updateUser(userId, userUpdateRequest);
         verify(userMapper, times(1)).toDto(user);
@@ -319,8 +315,8 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
-                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+                .andExpect(jsonPath("$.id", is(userDto.id()), Long.class))
+                .andExpect(jsonPath("$.email", is(userDto.email())));
 
         verify(userService, times(1)).updateUser(userId, userUpdateRequest);
         verify(userMapper, times(1)).toDto(user);
@@ -408,8 +404,8 @@ class UserControllerTest {
         mvc.perform(multipart("/users/{userId}/avatar", userId).file(file))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(dataFileDto.getId()), Long.class))
-                .andExpect(jsonPath("$.fileName", is(dataFileDto.getFileName())));
+                .andExpect(jsonPath("$.id", is(dataFileDto.id()), Long.class))
+                .andExpect(jsonPath("$.fileName", is(dataFileDto.fileName())));
 
         verify(userService, times(1)).uploadProfilePicture(userId, file);
         verify(dataFileMapper, times(1)).toDto(dataFile);
@@ -467,8 +463,8 @@ class UserControllerTest {
 
         mvc.perform(get("/users/{userId}/avatar", userId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(dataFileDto.getId()), Long.class))
-                .andExpect(jsonPath("$.fileName", is(dataFileDto.getFileName())));
+                .andExpect(jsonPath("$.id", is(dataFileDto.id()), Long.class))
+                .andExpect(jsonPath("$.fileName", is(dataFileDto.fileName())));
 
         verify(userService, times(1)).getProfilePicture(userId);
     }

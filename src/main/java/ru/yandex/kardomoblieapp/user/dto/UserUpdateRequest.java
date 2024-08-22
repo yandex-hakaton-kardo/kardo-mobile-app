@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Schema(description = "Запрос на обновление данных пользователя")
 public class UserUpdateRequest {
 
 
