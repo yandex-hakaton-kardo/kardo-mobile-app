@@ -1,7 +1,7 @@
 # Backend для мобильного приложения КАРДО
 
-### Приложение разрабатывали:
-Владимир Баханович ([vvbakhanovich](https://github.com/vvbakhanovich)), Руслан Якупов ([YakupovRR](https://github.com/YakupovRR)).
+### Приложение разрабатывал:
+Владимир Баханович ([vvbakhanovich](https://github.com/vvbakhanovich)).
 
 ![Static Badge](https://img.shields.io/badge/Java-%23FF7800?style=plastic)
 ![Static Badge](https://img.shields.io/badge/Spring%20Boot-%236DB33F?style=plastic&logo=springboot&logoColor=black)

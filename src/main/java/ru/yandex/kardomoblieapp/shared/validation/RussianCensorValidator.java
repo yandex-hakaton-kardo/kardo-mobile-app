@@ -7,7 +7,7 @@ public class RussianCensorValidator implements ConstraintValidator<Censored, Str
 
     private String message;
 
-    private String censorRegEx = "(?iux)\\b(?:\n" +
+    private static final String CENSOR_REGEX = "(?iux)\\b(?:\n" +
             "(?:(?:у|[нз]а|(?:хитро|не)?вз?[ыьъ]|с[ьъ]|(?:и|ра)[зс]ъ?|(?:о[тб]|п[оа]д)[ьъ]?|(?:.\\B)+?[оаеи-])-?)?(?:\n" +
             "  [её](?:б(?!о[рй]|рач)|п[уа](?:ц|тс))|\n" +
             "  и[пб][ае][тцд][ьъ]\n" +
@@ -48,6 +48,6 @@ public class RussianCensorValidator implements ConstraintValidator<Censored, Str
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        return !value.matches(censorRegEx);
+        return !value.matches(CENSOR_REGEX);
     }
 }

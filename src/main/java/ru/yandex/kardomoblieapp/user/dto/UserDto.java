@@ -1,64 +1,43 @@
 package ru.yandex.kardomoblieapp.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.user.model.Gender;
 
 import java.time.LocalDate;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 @Schema(description = "Сущность пользователя")
-public class UserDto {
+public record UserDto(@Schema(description = "Идентификатор пользователя")
+                      Long id,
+                      @Schema(description = "Никнейм пользователя")
+                      String username,
+                      @Schema(description = "Имя пользователя")
+                      String name,
+                      @Schema(description = "Отчество пользователя")
+                      String secondName,
+                      @Schema(description = "Фамилия пользователя")
+                      String surname,
+                      @Schema(description = "Дата рождения пользователя")
+                      LocalDate dateOfBirth,
+                      @Schema(description = "Электронная почта пользователя")
+                      String email,
+                      @Schema(description = "Страна проживания")
+                      String country,
+                      @Schema(description = "Регион страны проживания")
+                      String region,
+                      @Schema(description = "Город проживания")
+                      String city,
+                      @Schema(description = "Пол")
+                      Gender gender,
+                      @Schema(description = "Фотография профиля")
+                      DataFile profilePicture,
+                      @Schema(description = "Номер телефона")
+                      String phoneNumber,
+                      @Schema(description = "О себе")
+                      String overview,
+                      @Schema(description = "Ссылка на соцсети")
+                      String website) {
 
-    @Schema(description = "Идентификатор пользователя")
-    private Long id;
-
-    @Schema(description = "Никнейм пользователя")
-    private String username;
-
-    @Schema(description = "Имя пользователя")
-    private String name;
-
-    @Schema(description = "Отчество пользователя")
-    private String secondName;
-
-    @Schema(description = "Фамилия пользователя")
-    private String surname;
-
-    @Schema(description = "Дата рождения пользователя")
-    private LocalDate dateOfBirth;
-
-    @Schema(description = "Электронная почта пользователя")
-    private String email;
-
-    @Schema(description = "Страна проживания")
-    private String country;
-
-    @Schema(description = "Регион страны проживания")
-    private String region;
-
-    @Schema(description = "Город проживания")
-    private String city;
-
-    @Schema(description = "Пол")
-    private Gender gender;
-
-    @Schema(description = "Фотография профиля")
-    private DataFile profilePicture;
-
-    @Schema(description = "Номер телефона")
-    private String phoneNumber;
-
-    @Schema(description = "О себе")
-    private String overview;
-
-    @Schema(description = "Ссылка на соцсети")
-    private String website;
 }

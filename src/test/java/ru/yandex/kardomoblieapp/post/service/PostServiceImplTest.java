@@ -446,7 +446,7 @@ class PostServiceImplTest {
 
         assertThat(updatedComment, notNullValue());
         assertThat(updatedComment.getId(), is(savedComment.getId()));
-        assertThat(updatedComment.getText(), is(commentRequest.getText()));
+        assertThat(updatedComment.getText(), is(commentRequest.text()));
         assertThat(updatedComment.getAuthor().getId(), is(savedUser.getId()));
         assertThat(post.getComments().size(), is(1));
         assertThat(post.getComments().get(0).getId(), is(savedComment.getId()));

@@ -16,7 +16,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import ru.yandex.kardomoblieapp.datafiles.model.DataFile;
 import ru.yandex.kardomoblieapp.shared.exception.NotFoundException;
-import ru.yandex.kardomoblieapp.user.dto.LocationInfo;
 import ru.yandex.kardomoblieapp.user.dto.UserSearchFilter;
 import ru.yandex.kardomoblieapp.user.dto.UserUpdateRequest;
 import ru.yandex.kardomoblieapp.user.model.Friendship;
@@ -56,9 +55,6 @@ class UserServiceImplTest {
 
     private long unknownId;
 
-    private LocationInfo locationInfo;
-
-
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(POSTGRES_VERSION);
 
     @BeforeAll
@@ -92,11 +88,6 @@ class UserServiceImplTest {
                 .dateOfBirth(LocalDate.of(1990, 12, 12))
                 .build();
         unknownId = 99999L;
-        locationInfo = LocationInfo.builder()
-                .countryId(1L)
-                .regionId(1L)
-                .city("Москва")
-                .build();
     }
 
     @Test

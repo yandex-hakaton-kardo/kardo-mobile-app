@@ -1,5 +1,6 @@
 package ru.yandex.kardomoblieapp.location.service;
 
+import ru.yandex.kardomoblieapp.location.dto.Location;
 import ru.yandex.kardomoblieapp.location.model.City;
 import ru.yandex.kardomoblieapp.location.model.Country;
 import ru.yandex.kardomoblieapp.location.model.Region;
@@ -21,4 +22,6 @@ public interface LocationService {
     Optional<City> findCityByNameCountryAndRegion(String cityName, Long countryId, Long regionId);
 
     void deleteAllCities();
+
+    Location getLocation(Long countryId, Long regionId, String cityName);
 }

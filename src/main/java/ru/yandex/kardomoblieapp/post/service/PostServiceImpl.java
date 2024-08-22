@@ -237,7 +237,7 @@ public class PostServiceImpl implements PostService {
     public Comment updateComment(String username, long commentId, CommentRequest commentRequest) {
         Comment comment = getCommentWithAuthor(commentId);
         checkIfUserIsCommentAuthor(username, comment);
-        comment.setText(commentRequest.getText());
+        comment.setText(commentRequest.text());
         Comment savedComment = commentRepository.save(comment);
         log.info("Пользователь с id '{}' отредактировал комментарий с id '{}'.", username, commentId);
         return savedComment;
@@ -297,7 +297,7 @@ public class PostServiceImpl implements PostService {
 
     private List<Specification<Post>> postSearchFilterToSpecifications(PostSearchFilter searchFilter) {
         final List<Specification<Post>> resultSpecification = new ArrayList<>();
-        resultSpecification.add(PostSpecification.textInPostTitle(searchFilter.getTitle()));
+        resultSpecification.add(PostSpecification.textInPostTitle(searchFilter.title()));
         return resultSpecification.stream().filter(Objects::nonNull).collect(Collectors.toList());
     }
 
